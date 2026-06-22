@@ -1,0 +1,30 @@
+{
+  "name": "discord-oauth-server",
+  "version": "1.0.0",
+  "description": "Servidor para login via Discord (troca de code + opcional Firebase custom token)",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "discord.js": "^14.26.2",
+    "dotenv": "^16.6.1",
+    "express": "^4.19.2",
+    "express-rate-limit": "^8.3.1",
+    "firebase-admin": "^12.7.0",
+    "franc": "^6.2.0",
+    "helmet": "^8.1.0",
+    "node-fetch": "^2.7.0",
+    "openai": "^6.33.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
