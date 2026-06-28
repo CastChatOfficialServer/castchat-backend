@@ -22,7 +22,8 @@ const admin = require('firebase-admin');
 const serviceAccount = require('./serviceAccountKey.json');
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
+  credential: admin.credential.cert(serviceAccount),
+  projectId: serviceAccount.project_id
 });
 
 const db = admin.firestore();
@@ -515,18 +516,14 @@ app.get(
 
         });
 
-      const tokenResp =
-        await fetch(
-          'https://discord.com/api/oauth2/token',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type':
-                'application/x-www-form-urlencoded'
-            },
-            body: params.toString()
-          }
-        );
+      document.getElementById("discordBtn")
+.addEventListener("click", () => {
+  window.open(
+    "https://castchat-backend.onrender.com/auth/discord",
+    "discordLogin",
+    "width=500,height=700"
+  );
+});
 
       const tokenJson =
         await tokenResp.json();
@@ -543,7 +540,7 @@ app.get(
 
       const userResp =
         await fetch(
-          'https://discord.com/api/users/@me',
+          'https://castchat-backend.onrender.com/me',
           {
             headers: {
               Authorization:
