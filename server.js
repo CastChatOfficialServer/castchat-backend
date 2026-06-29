@@ -19,7 +19,18 @@ const admin = require('firebase-admin');
 // FIREBASE ADMIN
 // ===============================
 
-const serviceAccount = require('./serviceAccountKey.json');
+const fs = require('fs');
+
+const serviceAccountPath =
+  fs.existsSync('/etc/secrets/serviceAccountKey.json')
+    ? '/etc/secrets/serviceAccountKey.json'
+    : path.join(__dirname, 'serviceAccountKey.json');
+
+const serviceAccount =
+  JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+
+console.log('Firebase project:', serviceAccount.project_id);
+console.log('Firebase client:', serviceAccount.client_email);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
