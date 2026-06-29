@@ -516,15 +516,6 @@ app.get(
 
         });
 
-      document.getElementById("discordBtn")
-.addEventListener("click", () => {
-  window.open(
-    "https://castchat-backend.onrender.com/auth/discord",
-    "discordLogin",
-    "width=500,height=700"
-  );
-});
-
       const tokenJson =
         await tokenResp.json();
 
