@@ -459,9 +459,7 @@ app.get('/auth/discord', (req, res) => {
     `${SERVER_ROOT}/auth/discord/callback`;
 
   const scope =
-    encodeURIComponent(
-      'identify email'
-    );
+    encodeURIComponent('identify email');
 
   const url =
     `https://discord.com/api/oauth2/authorize` +
@@ -478,207 +476,169 @@ app.get('/auth/discord', (req, res) => {
 // DISCORD CALLBACK
 // ===============================
 
-app.get(
-  '/auth/discord/callback',
-  async (req, res) => {
+app.get('/auth/discord/callback', async (req, res) => {
 
-    try {
+  try {
 
-      const code =
-        req.query.code;
+    const code = req.query.code;
 
-      if (!code) {
-
-        return res.sendFile(
-          path.join(__dirname, 'auth_error.html')
-        );
-
-      }
-
-      const redirect_uri =
-        `${SERVER_ROOT}/auth/discord/callback`;
-
-      const params =
-        new URLSearchParams({
-
-          client_id:
-            DISCORD_CLIENT_ID,
-
-          client_secret:
-            DISCORD_CLIENT_SECRET,
-
-          grant_type:
-            'authorization_code',
-
-          code,
-
-          redirect_uri
-
-        });
-
-      const tokenJson =
-        await tokenResp.json();
-
-      if (!tokenJson.access_token) {
-
-        console.error(tokenJson);
-
-        return res.sendFile(
-          path.join(__dirname, 'auth_error.html')
-        );
-
-      }
-
-      const userResp =
-        await fetch(
-          'https://castchat-backend.onrender.com/me',
-          {
-            headers: {
-              Authorization:
-                `Bearer ${tokenJson.access_token}`
-            }
-          }
-        );
-
-      const profile =
-        await userResp.json();
-
-      const providerKey =
-        `discord:${profile.id}`;
-
-      const authRef =
-        db.collection('authLinks')
-          .doc(providerKey);
-
-      const authDoc =
-        await authRef.get();
-
-      let uid;
-
-      let role = 'user';
-
-      let isACClub = false;
-
-// ===============================
-// MASTER
-// ===============================
-if (
-  profile.id === AC_CLUB_DISCORD_ID
-) {
-
-  uid = "10000";
-  role = "admin";
-  isACClub = true;
-
-  await authRef.set({
-    perfilID: uid,
-    provider: "discord",
-    discordID: profile.id,
-    criadoEm: Date.now()
-  }, { merge: true });
-
-}
-
-// ===============================
-// USUÁRIO EXISTENTE
-// ===============================
-else if (authDoc.exists) {
-
-  const data = authDoc.data();
-
-  uid = String(data.perfilID);
-
-}
-
-// ===============================
-// NOVO USUÁRIO
-// ===============================
-else {
-
-  uid = await gerarNovoUID();
-
-  await authRef.set({
-    perfilID: uid,
-    provider: "discord",
-    discordID: profile.id,
-    criadoEm: Date.now()
-  });
-
-}
-
-// ===============================
-// VALIDA UID
-// ===============================
-if (!uid || uid === "undefined") {
-  throw new Error("UID não foi definido antes do token");
-}
-
-      // ===============================
-      // AVATAR
-      // ===============================
-
-      let avatar = null;
-
-      if (profile.avatar) {
-
-        avatar =
-          `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`;
-
-      }
-
-      // ===============================
-      // PERFIL
-      // ===============================
-
-      const perfil =
-        await criarPerfil({
-
-          uid,
-
-          nickname:
-            profile.username,
-
-          email:
-            profile.email || '',
-
-          avatar,
-
-          provider:
-            'discord',
-
-          role,
-
-          isACClub
-
-        });
-
-      // ===============================
-      // TOKEN
-      // ===============================
-const token =
-  makeToken({
-    uid: String(uid),
-    id: String(uid),
-    role: role,
-    isACClub: isACClub
-  });
-
-      res.send(
-        generateSuccessPage(token)
-      );
-
-    } catch (err) {
-
-      console.error(err);
-
-      res.sendFile(
+    if (!code) {
+      return res.sendFile(
         path.join(__dirname, 'auth_error.html')
       );
+    }
+
+    const redirect_uri =
+      `${SERVER_ROOT}/auth/discord/callback`;
+
+    const params =
+      new URLSearchParams({
+        client_id: DISCORD_CLIENT_ID,
+        client_secret: DISCORD_CLIENT_SECRET,
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri
+      });
+
+    const tokenResp =
+      await fetch(
+        'https://discord.com/api/oauth2/token',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: params.toString()
+        }
+      );
+
+    const tokenJson =
+      await tokenResp.json();
+
+    if (!tokenJson.access_token) {
+      console.error('ERRO TOKEN DISCORD:', tokenJson);
+      return res.sendFile(
+        path.join(__dirname, 'auth_error.html')
+      );
+    }
+
+    const userResp =
+      await fetch(
+        'https://discord.com/api/users/@me',
+        {
+          headers: {
+            Authorization: `Bearer ${tokenJson.access_token}`
+          }
+        }
+      );
+
+    const profile =
+      await userResp.json();
+
+    if (!profile.id) {
+      console.error('ERRO PERFIL DISCORD:', profile);
+      return res.sendFile(
+        path.join(__dirname, 'auth_error.html')
+      );
+    }
+
+    const providerKey =
+      `discord:${profile.id}`;
+
+    const authRef =
+      db.collection('authLinks')
+        .doc(providerKey);
+
+    const authDoc =
+      await authRef.get();
+
+    let uid;
+    let role = 'user';
+    let isACClub = false;
+
+    // MASTER
+    if (profile.id === AC_CLUB_DISCORD_ID) {
+
+      uid = '10000';
+      role = 'admin';
+      isACClub = true;
+
+      await authRef.set({
+        perfilID: uid,
+        provider: 'discord',
+        discordID: profile.id,
+        criadoEm: Date.now()
+      }, { merge: true });
 
     }
 
+    // USUÁRIO EXISTENTE
+    else if (authDoc.exists) {
+
+      const data = authDoc.data();
+      uid = String(data.perfilID);
+
+    }
+
+    // NOVO USUÁRIO
+    else {
+
+      uid = await gerarNovoUID();
+
+      await authRef.set({
+        perfilID: uid,
+        provider: 'discord',
+        discordID: profile.id,
+        criadoEm: Date.now()
+      });
+
+    }
+
+    if (!uid || uid === 'undefined') {
+      throw new Error('UID não foi definido antes do token');
+    }
+
+    let avatar = null;
+
+    if (profile.avatar) {
+      avatar =
+        `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`;
+    }
+
+    const perfil =
+      await criarPerfil({
+        uid,
+        nickname: profile.username,
+        email: profile.email || '',
+        avatar,
+        provider: 'discord',
+        role,
+        isACClub
+      });
+
+    const token =
+      makeToken({
+        uid: String(uid),
+        id: String(uid),
+        role,
+        isACClub
+      });
+
+    res.send(
+      generateSuccessPage(token)
+    );
+
+  } catch (err) {
+
+    console.error('ERRO DISCORD CALLBACK:', err);
+
+    res.sendFile(
+      path.join(__dirname, 'auth_error.html')
+    );
+
   }
-);
+
+});
 
 // ===============================
 // PHONE SEND
