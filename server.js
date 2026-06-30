@@ -943,15 +943,21 @@ app.get('/firebase-test', async (req, res) => {
       data: snap.data()
     });
 
-  } catch (err) {
-    console.error('ERRO FIREBASE TEST:', err);
+} catch (err) {
 
-    res.status(500).json({
-      ok: false,
-      error: err.message,
-      code: err.code || null
-    });
-  }
+  console.error("Arquivo usado:", serviceAccountPath);
+  console.error(err);
+
+  res.status(500).json({
+    ok: false,
+    file: serviceAccountPath,
+    project: serviceAccount.project_id,
+    client: serviceAccount.client_email,
+    error: err.message,
+    code: err.code
+  });
+
+}
 });
 
 app.listen(PORT, () => {
