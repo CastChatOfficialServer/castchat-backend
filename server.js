@@ -883,7 +883,6 @@ app.get('/me', (req, res) => {
 // ===============================
 // SUCCESS PAGE
 // ===============================
-
 function generateSuccessPage(token) {
 
   return `
@@ -926,14 +925,38 @@ setTimeout(() => {
 // START
 // ===============================
 
-app.listen(PORT, () => {
+app.get('/firebase-test', async (req, res) => {
+  try {
+    const ref = db.collection('config').doc('testeRender');
 
+    await ref.set({
+      ok: true,
+      atualizadoEm: Date.now()
+    }, { merge: true });
+
+    const snap = await ref.get();
+
+    res.json({
+      ok: true,
+      project: serviceAccount.project_id,
+      client: serviceAccount.client_email,
+      data: snap.data()
+    });
+
+  } catch (err) {
+    console.error('ERRO FIREBASE TEST:', err);
+
+    res.status(500).json({
+      ok: false,
+      error: err.message,
+      code: err.code || null
+    });
+  }
+});
+
+app.listen(PORT, () => {
   console.log('======================');
   console.log('CastChat2.0 ONLINE');
   console.log('======================');
-
-  console.log(
-    SERVER_ROOT
-  );
-
+  console.log(SERVER_ROOT);
 });
