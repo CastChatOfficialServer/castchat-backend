@@ -1,1 +1,1046 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Evento de Boas-Vindas - CastChat</title>
 
+<style>
+:root{
+  --site-bg:#000;
+  --event-bg:#3f2318;
+  --muted:#d3bfb0;
+  --accent:#ffcc00;
+  --radius:14px;
+  --mobile-w:380px;
+}
+
+*{box-sizing:border-box}
+html,body{
+  height:100%;
+  margin:0;
+  font-family:Segoe UI,Roboto,Arial;
+  background:linear-gradient(180deg,var(--site-bg),#060606);
+  color:#fff;
+}
+
+.phone{
+  width:100%;
+  max-width:var(--mobile-w);
+  margin:18px auto;
+  padding:8px;
+}
+
+.event-banner img{
+  width:100%;
+  border-radius:14px;
+  margin-bottom:12px;
+}
+
+.summary-card{
+  background:linear-gradient(180deg,#3f2318,#2f1910);
+  padding:14px;
+  border-radius:14px;
+  margin-bottom:12px;
+}
+
+.summary-title{
+  font-weight:800;
+  text-align:center;
+  margin-bottom:8px;
+}
+
+.controls-row{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  margin-top:12px;
+}
+
+.btn{
+  padding:10px 18px;
+  border-radius:12px;
+  border:none;
+  cursor:pointer;
+  font-weight:800;
+}
+
+.btn-yellow{background:var(--accent);color:#000}
+.btn-brown{background:#735546;color:#feeede}
+
+/* MACHINE */
+
+.machine{
+  background:#2a1b15;
+  border-radius:12px;
+  padding:12px;
+}
+
+.machine-top{
+  font-weight:900;
+  color:#ffd;
+  text-align:center;
+  margin-bottom:8px;
+}
+
+.machine-screen{
+  background:#111;
+  border-radius:10px;
+  min-height:120px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.machine-controls{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+}
+
+.machine-btn{
+  flex:1;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.machine-btn.free{background:#eee;color:#222}
+.machine-btn.coins{background:#ffc;color:#222}
+
+/* SPRITE */
+
+.styles-sprite{
+  width:300px;
+  height:300px;
+  background-image:url('9estilos.png');
+  background-size:300px 300px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(3,1fr);
+  gap:6px;
+  padding:6px;
+  margin:12px auto 0;
+}
+
+.style-tile{
+  width:88px;
+  height:88px;
+  background-image:url('9estilos.png');
+  background-size:300px 300px;
+  border-radius:10px;
+}
+
+/* RANK */
+
+.rank-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-top:14px;
+}
+
+.rank-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:#241613;
+  padding:12px;
+  border-radius:12px;
+}
+
+.avatar-wrapper{
+  position:relative;
+  width:60px;
+  height:60px;
+}
+
+.avatar{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  overflow:hidden;
+  border:3px solid #333;
+}
+
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.rank-number{
+  position:absolute;
+  top:-12px;
+  left:-10px;
+  font-size:22px;
+  font-weight:900;
+}
+
+.gold{color:#ffd700}
+.silver{color:#c0c0c0}
+.bronze{color:#cd7f32}
+
+.crown{
+  position:absolute;
+  top:-14px;
+  right:-6px;
+  width:28px;
+}
+
+.meta{flex:1;font-weight:700}
+
+.like-btn{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+}
+
+.heart{
+  width:26px;
+}
+
+.like-btn span{
+  font-weight:700;
+  font-size:16px;
+}
+
+.toast{
+  position:fixed;
+  bottom:16px;
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,0.8);
+  padding:8px 14px;
+  border-radius:8px;
+  display:none;
+}
+
+#petCardOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  display:none; /* começa fechado */
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+
+#petCard{
+  background:#111;
+  width:90%;
+  max-width:380px;
+  padding:20px;
+  border-radius:16px;
+  max-height:420px;
+  display:flex;
+  flex-direction:column;
+}
+
+.petHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.petClose{
+  cursor:pointer;
+  font-size:20px;
+  font-weight:bold;
+}
+
+#petLista{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:15px;
+  overflow-y:auto;
+  max-height:260px;
+  padding-right:4px;
+}
+
+.petItem{
+  width:100%;
+  max-width:70px;
+  cursor:pointer;
+  padding:6px;
+  border-radius:10px;
+  transition:0.2s;
+  border:2px solid transparent;
+  margin:auto;
+}
+
+.petItem:hover{
+  border:2px solid #ffd700;
+  transform:scale(1.05);
+}
+
+@keyframes fadeIn{
+  from{opacity:0; transform:scale(0.9);}
+  to{opacity:1; transform:scale(1);}
+}
+
+.rank-pets{
+  display:flex;
+  gap:4px;
+  margin-top:4px;
+}
+
+.rank-pets img{
+  width:22px;
+  height:22px;
+}
+
+.admin-edit{
+  width:55px;
+  height:24px;
+  font-size:14px;
+  padding:2px;
+}
+
+.rank-pos{
+  width:28px;
+  text-align:center;
+  font-weight:900;
+  font-size:18px;
+}
+
+.rank-pos.gold{
+  color:#ffd700;
+}
+
+.rank-pos.silver{
+  color:#c0c0c0;
+}
+
+.rank-pos.bronze{
+  color:#cd7f32;
+}
+
+.my-rank-box{
+  background:#2b5c38;
+  padding:12px;
+  border-radius:10px;
+  margin-top:16px;
+  text-align:center;
+}
+
+.event-banner{
+    position:relative;
+}
+
+.banner-img{
+    width:100%;
+    display:block;
+}
+
+.back-btn{
+    position:absolute;
+    top:16px;
+    left:16px;
+    z-index:100;
+}
+
+.back-btn img{
+    width:42px;
+    height:42px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="phone">
+
+ <div class="event-banner">
+
+    <a href="home.html" class="back-btn">
+        <img src="ic_back_circle.png" alt="Voltar">
+    </a>
+
+    <img src="welcometocastchat.png" class="banner-img">
+
+</div>
+
+  <div class="summary-card">
+    <div class="summary-title">SUMMARY</div>
+    <div style="color:var(--muted);line-height:1.4">
+      Nove fundos temáticos de Ação de Graças, em edição limitada, podem ser combinados aleatoriamente com seus pets. Vista o pet mais original para o Dia de Ação de Graças e deixe que todos votem em você! As 10, 30 e 50 melhores duplas de pets receberão pets especiais de Ação de Graças. Uma chance gratuita de personalização por dia.<br><br>
+      ⚠️ Observação: A dupla personalizada só será exibida na lista da página do evento e não afetará sua personalização original. O fundo temático de edição limitada do evento desaparecerá automaticamente após o término do evento e só será exibido durante o evento.
+    </div>
+
+    <div class="controls-row">
+      <button id="btnDress" class="btn btn-yellow">DRESS UP</button>
+      <button id="btnRank" class="btn btn-brown">RANK</button>
+    </div>
+  </div>
+
+  <!-- MACHINE AREA -->
+  <div id="machineArea">
+    <div class="machine">
+
+      <div class="machine-top">Boas-Vindas Gacha</div>
+
+      <div class="machine-screen">
+        <img src="ic_pet_add.png"
+             style="width:56px;cursor:pointer"
+             onclick="abrirCardPets()">
+      </div>
+
+      <div class="machine-controls">
+        <button class="machine-btn free" onclick="girarMaquina()">FREE</button>
+        <button class="machine-btn coins" onclick="girarMaquina()">
+          <img src="coin_rotate_06.png" style="width:20px;vertical-align:middle">
+          20
+        </button>
+      </div>
+
+      <div class="styles-sprite" id="stylesSprite"></div>
+
+    </div>
+  </div>
+
+  <!-- RANK AREA -->
+  <div id="rankArea" style="display:none;">
+    <div class="rank-list" id="rankList"></div>
+  </div>
+
+</div>
+
+<!-- CARD PETS -->
+<div id="petCardOverlay" style="display:none;">
+  <div id="petCard">
+
+    <div class="petHeader">
+      <h2 id="petTitulo">Minha tripulação de estimação (0)</h2>
+      <span class="petClose" onclick="fecharCardPets()">✕</span>
+    </div>
+
+    <h3>Escolha 1 animal de estimação para enfeitar.</h3>
+
+    <div id="petLista"></div>
+
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+</body>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script src="pets.js"></script>
+
+<script>
+  let petSelecionadoAtual = null;
+  const firebaseConfig = {
+  apiKey: "AIzaSyBAOQC_mEjF-m5fdEO2no1-XfsQUjZc2mU",
+  authDomain: "amongchat-848f9.firebaseapp.com",
+  projectId: "amongchat-848f9",
+  storageBucket: "amongchat-848f9.firebasestorage.app",
+  messagingSenderId: "317096866187",
+  appId: "1:317096866187:web:fc4be8871cc5a9e7f43f8e",
+  measurementId: "G-ZFE9C5E595"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+
+/* ================= 
+USER 
+================= */
+
+let currentUser = {
+  id: null,
+  nome: "",
+  selo: "",
+  discordID: "",
+  isAdmin: false
+};
+
+async function carregarUsuarioAtualEvento(){
+
+  const loginAtualDoc =
+    await db.collection("config")
+      .doc("loginAtual")
+      .get();
+
+  if (!loginAtualDoc.exists) {
+    alert("Faça login para participar do evento.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const loginAtual =
+    loginAtualDoc.data() || {};
+
+  let perfilID = null;
+
+  if (loginAtual.tipo === "google") {
+    perfilID = loginAtual.perfilID;
+  }
+
+  if (loginAtual.tipo === "discord") {
+    perfilID = loginAtual.uid;
+  }
+
+  if (!perfilID) {
+    alert("Perfil não encontrado.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const userDoc =
+    await db.collection("usuarios")
+      .doc(String(perfilID))
+      .get();
+
+  if (!userDoc.exists) {
+    alert("Perfil não encontrado no Firestore.");
+    return;
+  }
+
+  const data =
+    userDoc.data() || {};
+
+  currentUser = {
+    id: String(perfilID),
+    nome: data.nickname || data.nome || `Usuário ${perfilID}`,
+    selo: data.selo || "",
+    discordID: data.discordID || "",
+    isAdmin:
+      String(perfilID) === "10000" &&
+      String(data.discordID) === "908775623135219734"
+  };
+
+  console.log("Usuário do evento:", currentUser);
+}
+
+/* ================= 
+STORAGE 
+================= */
+async function getRank(){
+
+  const snap =
+    await db.collection("eventos_boas_vindas_rank")
+      .get();
+
+  const rank = [];
+
+  snap.forEach(doc => {
+    rank.push({
+      id: doc.id,
+      ...doc.data()
+    });
+  });
+
+  return rank;
+}
+
+async function setRankItem(ownerId, data){
+
+  await db.collection("eventos_boas_vindas_rank")
+    .doc(String(ownerId))
+    .set(data, { merge:true });
+
+}
+
+/* ================= 
+TOGGLE DRESS / RANK 
+================= */
+
+const btnDress = document.getElementById('btnDress');
+const btnRank  = document.getElementById('btnRank');
+const machineArea = document.getElementById('machineArea');
+const rankArea    = document.getElementById('rankArea');
+
+btnDress.onclick = () => {
+  machineArea.style.display = 'block';
+  rankArea.style.display = 'none';
+};
+
+btnRank.onclick = () => {
+  machineArea.style.display = 'none';
+  rankArea.style.display = 'block';
+  renderRank();
+};
+
+/* ================= 
+LIKE SYSTEM 
+================= */
+
+async function isLiked(id){
+
+  if (currentUser.isAdmin) {
+    return true;
+  }
+
+  if (!currentUser || !currentUser.id) {
+    return false;
+  }
+
+  const likeDoc =
+    await db.collection("eventos_boas_vindas_likes")
+      .doc(`${currentUser.id}_${id}`)
+      .get();
+
+  return likeDoc.exists;
+
+}
+
+async function handleLike(id){
+
+  if (!currentUser || !currentUser.id) {
+    alert("Perfil não carregado.");
+    return;
+  }
+
+  const meuId =
+    String(currentUser.id);
+
+  const itemId =
+    String(id);
+
+  const likeRef =
+    db.collection("eventos_boas_vindas_likes")
+      .doc(`${meuId}_${itemId}`);
+
+  const likeDoc =
+    await likeRef.get();
+
+  if (!currentUser.isAdmin && likeDoc.exists) {
+    return;
+  }
+
+  const rankRef =
+    db.collection("eventos_boas_vindas_rank")
+      .doc(itemId);
+
+  await db.runTransaction(async (transaction) => {
+
+    const rankDoc =
+      await transaction.get(rankRef);
+
+    if (!rankDoc.exists) return;
+
+    const data =
+      rankDoc.data() || {};
+
+    const likes =
+      Number(data.likes || 0) + 1;
+
+    transaction.set(rankRef, {
+      likes: likes
+    }, { merge:true });
+
+    transaction.set(likeRef, {
+      userId: meuId,
+      rankId: itemId,
+      criadoEm: Date.now()
+    }, { merge:true });
+
+  });
+
+  await renderRank();
+
+}
+
+/* ================= 
+ADMIN EDIT 
+================= */
+
+async function editarLikes(id, value){
+
+  let likes = parseInt(value) || 0;
+
+  if (likes < 0) {
+    likes = 0;
+  }
+
+  await db.collection("eventos_boas_vindas_rank")
+    .doc(String(id))
+    .set({
+      likes: likes
+    }, { merge:true });
+
+  await renderRank();
+
+}
+
+/* =================
+RENDER RANK
+================= */
+
+async function renderRank(){
+
+  const list = document.getElementById('rankList');
+  list.innerHTML = '';
+
+  let rank = await getRank();
+
+  // 🔥 ORDENA
+  rank.sort((a,b)=>b.likes-a.likes);
+
+  let myPosition = null;
+
+  for(const [index,r] of rank.entries()){
+
+    const pos = index + 1;
+
+    if(r.ownerId == currentUser.id){
+      myPosition = pos;
+    }
+
+    let medal="";
+    let crown="";
+
+    if(pos === 1){
+      medal="gold";
+      crown="ic_coroa_ouro.png";
+    }
+    else if(pos === 2){
+      medal="silver";
+      crown="ic_coroa_prata.png";
+    }
+    else if(pos === 3){
+      medal="bronze";
+      crown="ic_coroa_bronze.png";
+    }
+
+/* ==============
+    DADOS PADRÃO 
+================= */
+
+let nickname = "Usuário";
+let avatar = "avatarpreto01.png";
+let pets = [];
+let badges = [];
+
+try{
+
+  const doc = await db.collection("usuarios")
+  .doc(String(r.ownerId))
+  .get();
+
+  if(doc.exists){
+
+    const user = doc.data();
+
+nickname = user.nickname || "Usuário";
+
+if (user.avatarUpload) {
+  avatar = user.avatarUpload;
+}
+else if (user.avatarEquipado && user.avatarEquipado.valor) {
+  avatar = user.avatarEquipado.valor;
+}
+else if (user.avatar) {
+  avatar = user.avatar;
+}
+else if (user.foto) {
+  avatar = user.foto;
+}
+else if (user.profilePic) {
+  avatar = user.profilePic;
+}
+
+// 🔥 PETS DO EVENTO (prioridade)
+if(r.petsEvento && r.petsEvento.length > 0){
+  pets = r.petsEvento;
+}else{
+  pets = user.petsEquipados || [];
+}
+    badges = user.selos || [];
+
+  }
+
+}catch(err){
+  console.log("erro ao buscar perfil:",err);
+}
+
+    const liked =
+  await isLiked(r.id);
+
+const div = document.createElement('div');
+div.className = "rank-item";
+
+div.innerHTML = `
+  <div class="rank-pos ${medal}">
+    ${pos}
+  </div>
+
+  <div class="avatar-wrapper">
+    <div class="avatar">
+      <img src="${avatar}" onerror="this.src='avatarpreto01.png'">
+    </div>
+    ${pos <= 3 ? `<img src="${crown}" class="crown">` : ''}
+  </div>
+
+  <div class="meta">
+    <div class="nickname">${nickname}</div>
+    <div class="badges"></div>
+    <div class="rank-pets"></div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div class="like-btn" onclick="handleLike('${r.id}')">
+      <img class="heart" src="${liked ? 'ic_love_selected.png' : 'ic_love_default.png'}">
+      <span>${r.likes}</span>
+    </div>
+
+    ${currentUser.isAdmin ?
+      `<input
+        type="number"
+        class="admin-edit"
+        min="0"
+        value="${r.likes}"
+        onchange="editarLikes('${r.id}',this.value)">`
+      : ""}
+  </div>
+`;
+
+list.appendChild(div);
+
+  const icons = {
+  official:"ic_official.png",
+  verifyPadrao:"ic_settings_verify.png",
+  verifyAmarelo:"ic_settings_verify_amarelo.png",
+  verifyVermelho:"ic_settings_verify_vermelho.png"
+};
+
+const badgeContainer = div.querySelector(".badges");
+
+badges.forEach(b => {
+
+  if(!icons[b]) return;
+
+  const img = document.createElement("img");
+  img.src = icons[b];
+  img.style.width = "18px";
+  img.style.marginRight = "4px";
+
+  badgeContainer.appendChild(img);
+
+});
+
+    /* ============ 
+    PETS CORRIGIDO 
+    =============== */
+
+    const petsContainer = div.querySelector(".rank-pets");
+
+    pets.forEach(petId => {
+
+      const pet = todosAnimais.find(p => String(p.id) === String(petId));
+
+      if(!pet) return;
+
+      const img = document.createElement("img");
+      img.src = pet.img;
+
+      petsContainer.appendChild(img); // 🔥 AGORA CORRETO
+
+    });
+
+  }
+
+  /* ================ 
+  POSIÇÃO DO USUÁRIO 
+  =================== */
+
+  if(myPosition !== null){
+
+    const myBox = document.createElement("div");
+
+    myBox.className = "my-rank-box";
+
+    myBox.innerHTML = `
+      <div style="font-size:14px;opacity:0.8;">Sua posição no ranking</div>
+      <div style="font-size:22px;font-weight:900;color:#ffd700;">#${myPosition}</div>
+    `;
+
+    list.appendChild(myBox);
+
+  }
+
+}
+
+/* ================= 
+PET CARD 
+================= */
+
+async function abrirCardPets(){
+
+  const overlay = document.getElementById("petCardOverlay");
+  const lista   = document.getElementById("petLista");
+  const titulo  = document.getElementById("petTitulo");
+
+  lista.innerHTML = "";
+
+  try {
+
+    // 🔥 TODOS OS PETS DO JOGO
+    const pets = todosAnimais.map(p => p.id);
+
+    titulo.innerText = `Escolha seu pet (${pets.length})`;
+
+    pets.forEach(petId => {
+
+      const pet = todosAnimais.find(p => String(p.id) === String(petId));
+      if(!pet) return;
+
+      const img = document.createElement("img");
+      img.src = pet.img;
+      img.className = "petItem";
+
+img.onclick = async () => {
+
+  // 🔥 SEMPRE salva local primeiro
+  petSelecionadoAtual = petId;
+
+  // 🔥 atualiza máquina
+  const screen = document.querySelector(".machine-screen");
+  screen.innerHTML = `<img src="${pet.img}" style="width:70px;">`;
+
+  // 🔥 tenta salvar no Firebase (sem travar)
+  try {
+    const userRef = db.collection("usuarios").doc(String(currentUser.id));
+    await userRef.set({ petSelecionado: petId }, { merge:true });
+  } catch(err){
+    console.log("Erro ao salvar no Firebase:", err);
+  }
+
+  alert("Pet selecionado com sucesso!");
+  fecharCardPets();
+};    
+
+
+      lista.appendChild(img);
+
+    });
+
+    overlay.style.display = "flex";
+
+  } catch(err){
+    console.error(err);
+    alert("Erro ao carregar pets.");
+  }
+}
+
+function fecharCardPets(){
+  document.getElementById("petCardOverlay").style.display = "none";
+}
+
+/*==============
+ENTRAR NO RANK
+================*/
+async function entrarNoRank(petId){
+
+  if (!currentUser || !currentUser.id) {
+    alert("Perfil não carregado.");
+    return;
+  }
+
+  const ownerId =
+    String(currentUser.id);
+
+  const ref =
+    db.collection("eventos_boas_vindas_rank")
+      .doc(ownerId);
+
+  const doc =
+    await ref.get();
+
+  let petsEvento = [];
+  let likes = 0;
+
+  if (doc.exists) {
+    const data = doc.data() || {};
+    petsEvento = data.petsEvento || [];
+    likes = data.likes || 0;
+  }
+
+  petId = String(petId);
+
+  if (!petsEvento.includes(petId)) {
+
+    if (petsEvento.length < 3) {
+      petsEvento.push(petId);
+    } else {
+      petsEvento.shift();
+      petsEvento.push(petId);
+    }
+
+  }
+
+  await ref.set({
+    id: ownerId,
+    ownerId: ownerId,
+    petsEvento: petsEvento,
+    likes: likes,
+    atualizadoEm: Date.now()
+  }, { merge:true });
+
+}
+
+
+/*================
+GIRAR NA MÁQUINA
+==================*/
+async function girarMaquina(){
+
+  try {
+
+    if(!petSelecionadoAtual){
+      alert("Selecione um pet primeiro!");
+      return;
+    }
+
+    console.log("Pet escolhido:", petSelecionadoAtual);
+    console.log("Usuário atual:", currentUser);
+
+    await entrarNoRank(petSelecionadoAtual);
+
+    petSelecionadoAtual = null;
+
+    const screen = document.querySelector(".machine-screen");
+    screen.innerHTML = `
+      <img src="ic_pet_add.png"
+           style="width:56px;cursor:pointer"
+           onclick="abrirCardPets()">
+    `;
+
+    machineArea.style.display = "none";
+    rankArea.style.display = "block";
+
+    await renderRank();
+
+    alert("Pet enviado para o ranking!");
+
+  } catch (err) {
+
+    console.error("ERRO AO ENVIAR PET PARA O RANK:", err);
+    alert(err.message);
+
+  }
+
+}
+
+/* ================= 
+INIT 
+================= */
+
+(async () => {
+  await carregarUsuarioAtualEvento();
+  await renderRank();
+})();
+
+</script>
+
+</body>
+</html>
