@@ -1,0 +1,3718 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CastChat - Perfil</title>
+<link rel="icon" href="/img/favicon.ico?v=1">
+
+<style>
+
+:root{
+  --bg:#000;
+  --card:#141414;
+  --muted:#bfbfbf;
+  --yellow:#ffd700;
+  --glass: rgba(255,255,255,0.03);
+}
+
+html,body{
+  height:100%;
+  margin:0;
+  background:var(--bg);
+  color:#fff;
+  font-family:Inter,Roboto,Arial,sans-serif;
+}
+
+.app{
+  display:flex;
+  justify-content:center;
+  padding:18px 8px;
+}
+
+.phone{
+  width:420px;
+  max-width:96%;
+  background:linear-gradient(180deg,#121212,#0f0f0f);
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.6);
+}
+
+/* ================= TOPO ================= */
+
+.top-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 14px;
+}
+
+.coins{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.coins span{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  font-size:14px;
+  font-weight:600;
+}
+
+.coins img{
+  width:18px;
+  height:18px;
+  object-fit:contain;
+}
+
+.coins img[alt="discordorbs"]{
+  width:20px;
+  height:20px;
+}
+
+.btn-config{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:#111;
+  border:1px solid #222;
+  cursor:pointer;
+  box-shadow:0 0 6px rgba(255,215,0,.15);
+  transition:.2s ease;
+}
+
+.btn-config:hover{
+  background:#1a1a1a;
+  transform:scale(1.05);
+}
+
+.btn-config img{
+  width:18px;
+  height:18px;
+}
+
+/* ================= PERFIL ================= */
+
+.perfil-card{
+  background:linear-gradient(180deg,#1b1b1b,#151515);
+  padding:16px;
+  border-radius:14px;
+  position:relative; /* <<< ESSENCIAL */
+}
+
+/* header perfil */
+.perfil-header-row{
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+}
+
+/* avatar */
+.avatar-wrap{
+  width:88px;
+  flex-shrink:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  position:relative;
+}
+
+.perfil-avatar{
+  width:88px;
+  height:88px;
+  border-radius:50%;
+  object-fit:cover;
+}
+
+/* nome abaixo do avatar */
+.avatar-name{
+  font-size:14px;
+  font-weight:700;
+  color:#fff;
+}
+
+/* ================= INFO PERFIL ================= */
+
+.perfil-info{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+}
+
+/* linha ID + infos */
+.id-row{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:6px;
+  font-size:13px;
+  color:var(--muted);
+}
+
+/* bio em linha */
+.bio{
+  margin-top:8px;
+  font-size:14px;
+  line-height:1.4;
+  color:#d0d0d0;
+  text-align:left;
+  word-break:break-word;
+}
+
+/* ================= STATS ================= */
+
+.stats{
+  display:flex;
+  justify-content:space-around;
+  margin:16px 0 12px;
+  color:var(--muted);
+}
+
+.center{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-width:90px;
+}
+
+/* ================= BOTÕES ================= */
+
+.btns{
+  display:flex;
+  gap:10px;
+}
+
+.btn{
+  flex:1;
+  padding:10px;
+  border-radius:26px;
+  border:2px solid var(--yellow);
+  background:transparent;
+  color:var(--yellow);
+  font-weight:700;
+  cursor:pointer;
+}
+
+.btn.primary{
+  background:var(--yellow);
+  color:#000;
+  border:none;
+}
+
+/* ================= TABS ================= */
+
+.tabs{
+  display:flex;
+  justify-content:space-around;
+  margin-top:16px;
+}
+
+.tab-btn{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  background:none;
+  border:none;
+  color:#fff;
+  cursor:pointer;
+  opacity:.6;
+}
+
+.tab-btn.active{
+  opacity:1;
+}
+
+.tab-icon{
+  width:22px;
+  height:22px;
+}
+
+.tab-btn span{
+  font-size:12px;
+}
+
+/* ================= CONTEÚDO ================= */
+
+.content-area{
+  margin-top:14px;
+  background:#0f0f0f;
+  padding:14px;
+  border-radius:12px;
+  min-height:120px;
+  color:#ddd;
+}
+
+.hidden{
+  display:none!important;
+}
+
+/* ================= BOTTOM NAV ================= */
+
+.bottom-nav{
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  margin-top:16px;
+  padding:10px;
+  background:#111;
+  border-radius:12px;
+}
+
+.bottom-nav a{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px;
+  border-radius:8px;
+}
+
+/* ================= MODAIS ================= */
+
+.overlay{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.35);
+  backdrop-filter:blur(6px);
+  z-index:2000;
+}
+
+.modal{
+  background:#161616;
+  border-radius:12px;
+  padding:16px;
+  width:92%;
+  max-width:360px;
+  box-shadow:0 10px 40px rgba(0,0,0,.6);
+}
+
+.modal h3{
+  margin:0 0 10px;
+}
+
+.modal .actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.modal .action{
+  flex:1;
+  padding:10px;
+  border-radius:10px;
+  background:#1f1f1f;
+  text-align:center;
+  cursor:pointer;
+}
+
+/* botão editar perfil */
+.perfil-card .btn-edit-profile{
+  position:absolute;
+  top:38px;              /* alinha com o nome */
+  right:14px;
+
+  background:none;
+  border:none;
+  padding:0;
+
+  cursor:pointer;
+  z-index:10;
+}
+
+.perfil-card .btn-edit-profile:hover{
+  background:#1a1a1a;
+  transform:scale(1.08);
+}
+
+/* ícone editar perfil */
+.perfil-card .btn-edit-profile img{
+  width:30px;
+  height:30px;
+  object-fit:contain;
+  opacity:0.8;
+  margin-top:3px;
+  transition:0.2s ease;
+}
+
+.perfil-card .btn-edit-profile:hover img{
+  opacity:1;
+  transform:scale(1.1);
+}
+
+.modal-card{
+  width:90%;
+  max-width:420px;
+  background:#111;
+  border-radius:12px;
+  padding:14px;
+  border:1px solid #222;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.close-btn{
+  background:none;
+  border:none;
+  font-size:22px;
+  color:#fff;
+  cursor:pointer;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  margin-bottom:12px;
+}
+
+.field label{
+  color:#bbb;
+  margin-bottom:6px;
+}
+
+.field input,
+.field select,
+.field textarea{
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #2b2b2b;
+  background:#0f0f0f;
+  color:#fff;
+}
+
+.field textarea{
+  min-height:80px;
+  resize:vertical;
+}
+
+.modal-footer{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+
+.modal-btn{
+  padding:10px 16px;
+  border-radius:10px;
+  font-weight:700;
+  border:none;
+  cursor:pointer;
+}
+
+.modal-btn.primary{
+  background:var(--yellow);
+  color:#000;
+}
+
+.modal-btn.secondary{
+  background:#333;
+  color:#fff;
+}
+
+/* === STATS === */
+.perfil-stats{
+  display:flex;
+  justify-content:space-around;
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid #222;
+}
+
+.stat{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+}
+
+.stat span{
+  font-size:18px;
+  font-weight:700;
+  color:#fff;
+}
+
+.stat small{
+  font-size:13px;
+  color:#bfbfbf;
+}
+
+/* === BOTÕES === */
+.perfil-botoes{
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+}
+
+/* botão outline */
+.btn-outline{
+  flex:1;
+  padding:10px 14px;
+  border-radius:22px;
+  background:transparent;
+  border:2px solid #ffd700;
+  color:#ffd700;
+  font-weight:700;
+  cursor:pointer;
+  transition:0.2s ease;
+}
+
+.btn-outline:hover{
+  background:rgba(255,215,0,0.08);
+}
+
+/* botão PRO */
+.btn-pro{
+  flex:1;
+  padding:10px 14px;
+  border-radius:22px;
+  border:none;
+  background:#ffd700;
+  color:#000;
+  font-weight:800;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  transition:0.2s ease;
+}
+
+.btn-pro img{
+  width:18px;
+  height:18px;
+}
+
+.btn-pro:hover{
+  transform:scale(1.03);
+  box-shadow:0 0 12px rgba(255,215,0,.35);
+}
+
+/* linha do nome */
+.name-row{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:nowrap;
+}
+
+/* container dos badges */
+.name-badges{
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+
+/* ícones dos badges */
+.name-badges img{
+  width:18px;
+  height:18px;
+  object-fit:contain;
+}
+
+/* nome */
+.name-row h2{
+  margin:0;
+  font-size:20px;
+  font-weight:700;
+}
+
+/* ================= TABS PERFIL ================= */
+
+.perfil-tabs{
+  display:flex;
+  justify-content:space-around;
+  margin-top:16px;
+  background:#111;
+  border-radius:14px;
+  padding:6px 0;
+}
+
+.tab-btn{
+  flex:1;
+  background:none;
+  border:none;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  padding:8px 0;
+  cursor:pointer;
+  color:#aaa;
+  transition:0.2s ease;
+}
+
+.tab-btn:hover{
+  color:#fff;
+}
+
+.tab-btn.active{
+  color:var(--yellow);
+}
+
+.tab-icon{
+  width:22px;
+  height:22px;
+  object-fit:contain;
+}
+
+.tab-btn span{
+  font-size:12px;
+  font-weight:600;
+}
+
+/* ================= CONTEÚDO DAS TABS ================= */
+
+.perfil-tab-content{
+  margin-top:14px;
+  background:#0f0f0f;
+  padding:14px;
+  border-radius:12px;
+  min-height:120px;
+}
+
+.tab-content{
+  display:none;
+}
+
+.tab-content.active{
+  display:block;
+}
+
+/* ================= PETS GRID ================= */
+
+.pets-grid{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr); /* 2 por linha */
+  gap:12px;
+}
+
+/* card do pet */
+.pet-card{
+  background:#141414;
+  border-radius:14px;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  cursor:pointer;
+  transition:0.2s ease;
+  border:1px solid #222;
+}
+
+.pet-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 16px rgba(0,0,0,.5);
+}
+
+/* imagem */
+.pet-card img{
+  width:72px;
+  height:72px;
+  object-fit:contain;
+  margin-bottom:8px;
+}
+
+/* nome */
+.pet-name{
+  font-size:13px;
+  font-weight:700;
+  color:#fff;
+  line-height:1.2;
+}
+
+/* raridade */
+.pet-rarity{
+  margin-top:4px;
+  font-size:11px;
+  font-weight:600;
+  color:#bfbfbf;
+}
+
+.pet-card{
+  position:relative;
+  background:#1a1a1a;
+  border-radius:14px;
+  padding:12px;
+  text-align:center;
+}
+
+.pet-rarity-icon{
+  position:absolute;
+  top:8px;
+  right:8px;
+  display:flex;
+  align-items:center;
+  gap:4px;
+  padding:4px 8px;
+  border-radius:999px;
+  background:#000;
+  font-size:11px;
+  font-weight:700;
+}
+
+.pet-rarity-icon img{
+  width:16px;
+  height:16px;
+}
+
+.pet-rarity-icon span{
+  color:#fff;
+}
+
+.pets-action{
+  margin-top:16px;
+  position:sticky;
+  bottom:12px;
+}
+
+#equipPetBtn{
+  width:100%;
+  padding:14px;
+  border-radius:26px;
+  border:none;
+  font-size:16px;
+  font-weight:800;
+  background:#ffd700;
+  color:#000;
+  cursor:pointer;
+  transition:.2s;
+}
+
+#equipPetBtn:disabled{
+  background:#444;
+  color:#aaa;
+  cursor:not-allowed;
+}
+
+.perfil-avatar-area{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.perfil-pets{
+  display:flex;
+  gap:8px;
+}
+
+.perfil-pets img{
+  width:60px;
+  height:60px;
+  object-fit:contain;
+}
+
+#perfilPets {
+  display: flex;
+  gap: 8px;
+  margin-left: 12px; /* distância do avatar */
+  align-items: center;
+}
+
+.perfil-pet {
+  width: 36px;
+  height: 36px;
+}
+
+.pet-equip-btn{
+  margin-top:8px;
+  width:100%;
+  padding:8px 10px;
+
+  border-radius:14px;
+  border:none;
+
+  background:var(--yellow);
+  color:#000;
+
+  font-weight:700;
+  font-size:13px;
+
+  cursor:pointer;
+  transition:0.2s ease;
+}
+
+.perfil-header {
+  display: flex;
+  align-items: center; /* mesma altura */
+}
+
+/*=============
+JOGOS
+===============*/
+
+.games-grid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:12px;
+  margin-top:12px;
+}
+
+.game-card{
+  background:#111;
+  border-radius:12px;
+  padding:6px;
+}
+
+.game-card img{
+  width:100%;
+  aspect-ratio:1/1;
+  object-fit:cover;
+  border-radius:8px;
+}
+
+/* botão adicionar */
+.add-game-btn{
+  margin-top:14px;
+  width:100%;
+  padding:10px;
+
+  border-radius:18px;
+  border:none;
+
+  background:var(--yellow);
+  color:#000;
+
+  font-weight:800;
+  cursor:pointer;
+}
+
+.games-title{
+  font-size:15px;
+  font-weight:700;
+  margin-bottom:12px;
+}
+
+.games-action{
+  margin-top:14px;
+}
+
+/*================
+Circulo do Avatar
+==================*/
+.avatar-circulo{
+  position:relative;
+  width:140px;
+  height:140px;
+  border-radius:50%;
+  overflow:hidden;
+}
+
+.avatar-bg,
+.avatar-img,
+.avatar-roupa,
+.avatar-chapeu{
+  position:absolute;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.avatar-chapeu{
+  top:-18px;
+  transform:scale(0.85);
+}
+
+/* MENU INTERNO DO AVATAR */
+.avatar-menu{
+  display:flex;
+  gap:18px;
+  margin:12px 0 16px;
+  padding-bottom:8px;
+  border-bottom:1px solid #222;
+  overflow-x:auto;
+}
+
+/* cada nome */
+.avatar-tab{
+  font-size:14px;
+  font-weight:700;
+  color:#aaa;
+  cursor:pointer;
+  white-space:nowrap;
+  position:relative;
+  transition:color .2s ease;
+}
+
+/* hover */
+.avatar-tab:hover{
+  color:#fff;
+}
+
+/* ativo */
+.avatar-tab.active{
+  color:var(--yellow);
+}
+
+/* underline do ativo */
+.avatar-tab.active::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:-8px;
+  height:2px;
+  background:var(--yellow);
+  border-radius:2px;
+}
+
+.avatar-section {
+  display: none;
+}
+
+.avatar-section.active {
+  display: block;
+}
+
+/* ===============================
+   CARD DO IC_REFRESH
+================================ */
+.avatar-options {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 240px;
+  background: #111;
+  border-radius: 20px;
+  padding: 18px;
+
+  flex-direction: column;
+  gap: 18px;
+
+  box-shadow: 0 0 25px rgba(0,0,0,0.6);
+  z-index: 9999;
+}
+
+.avatar-options .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #ffd700;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.avatar-options .option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1c1c1c;
+  border-radius: 14px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.avatar-options .option img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+#cameraOption::after {
+  content: "Câmera";
+}
+
+#galleryOption::after {
+  content: "Galeria";
+}
+
+#gifOption::after {
+  content: "GIF";
+}
+
+#closeAvatarCard {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* ===============================
+   BARRA INFERIOR (DENTRO DO CARD)
+=============================== */
+.bottombar {
+  width: 100%;
+  height: 56px;
+
+  margin-top: 16px;
+
+  background: #0e0e0e;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 0 12px;
+}
+
+/* LINKS */
+.bottombar a {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+/* ÍCONES */
+.bottombar img {
+  width: 24px;
+  height: 24px;
+  opacity: 0.6;
+  transition: 0.2s ease;
+}
+
+/* HOVER */
+.bottombar a:hover img {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+/* ÍCONE ATIVO */
+.bottombar a.active img {
+  opacity: 1;
+  filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.6));
+}
+
+.perfil-bio{
+  margin-top:8px;
+  font-size:13px;
+  color:#ccc;
+  line-height:1.4;
+  text-align:left;
+  word-break:break-word;
+}
+
+.name-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.name-left{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.btn-edit-profile{
+  background:none;
+  border:none;
+  cursor:pointer;
+  padding:0;
+}
+
+.btn-edit-profile img{
+  width:28px;
+  height:28px;
+  opacity:.85;
+}
+
+#tab-groups{
+  padding:16px;
+}
+
+.groups-card{
+  background:#111;
+  border-radius:16px;
+  padding:16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.groups-info{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:#bbb;
+}
+
+.groups-info img{
+  width:22px;
+  height:22px;
+}
+
+.groups-btn{
+  background:var(--yellow);
+  color:#000;
+  border:none;
+  border-radius:14px;
+  padding:8px 16px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 9999;
+}
+
+.overlay.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Linha dos ícones */
+.info-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Cada item */
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Ícones */
+.info-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* Texto pequeno ao lado do UID */
+.info-text {
+  font-size: 13px;
+  color: #ccc;
+}
+
+/* BIO abaixo do UID */
+.profile-bio {
+  font-size: 14px;
+  color: #aaa;
+  max-width: 300px;
+  word-break: break-word;
+}
+
+/*==============
+Avatar
+================*/
+.avatar-wrap {
+  position: relative;
+  width: 130px;
+  height: 130px;
+}
+
+.avatar-refresh {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  background: #111;
+  border: 2px solid #ffd700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.avatar-refresh img {
+  width: 16px;
+  height: 16px;
+}
+
+.avatar-options {
+  display: none;
+  position: absolute;
+  bottom: -90px;
+  right: 0;
+  background: #1a1a1a;
+  padding: 12px;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+  gap: 15px;
+  flex-direction: row;
+  z-index: 10;
+}
+
+.avatar-options .option {
+  position: relative;
+  cursor: pointer;
+}
+
+.avatar-options img {
+  width: 38px;
+}
+
+.locked {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: red;
+  color: white;
+  font-size: 11px;
+  border-radius: 50%;
+  padding: 2px 6px;
+  display: none;
+}
+
+.avatar-options {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  
+  width: 220px;
+  height: 220px; /* quadrado */
+
+  background: #111;
+  border-radius: 20px;
+  padding: 20px;
+
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+
+  box-shadow: 0 0 25px rgba(0,0,0,0.6);
+  z-index: 9999;
+}
+
+/* Fundo escurecido + blur */
+body.blur-active::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(5px);
+  z-index: 999;
+}
+
+/* Header do card */
+.card-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  font-size: 16px;
+  color: #ffd700;
+}
+
+#closeAvatarCard {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 22px; /* maior */
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+}
+
+.avatar-options .option-area {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* GRID */
+
+.avatar-grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
+margin-top:15px;
+}
+
+/* CARD */
+
+.avatar-card{
+
+background:#111;
+border-radius:12px;
+padding:10px;
+
+display:flex;
+flex-direction:column;
+align-items:center;
+
+justify-content: flex-start;
+
+gap:8px;
+
+min-height:150px;
+
+}
+
+/* IMAGEM */
+
+.avatar-img{
+
+width:70px;
+height:70px;
+
+object-fit:cover;
+
+border-radius:10px;
+
+}
+
+/* BOTÃO */
+
+.avatar-equip-btn{
+  position: relative;
+  z-index: 2; /* 🔥 fica na frente */
+  display:block;
+  background:#ffd700;
+  border:none;
+  padding:6px 12px;
+  border-radius:6px;
+  font-weight:bold;
+  cursor:pointer;
+  font-size:12px;
+  margin-top: auto; /* 🔥 joga o botão pro fundo */
+  width:100%; /* 🔥 garante visibilidade */
+}
+
+/* ===============================
+   GRID DE MOLDURAS
+=============================== */
+
+.molduras-grid{
+
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
+
+margin-top:15px;
+padding:5px;
+
+}
+
+/* ===============================
+   CARD DA MOLDURA
+=============================== */
+
+.moldura-card{
+
+background:#111;
+border-radius:12px;
+padding:10px;
+
+display:flex;
+flex-direction:column;
+align-items:center;
+
+transition:0.2s;
+
+}
+
+.moldura-card:hover{
+background:#1a1a1a;
+transform:scale(1.05);
+}
+
+/* ===============================
+   IMAGEM DA MOLDURA
+=============================== */
+
+.moldura-img{
+
+width:80px;
+height:80px;
+
+object-fit:contain;
+
+margin-bottom:8px;
+
+}
+
+/* ===============================
+   BOTÃO EQUIPAR
+=============================== */
+
+.equip-btn{
+
+background:#ffd700;
+border:none;
+
+padding:6px 10px;
+
+border-radius:6px;
+
+font-weight:bold;
+font-size:12px;
+
+cursor:pointer;
+
+}
+
+/* ===============================
+   SEÇÕES (MOSTRAR / ESCONDER)
+=============================== */
+
+.avatar-section{
+display:none;
+width:100%;
+}
+
+.avatar-section.active{
+display:block;
+}
+
+/* ===============================
+   RESPONSIVO CELULAR
+=============================== */
+
+@media (max-width:480px){
+
+.molduras-grid{
+grid-template-columns:repeat(2,1fr);
+}
+
+.moldura-img{
+width:70px;
+height:70px;
+}
+
+}
+
+/* 🔥 requisito no canto (igual pets) */
+.moldura-card{
+  position:relative; /* importante */
+}
+
+.moldura-req{
+  position:absolute;
+  top:6px;
+  right:6px;
+}
+
+.moldura-req img{
+  width:26px;   /* 🔥 aumenta o tamanho */
+  height:26px;
+}
+
+.moldura-req span{
+  display:none; /* 🔥 opcional: esconde número */
+}
+
+/*============
+TROCAS 
+==============*/
+.card-troca{
+  position:relative;
+  width:100%;
+  max-width:420px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:14px;
+
+  border-radius:16px;
+
+  background:linear-gradient(90deg,#1c1c1c,#2a2a2a);
+
+  box-shadow:0 4px 15px rgba(0,0,0,0.4);
+
+  margin:12px 0 12px -6px; /* 🔥 puxa pra esquerda */
+}
+
+.troca-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.icon-left{
+  width:26px;
+}
+
+.icon-right{
+  width:18px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.icon-right:hover{
+  transform:translateX(4px);
+}
+
+.titulo-troca{
+  font-weight:bold;
+  font-size:15px;
+}
+
+.icon-link{
+  display:flex;
+  align-items:center;
+}
+
+/*==============
+molduras
+================*/
+.moldura-req{
+  position:absolute;
+  top:6px;
+  right:6px;
+
+  display:flex;
+  align-items:center;
+  gap:4px;
+
+  opacity:1 !important;
+  visibility:visible !important;
+}
+
+.moldura-req img{
+  width:26px;
+  height:26px;
+}
+
+.moldura-req span{
+  font-size:12px;
+  font-weight:700;
+  color:#fff;
+}
+
+/*===========
+MOLDURAS
+=============*/
+.avatar-frame::after{
+  content:"";
+  position:absolute;
+
+  top:var(--y, 50%);
+  left:50%;
+
+  width:calc(100% * var(--scale, 1));
+  height:calc(100% * var(--scale, 1));
+
+  transform:translate(-50%, -50%);
+
+  background-image: var(--frame);
+  background-size:contain;
+  background-repeat:no-repeat;
+  background-position:center;
+
+  pointer-events:none;
+}
+
+/*===========
+MENSAGENS
+=============*/
+.msg-bloqueio {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  background: #111;
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 10px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  z-index: 9999;
+
+  transition: 0.3s;
+}
+
+.msg-bloqueio img {
+  width: 20px;
+  height: 20px;
+}
+
+/*===============
+CORES DO AVATAR
+=================*/
+.cor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* CARD */
+.avatar-card {
+  background: #141414;
+  border-radius: 14px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 🔥 TAMANHO DAS CORES (NO GRID) */
+.avatar-cor-img{
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+}
+
+/* 🔥 EFEITO QUANDO EQUIPADO NO PERFIL */
+.avatar-cor{
+  transform: scale(0.9);
+  object-fit: cover;
+  object-position: center 20%;
+}
+
+/*==================================
+GRID DOS COSMÉTICOS
+====================================*/
+
+.itens-grid{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:12px;
+  padding:10px;
+}
+
+
+/*==================================
+CARD DOS COSMÉTICOS
+====================================*/
+
+.itens-grid .avatar-card{
+  background:#1f1f1f;
+  border-radius:16px;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+
+
+/*==================================
+IMAGEM DOS COSMÉTICOS
+====================================*/
+
+.itens-grid .avatar-item-img{
+  width:85px;
+  height:85px;
+  object-fit:contain;
+  margin-bottom:10px;
+}
+
+
+/*==================================
+BOTÃO DOS COSMÉTICOS
+====================================*/
+
+.itens-grid .avatar-equip-btn{
+  width:100%;
+  height:36px;
+  border:none;
+  border-radius:10px;
+  background:#ffe600;
+  color:#000000;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+
+/*==================================
+EFEITO CLICK
+====================================*/
+
+.itens-grid .avatar-equip-btn:active{
+  transform:scale(0.97);
+}
+
+.perfil-pronoun{
+  font-size:14px;
+  color:#aaa;
+  margin-left:6px;
+}
+
+.perfil-card{
+  position:relative;
+}
+
+.btn-edit-profile{
+  position:absolute;
+  right:18px;
+  top:195px;
+
+  width:32px;
+  height:32px;
+
+  background:rgba(255,255,255,0.12);
+  border-radius:50%;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  z-index:20;
+  cursor:pointer;
+}
+
+.btn-edit-profile img{
+  width:16px;
+  height:16px;
+  object-fit:contain;
+}
+
+/*=============
+BOTÃO PRO/VIP
+===============*/
+.btn-pro{
+  width:100%;
+  height:72px;
+
+  background:#FFD700;
+
+  border:none;
+  border-radius:16px;
+
+  display:flex;
+  align-items:center;
+
+  padding:0 16px;
+
+  cursor:pointer;
+}
+
+.btn-pro img{
+  width:42px;
+  height:42px;
+  flex-shrink:0;
+}
+
+.btn-pro .pro-content{
+  margin-left:12px;
+  flex:1;
+}
+
+.btn-pro .pro-title{
+  display:block;
+
+  font-size:15px;
+  font-weight:800;
+
+  color:#000;
+
+  text-align:left;
+}
+
+.btn-pro .pro-desc{
+  display:block;
+
+  font-size:12px;
+  font-weight:600;
+
+  color:#000;
+
+  margin-top:2px;
+
+  text-align:left;
+}
+
+.btn-pro .arrow{
+  font-size:30px;
+  font-weight:900;
+
+  color:#000;
+
+  margin-left:10px;
+
+  flex-shrink:0;
+}
+
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="phone" role="main">
+<!-- AQUI VAI O PERFIL -->
+<div class="perfil-card">
+    <!-- TOPO -->
+    <div class="top-row">
+      <div class="coins">
+        <span><img src="coin_rotate_06.png" width="18"><span id="coinCount">0</span></span>
+        <span><img src="discordorbs.gif" alt="discordorbs"><span id="discordorbs">0</span></span>
+        <span><img src="ic_diamond.png" width="18"><span id="diamondCount">0</span></span>
+
+        <a href="selos.html"
+   class="link-badges"
+   id="openBadges">
+
+  Selos CastChat2.0
+
+</a>
+
+<a href="editarapelido.html" class="btn-edit-profile">
+  <img src="ic_edit_profile.png" alt="Editar perfil">
+</a>
+      </div>
+      <div class="btn-config" onclick="location.href='configuracao.html'">
+        <img src="ic_group_detail_edit.png" width="18">
+      </div>
+    </div>
+
+  <div class="perfil-header">
+
+    <div class="avatar-wrap">
+    <div id="avatarFrame" class="avatar-frame">
+      <img src="avatarpreto01.png" id="avatarImg" class="perfil-avatar">
+    </div>
+
+      <!-- Botão refresh -->
+      <div class="avatar-refresh" id="refreshBtn">
+        <img src="ic_refresh.png">
+      </div>
+
+      <!-- Card de opções -->
+      <div class="avatar-options" id="avatarOptions">
+
+  <div class="card-header">
+    <span>Escolher Avatar</span>
+    <button id="closeAvatarCard">✖</button>
+  </div>
+
+  <div class="option" id="cameraOption">
+    <img src="ic_camera.png">
+  </div>
+
+  <div class="option" id="galleryOption">
+    <img src="ps_ic_placeholder.png">
+  </div>
+
+  <div class="option" id="gifOption">
+    <img src="ic_gif.png">
+    <span class="locked" id="gifLock">🔒</span>
+  </div>
+
+</div>
+
+      <!-- INPUTS ESCONDIDOS (DENTRO DA AVATAR-WRAP) -->
+      <input type="file" 
+             id="cameraInput" 
+             accept="image/*" 
+             capture="environment" 
+             style="display:none;">
+
+      <input type="file" 
+             id="galleryInput" 
+             accept="image/png, image/jpeg, image/webp" 
+             style="display:none;">
+
+      <input type="file" 
+             id="gifInput" 
+             accept="image/gif" 
+             style="display:none;">
+
+    </div>
+
+ <!-- AVATAR + PETS -->
+    <!-- PETS EQUIPADOS (ATÉ 4) -->
+    <div id="perfilPets" class="perfil-pets"></div>
+
+  </div>
+
+ <!-- NOME + BADGES -->
+<div class="name-row">
+
+  <div class="name-left">
+    <h2>
+
+      <span id="perfilNickname">
+        Usuário
+      </span>
+
+      <span id="perfilPronoun"
+            class="perfil-pronoun">
+      </span>
+
+      <span id="badgesArea"></span>
+
+    </h2>
+  </div>
+</div>
+
+    <!-- INFO -->
+<div class="profile-info">
+
+  <div class="info-top">
+
+    <!-- ID -->
+    <div class="info-item">
+      <img src="ic_uid.png" class="info-icon">
+      <span class="info-text" id="perfilUID">10000</span>
+    </div>
+
+    <!-- IDADE -->
+    <div class="info-item">
+      <img src="ic_birthday.png" class="info-icon">
+      <span class="info-text" id="perfilAge"></span>
+    </div>
+
+    <!-- SIGNO -->
+    <div class="info-item">
+      <img src="ic_constellation.png" class="info-icon">
+      <span class="info-text" id="perfilSigno"></span>
+    </div>
+
+    <!-- PAÍS -->
+    <div class="info-item">
+      <img src="ic_location.png" class="info-icon">
+      <span class="info-text" id="perfilCountry"></span>
+    </div>
+
+    <!-- ESCOLA -->
+    <div class="info-item">
+      <img src="ic_school.png" class="info-icon">
+      <span class="info-text" id="perfilSchool"></span>
+    </div>
+
+  </div>
+
+  <!-- BIO -->
+  <div class="profile-bio" id="perfilBio">
+    
+  </div>
+
+</div>
+
+    <!-- STATS -->
+<div class="perfil-stats">
+  <div class="stat">
+    <span id="followingCount">0</span>
+    <small>Seguindo</small>
+  </div>
+
+  <div class="stat">
+    <span id="followersCount">0</span>
+    <small>Seguidores</small>
+  </div>
+</div>
+
+<!-- BOTÕES -->
+<button id="assinarBtn" class="btn-outline">
+  Assinar / Inscrever-se
+</button>
+
+<button class="btn-pro" onclick="abrirPRO()">
+
+  <img src="ic_unlock_pro.png">
+
+  <div class="pro-content">
+
+    <span class="pro-title">
+      Desbloquear PRO
+    </span>
+
+    <span class="pro-desc">
+      Desfrute de 7 privilégios exclusivos
+    </span>
+
+  </div>
+
+  <span class="arrow">›</span>
+
+</button>
+</div>
+
+<!-- TABS -->
+<div class="perfil-tabs">
+
+  <button class="tab-btn active" data-tab="pets">
+    <img src="ic_person_pet_trade_selected.png" class="tab-icon">
+    <span>Pets</span>
+  </button>
+
+  <button class="tab-btn" data-tab="game">
+    <img src="ic_person_game_stats_selected.png" class="tab-icon">
+    <span>Jogo</span>
+  </button>
+
+  <button class="tab-btn" data-tab="hats">
+    <img src="ic_tab_person_customize_selected.png" class="tab-icon">
+    <span>Chapéus</span>
+  </button>
+
+  <button class="tab-btn" data-tab="groups">
+    <img src="ic_person_group_selected.png" class="tab-icon">
+    <span>Grupos</span>
+  </button>
+
+</div>
+
+<div class="card-troca">
+
+  <div class="troca-left">
+    <img src="ic_person_trade.png" class="icon-left">
+    <span class="titulo-troca">Trocas</span>
+  </div>
+
+  <a href="trocas.html">
+    <img src="ic_settings_arrow_right.png" class="icon-right">
+  </a>
+
+</div>
+
+<!-- CONTEÚDO DAS TABS E CARDS -->
+<div class="perfil-tab-content">
+
+  <!-- TAB PETS -->
+  <div class="tab-content active" id="tab-pets">
+
+    <div class="pets-title">
+      Meus animais de estimação
+    </div>
+
+    <!-- GRID DE PETS (cards entram aqui via JS) -->
+    <div id="petsGrid" class="pets-grid"></div>
+
+    <!-- AÇÃO (fica vazio por enquanto, pode usar depois se quiser algo global) -->
+    <div class="pets-action"></div>
+  </div>
+ 
+<div class="tab-content" id="tab-game">
+
+  <div class="games-title">
+    Meus Jogos
+  </div>
+
+  <!-- GRID DE JOGOS -->
+  <div id="gamesGrid" class="games-grid"></div>
+
+  <!-- BOTÃO ADICIONAR -->
+  <div class="games-action">
+    <button id="addGameBtn" class="add-game-btn">
+      Adicionar jogo
+    </button>
+
+    <input 
+      type="file" 
+      id="gameInput" 
+      accept="image/*" 
+      hidden
+    >
+  </div>
+  </div>
+
+  <div class="tab-content" id="tab-hats">
+
+  <!-- TÍTULO -->
+  <div class="hats-title">
+    Meus Acessórios
+  </div>
+
+  <!-- MENU INTERNO (NOMES CLICÁVEIS) -->
+  <div class="avatar-tabs">
+
+<button data-section="molduras" class="active">Molduras</button>
+
+<button data-section="avatar">Avatar</button>
+
+<button data-section="cor">Cor do Avatar</button>
+
+<button data-section="itens">Chapéus e Roupas</button>
+
+</div>
+
+<!-- CONTEÚDO -->
+<div class="avatar-content">
+
+<!-- MOLDURAS -->
+<div class="avatar-section active" id="molduras">
+<div class="molduras-grid"></div>
+</div>
+
+<!-- PERSONAGEM COM FUNDO -->
+<div class="avatar-section" id="avatar">
+<div class="avatar-grid"></div>
+</div>
+
+<!-- APENAS COR DO PERSONAGEM -->
+<div class="avatar-section" id="cor">
+<div class="cor-grid cores-personagens"></div>
+</div>
+
+<!-- CHAPÉUS E ROUPAS -->
+<div class="avatar-section" id="itens">
+<div class="itens-grid"></div>
+</div>
+
+</div>
+</div>
+
+  <div class="tab-content" id="tab-groups">
+
+  <div class="groups-card">
+
+    <div class="groups-info">
+      <img src="ic_explore_verify.png" class="tab-icon">
+      <span>Torne-se verificado e crie um novo grupo</span>
+    </div>
+
+    <button class="groups-btn">
+      Ir
+    </button>
+
+  </div>
+  </div>
+   
+ <!-- BARRA INFERIOR -->
+  <div class="bottombar">
+    <a href="home.html"><img src="icon_home_selected.png" alt="home"></a>
+    <a href="animal.html"><img src="icon_pet_game_selected.png" alt="pets"></a>
+    <a href="missao.html"><img src="icon_friends_selected.png" alt="missões"></a>
+    <a href="mensagem.html"><img src="icon_dm_selected.png" alt="chat"></a>
+    <a href="perfil.html"><img src="icon_profile_selected.png" alt="perfil"></a>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+
+// ===============================
+// FIREBASE
+// ===============================
+const firebaseConfig = {
+  apiKey: "AIzaSyBAOQC_mEjF-m5fdEO2no1-XfsQUjZc2mU",
+  authDomain: "amongchat-848f9.firebaseapp.com",
+  projectId: "amongchat-848f9",
+  storageBucket: "amongchat-848f9.firebasestorage.app",
+  messagingSenderId: "317096866187",
+  appId: "1:317096866187:web:fc4be8871cc5a9e7f43f8e",
+  measurementId: "G-ZFE9C5E595"
+};
+
+// ===============================
+// INICIALIZA FIREBASE
+// ===============================
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+// ===============================
+// AUTH + FIRESTORE
+// ===============================
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ===============================
+// PERFIL ABERTO
+// ===============================
+let perfilUID = null;
+
+// ===============================
+// ID REAL DO USUÁRIO
+// ===============================
+let meuPerfilID = null;
+
+let carteiraPerfilIniciada = false;
+
+function iniciarCarteiraPerfil(){
+
+  if (!meuPerfilID || carteiraPerfilIniciada) return;
+
+  carteiraPerfilIniciada = true;
+
+  db.collection("usuarios")
+    .doc(String(meuPerfilID))
+    .onSnapshot(async (doc) => {
+
+      if (!doc.exists) return;
+
+      const data = doc.data() || {};
+
+      const infinitoAtivo =
+        String(meuPerfilID) === "10000" &&
+        String(data.discordID) === "908775623135219734" &&
+        data.infinito === true;
+
+      let coins = Number(data.coins || 0);
+      let diamonds = Number(data.diamonds || 0);
+      let orbs = Number(data.discordOrbs || 0);
+
+      if (infinitoAtivo) {
+
+        coins = 999999;
+        diamonds = 999999;
+        orbs = 999999;
+
+        await db.collection("usuarios")
+          .doc("10000")
+          .set({
+            coins: 999999,
+            diamonds: 999999,
+            discordOrbs: 999999
+          }, { merge:true });
+
+      }
+
+      const coinEl = document.getElementById("coinCount");
+      const diamondEl = document.getElementById("diamondCount");
+      const orbEl = document.getElementById("discordorbs");
+
+      if (coinEl) coinEl.textContent = coins;
+      if (diamondEl) diamondEl.textContent = diamonds;
+      if (orbEl) orbEl.textContent = orbs;
+
+    });
+}
+
+// ===============================
+// VARIÁVEIS GLOBAIS
+// ===============================
+let currentUID = null;
+let currentUser = null;
+let userBadges = [];
+let userData = null;
+
+// ADICIONE AQUI
+let meuUserData = null;
+let perfilData = null;
+
+const MASTER_ID = "10000";
+
+// ===============================
+// PERSISTÊNCIA + AUTH
+// ===============================
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  .then(() => {
+
+    console.log("Persistência ativada");
+
+    auth.onAuthStateChanged(async (user) => {
+
+// ===============================
+// PERFIL VISITADO
+// ===============================
+const visitado =
+  sessionStorage.getItem("perfilVisitado");
+
+// ===============================
+// LOGIN ATIVO PELO FIRESTORE
+// ===============================
+const loginAtualDoc =
+  await db.collection("config")
+    .doc("loginAtual")
+    .get();
+
+const loginAtual =
+  loginAtualDoc.exists
+    ? loginAtualDoc.data()
+    : null;
+
+console.log("LOGIN ATIVO:", loginAtual);
+
+if (loginAtual) {
+
+  // ===============================
+  // LOGIN GOOGLE
+  // ===============================
+  if (
+    loginAtual.tipo === "google" &&
+    loginAtual.perfilID
+  ) {
+
+    const perfilID =
+      String(loginAtual.perfilID);
+
+    currentUser = loginAtual;
+    currentUID = String(loginAtual.firebaseUID || "");
+
+    meuPerfilID = perfilID;
+    perfilUID = visitado ? String(visitado) : perfilID;
+
+    await criarPerfilPadrao(meuPerfilID);
+
+    console.log("Perfil Google:", perfilUID);
+
+  startUserListener();
+iniciarCarteiraPerfil();
+initApp();
+
+    return;
+  }
+
+  // ===============================
+  // LOGIN DISCORD
+  // ===============================
+  if (
+    loginAtual.tipo === "discord" &&
+    loginAtual.uid
+  ) {
+
+    const perfilID =
+  String(loginAtual.perfilID || loginAtual.uid);
+
+    currentUser = loginAtual;
+    currentUID = perfilID;
+
+    meuPerfilID = perfilID;
+    perfilUID = visitado ? String(visitado) : perfilID;
+
+    await criarPerfilPadrao(meuPerfilID);
+
+    console.log("Perfil Discord:", perfilUID);
+
+startUserListener();
+iniciarCarteiraPerfil();
+initApp();
+
+    return;
+  }
+
+}
+
+// ===============================
+// VISITANTE
+// ===============================
+if (!user && !castToken) {
+
+  console.log("Visitante");
+
+  currentUser = null;
+  currentUID = null;
+
+  const visitanteRef =
+    db.collection("config")
+      .doc("visitanteLocal");
+
+  const visitanteDoc =
+    await visitanteRef.get();
+
+  let perfilID = null;
+
+  if (visitanteDoc.exists) {
+    perfilID = String(visitanteDoc.data().perfilID);
+  }
+
+  if (!perfilID || perfilID === "undefined") {
+    perfilID = await gerarNovoID();
+
+    await visitanteRef.set({
+      perfilID: perfilID,
+      criadoEm: Date.now()
+    }, { merge:true });
+  }
+
+  meuPerfilID = perfilID;
+  perfilUID = visitado ? String(visitado) : perfilID;
+
+  await criarPerfilPadrao(meuPerfilID);
+
+  console.log("Perfil visitante:", perfilUID);
+
+startUserListener();
+iniciarCarteiraPerfil();
+initApp();
+
+  return;
+}
+
+
+// ===============================
+// LOGADO FIREBASE / GOOGLE
+// ===============================
+if (!user) {
+  return;
+}
+
+currentUser = user;
+currentUID = user.uid;
+
+console.log("Firebase UID:", currentUID);
+
+try {
+
+  const linkRef =
+    db.collection("authLinks")
+      .doc(String(currentUID));
+
+  const linkDoc =
+    await linkRef.get();
+
+  let perfilID = null;
+
+  if (linkDoc.exists) {
+    perfilID =
+      String(linkDoc.data().perfilID);
+  }
+
+  if (!perfilID || perfilID === "undefined") {
+
+    perfilID =
+      await gerarNovoID();
+
+    await linkRef.set({
+      perfilID: perfilID,
+      firebaseUID: currentUID,
+      criadoEm: Date.now()
+    }, { merge:true });
+
+  }
+
+  meuPerfilID = String(perfilID);
+  perfilUID = visitado ? String(visitado) : String(meuPerfilID);
+
+  await criarPerfilPadrao(meuPerfilID);
+
+  console.log("Perfil Firebase:", perfilUID);
+
+startUserListener();
+iniciarCarteiraPerfil();
+initApp();
+
+} catch (err) {
+
+  console.error("Erro login:", err);
+
+}
+
+return;
+ });
+
+  })
+  .catch((err) => {
+
+    console.error("Erro persistência:", err);
+
+  });
+ 
+// ===============================
+// GERAR NOVO ID
+// ===============================
+async function gerarNovoID(){
+
+  const contadorRef =
+    db.collection("config")
+      .doc("contadorIDs");
+
+  try{
+
+    const novoID = await db.runTransaction(async (transaction) => {
+
+      const contadorDoc =
+        await transaction.get(contadorRef);
+
+      let ultimoID = 10000;
+
+      if(contadorDoc.exists){
+
+        ultimoID =
+          contadorDoc.data().ultimoID || 10000;
+
+      }
+
+      // próximo ID
+      const proximoID = ultimoID + 1;
+
+      // atualiza contador
+      transaction.set(contadorRef, {
+
+        ultimoID: proximoID
+
+      });
+
+      return String(proximoID);
+
+    });
+
+    return novoID;
+
+  }catch(err){
+
+    console.error("Erro gerando ID:", err);
+
+    return null;
+
+  }
+
+}
+
+// ===============================
+// LISTENER TEMPO REAL
+// ===============================
+function startUserListener() {
+
+  db.collection("usuarios")
+    .doc(String(perfilUID))
+    .onSnapshot((doc) => {
+
+      if (!doc.exists) {
+
+        console.log("Documento do usuário não existe");
+
+        return;
+      }
+
+      userData = doc.data() || {};
+
+      userBadges = userData.selos || [];
+
+      console.log("Dados do usuário:", userData);
+
+      // atualiza interface
+      updateUI();
+
+    }, (err) => {
+
+      console.error("Erro listener:", err);
+
+    });
+
+}
+
+// ===============================
+// ABRIR PERFIL
+// ===============================
+function abrirPerfil(uid) {
+
+  perfilUID = String(uid);
+
+  console.log("Abrindo perfil:", perfilUID);
+
+  startUserListener();
+
+}
+
+// ===============================
+// PERFIL
+// ===============================
+function iniciarPerfil() {
+
+  console.log("Perfil iniciado");
+
+}
+
+const todosAnimais = [
+    { id:346, nome:"Águia", desc:"", img:"aguia.png", raridade:"Super Legendário"},
+    { id:345, nome:"Onça pintada", desc:"", img:"onçapintada.png", raridade:"Super Legendário"},
+    { id:344, nome:"Alce", desc:"", img:"alce.png", raridade:"Super Legendário"},
+    { id:343, nome:"Ovelha Roxa", desc:"", img:"ovelharoxo.png", raridade:"Legendário"},
+    { id:342, nome:"Ovelha Marron", desc:"", img:"ovelhamarron.png", raridade:"Legendário"},
+    { id:341, nome:"Ovelha Rosa", desc:"", img:"ovelharosa.png", raridade:"Raro"},
+    { id:340, nome:"Ovelha Rosa Choque", desc:"", img:"ovelharosachoque.png", raridade:"Raro"},
+    { id:339, nome:"Ovelha Azul Escuro", desc:"", img:"ovelhaazulescuro.png", raridade:"Comum"},
+    { id:338, nome:"Ovelha Azul Claro", desc:"", img:"ovelhaazulclaro.png", raridade:"Comum"},
+    { id:337, nome:"Ovelha Azul Celeste", desc:"", img:"ovelhaazulceleste.png", raridade:"Incomum"},
+    { id:336, nome:"Ovelha Verde Escuro", desc:"", img:"ovelhaverdeescuro.png", raridade:"Incomum"},
+    { id:335, nome:"Ovelha Verde Claro", desc:"", img:"ovelhaverdeclara.png", raridade:"Raro"},
+    { id:334, nome:"Ovelha Amarela", desc:"", img:"ovelhaamarela.png", raridade:"Raro"},
+    { id:333, nome:"Ovelha Laranja", desc:"", img:"ovelhalaranja.png", raridade:"Legendário"},
+    { id:332, nome:"Ovelha Vermelha", desc:"", img:"ovelhavermelha.png", raridade:"Legendário"},
+    { id:331, nome:"Ovelha Vinho", desc:"", img:"ovelhavinho.png", raridade:"Raro"},
+    { id:330, nome:"Ovelha Cinza Escuro", desc:"", img:"ovelhacinzaescuro.png", raridade:"Comum"},
+    { id:329, nome:"Ovelha Cinza", desc:"", img:"ovelhacinza.png", raridade:"Incomum"},
+    { id:328, nome:"Axolote", desc:"", img:"axolte.png", raridade:"Lendário"},
+    { id:327, nome:"Biscoito Natalino", desc:"", img:"biscoito natalino.png", raridade:"Raro"},
+    { id:326, nome:"Kit de Maquiagem", desc:"", img:"kitdemaquiagem.png", raridade:"Comum"},
+    { id:325, nome:"Guirlanda", desc:"", img:"guirlanda.png", raridade:"Super Lendário"},
+    { id:324, nome:"Guizo", desc:"", img:"guizo.png", raridade:"Legendário"},
+    { id:323, nome:"Peixe Palhaço", desc:"", img:"peixepalhaço.png", raridade:"Raro"},
+    { id:322, nome:"Banana", desc:"", img:"banana.png", raridade:"Raro"},
+    { id:321, nome:"Munmia", desc:"", img:"mumia.png", raridade:"Comum"},
+    { id:320, nome:"Elfo", desc:"", img:"elfo.png", raridade:"Incomum"},
+    { id:319, nome:"Pantera Negra", desc:"", img:"panteranegra.png", raridade:"Legendário"},
+    { id:318, nome:"Aranha de Cartola", desc:"", img:"aranhadecartola.png", raridade:"Raro"},
+    { id:317, nome:"Caveira de chapéu", desc:"", img:"caveiradechapeu.png", raridade:"Raro"},
+    { id:316, nome:"Sapo de luvabox", desc:"", img:"sapobox.png", raridade:"Comum"},
+    { id:315, nome:"Joaninha", desc:"", img:"joaninha.png", raridade:"Legendário"},
+    { id:314, nome:"Coala", desc:"", img:"coala.png", raridade:"Raro"},
+    { id:313, nome:"Sol", desc:"", img:"sol.png", raridade:"Comum"},
+    { id:312, nome:"Lua", desc:"", img:"lua.png", raridade:"Comum"},
+    { id:311, nome:"Siclop", desc:"", img:"siclop.png", raridade:"Legendário"},
+    { id:310, nome:"Mega Polvo", desc:"", img:"megapolvo.png", raridade:"Raro"},
+    { id:309, nome:"Mega Polvo Femenino", desc:"", img:"megapolvofemea.png", raridade:"Raro"},
+    { id:308, nome:"Suco de Laranja", desc:"", img:"sucodelaranja.png", raridade:"Comum"},
+    { id:307, nome:"Rinoceronte", desc:"", img:"rinoceronte.png", raridade:"Legendário"},
+    { id:306, nome:"Caranguejo com concha", desc:"", img:"lagosta.png", raridade:"Raro"},
+    { id:305, nome:"Mineiro", desc:"", img:"mineiro.png", raridade:"Comum"},
+    { id:304, nome:"Guinomio", desc:"", img:"guinomio.png", raridade:"Incomum"},
+    { id:303, nome:"Unicornio", desc:"", img:"unicornio.png", raridade:"Raro"},
+    { id:302, nome:"Tigre", desc:"", img:"onça.png", raridade:"Legendário"},
+    { id:301, nome:"Abacachi", desc:"", img:"abacachi.png", raridade:"Incomum"},
+    { id:300, nome:"Peixe das Profundesas", desc:"", img:"peixedasprofundesas.png", raridade:"Comum"},
+    { id:299, nome:"Cachorro Quente", desc:"", img:"salsicha.png", raridade:"Incomum"},
+    { id:298, nome:"Camaleão", desc:"", img:"camaleao.png", raridade:"Comum"},
+    { id:297, nome:"Urso Polar", desc:"", img:"ursopolar.png", raridade:"Legendário"},
+    { id:296, nome:"Gelatina de Morango", desc:"", img:"gelatinademorango.png", raridade:"Raro"},
+    { id:295, nome:"Largata", desc:"", img:"largata.png", raridade:"Incomum"},
+    { id:294, nome:"Camelo", desc:"", img:"camelo.png", raridade:"Raro"},
+    { id:293, nome:"Pinguindino", desc:"", img:"pinguindino.png", raridade:"Legendário"},
+    { id:292, nome:"Porquinho", desc:"", img:"porquinho.png", raridade:"Comum"},
+    { id:291, nome:"Jacaré", desc:"", img:"jacare.png", raridade:"Raro"},
+    { id:290, nome:"Cubo de Gelo", desc:"", img:"cubodegeloderretido.png", raridade:"Incomum"},
+    { id:289, nome:"Caveira Dourada", desc:"", img:"caveiradourada.png", raridade:"Legendário"},
+    { id:288, nome:"Coelho azul com boné", desc:"", img:"coelhoazulcombone.png", raridade:"Comum"},
+
+    { id:287, nome:"Bandeira de Israel", desc:"", img:"israel.png", raridade:"Legendário"},
+    { id:286, nome:"Bandeira do Brasil", desc:"", img:"brasil.png", raridade:"Legendário"},
+    { id:285, nome:"Bandeira dos Estados Unidos", desc:"", img:"estadosunidos.png", raridade:"Legendário"},
+    { id:284, nome:"Bandeira da França", desc:"", img:"frança.png", raridade:"Raro"},
+    { id:283, nome:"Bandeira do Canada", desc:"", img:"canada.png", raridade:"Legendário"},
+    { id:282, nome:"Bandeira da Inglaterra", desc:"", img:"inglaterra.png", raridade:"Legendário" },
+    { id:281, nome:"Bandeira da Alemanha", desc:"", img:"alemanha.png", raridade:"Incomum"},
+    { id:280, nome:"Bandeira da Bélgica", desc:"", img:"belgica.png", raridade:"Raro"},
+    { id:279, nome:"Bandeira da Italia", desc:"", img:"italia.png", raridade:"Raro"},
+    { id:278, nome:"Bandeira do México", desc:"", img:"mexico.png", raridade:"Legendário"},
+    { id:277, nome:"Bandeira da Colombia", desc:"", img:"colombia.png", raridade:"Raro" },
+    { id:276, nome:"Bandeira da Coreia do Norte", desc:"", img:"coreiadonorte.png", raridade:"Raro" },
+    { id:275, nome:"Bandeira da Coreia do Sul", desc:"", img:"coreiadosul.png", raridade:"Comum" },
+    { id:274, nome:"Bandeira da Suécia", desc:"", img:"suecia.png", raridade:"Raro" },
+    { id:273, nome:"Bandeira da Argentina", desc:"", img:"argentina.png", raridade:"Incomum" },
+    { id:272, nome:"Bandeira da Aftoca", desc:"", img:"africa.gif", raridade:"Incomum" },
+    { id:271, nome:"Bandeira do Japão", desc:"", img:"japao.png", raridade:"Legendário"},
+    { id:270, nome:"Bandeira da Jamaica", desc:"", img:"jamaica.png", raridade:"Incomum" },
+    { id:269, nome:"Bandeira da Turquia", desc:"", img:"turquia.png", raridade:"Comum" },
+    { id:268, nome:"Bandeira da Escócia", desc:"", img:"escocia.png", raridade:"Incomum" },
+    { id:267, nome:"Bandeira da Australia", desc:"", img:"australia.png", raridade:"Comum" },
+    { id:266, nome:"Bandeira da Costa do Marfin", desc:"", img:"costadomarfim.png", raridade:"Raro" },
+
+    { id:265, nome:"Clone das Sombras", desc:"", img:"clonedassombras.png", raridade:"Legendário"},
+    { id:264, nome:"Abóbora com Lanterna", desc:"", img:"aboboracomlanterna.png", raridade:"Raro"},
+    { id:263, nome:"Barrio de Bebidas", desc:"", img:"tanque.png", raridade:"Comum"},
+    { id:262, nome:"Cogumélo Maior", desc:"", img:"cogumelomaior.png", raridade:"Legendário"},
+    { id:261, nome:"Chama", desc:"", img:"chama.png", raridade:"Raro"},
+    { id:260, nome:"Geada", desc:"", img:"geada.png", raridade:"Comum"},
+    { id:259, nome:"Espirito", desc:"", img:"espirito.png", raridade:"Legendário"},
+    { id:258, nome:"Filhote de Caranguejo", desc:"", img:"filhotedecaranguejo.png", raridade:"Raro"},
+    { id:257, nome:"Pinóquio", desc:"", img:"pinoquio.png", raridade:"Comum"},
+    { id:256, nome:"Filhote", desc:"", img:"filhote.png", raridade:"Incomum"},
+    { id:255, nome:"Arroz Doce", desc:"", img:"arrozdoce.png", raridade:"Legendário"},
+    { id:254, nome:"Torradeira", desc:"", img:"torradeira.png", raridade:"Raroo"},
+    { id:253, nome:"Abacate", desc:"", img:"abacate.png", raridade:"Comum"},
+    { id:252, nome:"Origami", desc:"", img:"origami.png", raridade:"Legendário"},
+    { id:251, nome:"Espuma", desc:"", img:"espoma.png", raridade:"Raro"},
+    { id:250, nome:"Felicidade", desc:"", img:"felicidade.png", raridade:"Comum"},
+    { id:249, nome:"Casa", desc:"", img:"casa.png", raridade:"Legendário"},
+    { id:248, nome:"Pequeno Cavaleiro", desc:"", img:"pequenocavaleiro.png", raridade:"Raro"},
+    { id:247, nome:"Guaxinim", desc:"", img:"guaxinim.png", raridade:"Comum"},
+    { id:246, nome:"Rei do Coração", desc:"", img:"reicoracao.png", raridade:"Incomum"},
+    { id:245, nome:"Vasinhame com Hamster", desc:"", img:"vasilhacomhamster.png", raridade:"Legendário"},
+    { id:244, nome:"Alfinete Cavalheiro", desc:"", img:"alfinete.png", raridade:"Raro"},
+    { id:243, nome:"Tecelador de Sonhos", desc:"", img:"tecelador.png", raridade:"Comum"},
+    { id:242, nome:"Ampulheta", desc:"", img:"ampulheta.png", raridade:"Legendário"},
+    { id:241, nome:"Bolsa com Moedas", desc:"", img:"bolsacommoedas.png", raridade:"Raro"},
+    { id:240, nome:"Urso Cabeça de Maçã", desc:"", img:"ursocabecademaca.png", raridade:"Comum"},
+    { id:239, nome:"Espelho de Pé", desc:"", img:"espelhodepe.png", raridade:"Legendário"},
+    { id:238, nome:"Gatinho dentro da Caixa", desc:"", img:"gatinhodentrodacaixa.png", raridade:"Raro"},
+    { id:237, nome:"Saco de Lixo", desc:"", img:"sacoladelixo.png", raridade:"Comum"},
+    { id:236, nome:"Caldeirão de Fogo", desc:"", img:"caldeirao.png", raridade:"Comum"},
+    { id:235, nome:"Televisão", desc:"", img:"televisao.png", raridade:"Legendário"},
+    { id:234, nome:"Torrada", desc:"", img:"torrada.png", raridade:"Legendário"},
+    { id:233, nome:"Saco de Vento", desc:"", img:"sacodevento.png", raridade:"Raro"},
+    { id:232, nome:"Baiacu", desc:"", img:"baiacu.png", raridade:"Raro"},
+    { id:231, nome:"Tritão Ancião", desc:"", img:"tritaoanciao.png", raridade:"Comum"},
+    { id:230, nome:"Tentáculo Bllop", desc:"", img:"tentaculobloop.png", raridade:"Comum"},
+    { id:229, nome:"Rato", desc:"", img:"rato.png", raridade:"Legendário"},
+    { id:228, nome:"Macaco com Banana", desc:"", img:"macacocombanana.png", raridade:"Raro"},
+    { id:227, nome:"Corvo", desc:"", img:"corvo.png", raridade:"Comum"},
+    { id:226, nome:"Rosa no vazo", desc:"", img:"rosanovazo.png", raridade:"Incomum"},
+    { id:225, nome:"Lápis", desc:"", img:"lapis.png", raridade:"Legendário"},
+    { id:224, nome:"Guardião Robô", desc:"", img:"guardarobo.png", raridade:"Raro"},
+    { id:223, nome:"Pedra com Vestido", desc:"", img:"pedracomvestido.png", raridade:"Comum"},
+    { id:222, nome:"Hipnotizador", desc:"", img:"hipnotizador.png", raridade:"Comum"},
+    { id:221, nome:"Pintinho Gordo", desc:"", img:"pintinhogordo.png", raridade:"Raro"},
+    { id:220, nome:"Vulcão", desc:"", img:"vulcao.png", raridade:"Legendário"},
+    { id:219, nome:"Koala", desc:"", img:"koala.png", raridade:"Comum"},
+    { id:218, nome:"Mamadeira", desc:"", img:"mamadeira.png", raridade:"Legendário"},
+    { id:217, nome:"Conha Andarilha", desc:"", img:"conchaandarilha.png", raridade:"Raro"},
+    { id:216, nome:"Aroma de Feijão", desc:"", img:"aromadefeijao.png", raridade:"Comum"},
+    { id:215, nome:"Topeira", desc:"", img:"topeira.png", raridade:"Legendário"},
+    { id:214, nome:"Esquilo Fofinho", desc:"", img:"esquiloFofinho.png", raridade:"Raro"},
+    { id:213, nome:"Pata", desc:"", img:"pata.png", raridade:"Comum"},
+    { id:212, nome:"Abajur", desc:"", img:"abajur.png", raridade:"Legendário"},
+    { id:211, nome:"Coco", desc:"", img:"coco.png", raridade:"Raro"},
+    { id:210, nome:"Ervilha", desc:"", img:"ervilha.png", raridade:"Comum"},
+    { id:209, nome:"Livro de Receita", desc:"", img:"livrodeReceita.png", raridade:"Comum"},
+    { id:208, nome:"Bobo da Corte", desc:"", img:"bobodacorte.png", raridade:"Legendário"},
+    { id:207, nome:"Ornitorrinco", desc:"", img:"ornitorrinco.png", raridade:"Raro"},
+    { id:206, nome:"Video Gama", desc:"", img:"videogame.png", raridade:"Comum"},
+    { id:205, nome:"Aranha", desc:"", img:"aranha.png", raridade:"Legendário"},
+    { id:204, nome:"Frasco de perfume", desc:"", img:"potecomqueijo.png", raridade:"Raro"},
+    { id:203, nome:"Pintinho", desc:"", img:"pintinho.png", raridade:"Comum"},
+    { id:202, nome:"Cristal", desc:"", img:"cristal.png", raridade:"Comum"},
+    { id:201, nome:"Polvo Policial", desc:"", img:"polvoPolicial.png", raridade:"Legendário"},
+    { id:200, nome:"Baú", desc:"", img:"bau.png", raridade:"Raro"},
+    { id:199, nome:"Gamba", desc:"", img:"gamba.png", raridade:"Comum"},
+    { id:198, nome:"Cadela Caramelo", desc:"", img:"cadelacaramela.png", raridade:"Legendário"},
+    { id:197, nome:"Lampada", desc:"", img:"lampada.png", raridade:"Raro"},
+    { id:196, nome:"Pombo", desc:"", img:"feijao.png", raridade:"Comum"},
+    { id:195, nome:"Burrito", desc:"", img:"burrito.png", raridade:"Comum"},
+    { id:194, nome:"Esfinge", desc:"", img:"esfingeegipcia.png", raridade:"Legendário"},
+    { id:193, nome:"Ostra", desc:"", img:"ostra.png", raridade:"Raro"},
+    { id:192, nome:"Chicara de Xá", desc:"", img:"chiracadexa.png", raridade:"Comum"},
+    { id:191, nome:"Alienigena", desc:"", img:"alienigena.png", raridade:"Legendário"},
+    { id:190, nome:"Nós", desc:"", img:"nos.png", raridade:"Raro"},
+    { id:189, nome:"Fogueira", desc:"", img:"fogueira.png", raridade:"Raro"},
+    { id:188, nome:"Sorvete", desc:"", img:"sorvete.png", raridade:"Comum"},
+    { id:187, nome:"Astronalta", desc:"", img:"astronalta.png", raridade:"Legendário"},
+    { id:186, nome:"Zebra", desc:"", img:"zebra.png", raridade:"Raro"},
+    { id:185, nome:"Hamburguer", desc:"", img:"hamburguer.png", raridade:"Comum"},
+    { id:184, nome:"Garrafa", desc:"", img:"garrafacomroupa.png", raridade:"Legendário"},
+    { id:183, nome:"Dama Chocolate", desc:"", img:"damaChocolate.png", raridade:"Raro"},
+    { id:182, nome:"Caixa de Leite", desc:"", img:"caixadeleite.png", raridade:"Comum"},
+    { id:181, nome:"Coca Cola", desc:"", img:"cocaCola.png", raridade:"Comum"},
+    { id:180, nome:"Morte", desc:"", img:"morte.png", raridade:"Legendário"},
+    { id:179, nome:"Geleia Verde de Bone com Fone", desc:"", img:"geleiaverdedebonecomfone.png", raridade:"Raro"},
+    { id:178, nome:"Preguiça", desc:"", img:"preguiça.png", raridade:"Comum"},
+    { id:177, nome:"Livro", desc:"", img:"livro.png", raridade:"Legendário"},
+    { id:176, nome:"Balão", desc:"", img:"balão.png", raridade:"Raro"},
+    { id:175, nome:"Bailarina", desc:"", img:"bailarina.png", raridade:"Comum"},
+    { id:174, nome:"Nuvem", desc:"", img:"nuvem.png", raridade:"Legendário"},
+    { id:173, nome:"Toca Disco", desc:"", img:"tocaDiscos.png", raridade:"Raro"},
+    { id:172, nome:"Dino de Pelucia", desc:"", img:"Dinodepelucia.png", raridade:"Comum"},
+    { id:171, nome:"Foca", desc:"", img:"Foca.png", raridade:"Legendário"},
+    { id:170, nome:"Coelho da Cartola", desc:"", img:"coelhodacartola.png", raridade:"Raro"},
+    { id:169, nome:"Cogumelo", desc:"", img:"cogumelo.png", raridade:"Comum"},
+    { id:168, nome:"Pipoca", desc:"", img:"pipoca.png", raridade:"Comum"},
+    { id:167, nome:"Porco Apaixonado", desc:"", img:"porcoApaixonado.png", raridade:"Legendário"},
+    { id:166, nome:"Guachinim Vermelho", desc:"", img:"guachinimVermelho.png", raridade:"Legendário"},
+    { id:165, nome:"Planta Carnivora", desc:"", img:"plantaCarnivora.png", raridade:"Raro"},
+    { id:164, nome:"Serpente", desc:"", img:"cobra.png", raridade:"Raro"},
+    { id:163, nome:"Cavalo Marinho", desc:"", img:"cavaloMarinho.png", raridade:"Comum"},
+    { id:162, nome:"Golfinho", desc:"", img:"golfinho.png", raridade:"Comum"},
+    { id:161, nome:"Bruxa", desc:"", img:"bruxa.png", raridade:"Legendário"},
+    { id:160, nome:"Gato Estelar", desc:"", img:"gatoestelar.png", raridade:"Raro"},
+    { id:159, nome:"Pudim", desc:"", img:"pudim.png", raridade:"Raro"},
+    { id:158, nome:"Beringela", desc:"", img:"beringela.png", raridade:"Comum"},
+    { id:157, nome:"Guitarrista", desc:"", img:"guitarrista.png", raridade:"Legendário"},
+    { id:156, nome:"Tritão", desc:"", img:"tritão.png", raridade:"Raro"},
+    { id:155, nome:"Boneca", desc:"", img:"bonecadepano.png", raridade:"Comum"},
+    { id:154, nome:"Dragão Verde", desc:"", img:"dragãoVerde.png", raridade:"Legendário"},
+    { id:153, nome:"Frango", desc:"", img:"chester.png", raridade:"Raro"},
+    { id:152, nome:"Rena", desc:"", img:"rena.png", raridade:"Comum"},
+    { id:151, nome:"Cavalo", desc:"", img:"cavalinho.png", raridade:"Comum"},
+    { id:150, nome:"Guarda Nacional", desc:"", img:"guardanacional.png", raridade:"Legendário"},
+    { id:149, nome:"Caracol", desc:"", img:"caracol.png", raridade:"Raro"},
+    { id:148, nome:"Gatuno", desc:"", img:"gatuno.png", raridade:"Comum"},
+    { id:147, nome:"Anjo", desc:"", img:"anjo.png", raridade:"Legendário"},
+    { id:146, nome:"Bolacha", desc:"", img:"bolacha.png", raridade:"Comum"},
+    { id:145, nome:"Maçã partida ao Meio", desc:"", img:"macapartidaaomeio.png", raridade:"Comum"},
+    { id:144, nome:"Maçã Nariguda", desc:"", img:"macanariguda.png", raridade:"Raro"},
+    { id:143, nome:"Trem", desc:"", img:"trem.png", raridade:"Legendário"},
+    { id:142, nome:"Gelatina Amarela", desc:"", img:"gelatinaamarela.png", raridade:"Raro"},
+    { id:141, nome:"Brocolis", desc:"", img:"brocolis.png", raridade:"Comum"},
+    { id:140, nome:"Rocha", desc:"", img:"rocha.png", raridade:"Raro"},
+    { id:139, nome:"Fantasma Alegre", desc:"", img:"fantasmaalegre.png", raridade:"Comum"},
+    { id:138, nome:"Malevola", desc:"", img:"malevola.png", raridade:"Legendário"},
+    { id:137, nome:"Sr Abóbora", desc:"", img:"srAbóbora.png", raridade:"Comum"},
+    { id:136, nome:"Bolinho", desc:"", img:"bolinho.png", raridade:"Raro"},
+    { id:135, nome:"Vela", desc:"", img:"vela.png", raridade:"Raro"},
+    { id:134, nome:"Espadachim", desc:"", img:"espadachim.png", raridade:"Raro"},
+    { id:133, nome:"Mimico", desc:"", img:"mimico.png", raridade:"Legendário"},
+    { id:132, nome:"Cabra", desc:"", img:"cabra.png", raridade:"Comum"},
+    { id:131, nome:"Bomba Potente", desc:"", img:"bombapotente.png", raridade:"Legendário"},
+    { id:130, nome:"Robô da Atualidade ", desc:"", img:"robodaatualidade.png", raridade:"Raro"},
+    { id:129, nome:"Geleia no Balde", desc:"", img:"geleianoBalde.png", raridade:"Comum"},
+    { id:128, nome:"Tamandoa", desc:"", img:"tamandoa.png", raridade:"Comum"},
+    { id:127, nome:"Pinguim Pescador", desc:"", img:"pinguimpescador.png", raridade:"Raro"},
+    { id:126, nome:"Vampiro", desc:"", img:"vampiro.png", raridade:"Legendário"},
+    { id:125, nome:"Esquilo", desc:"", img:"esquilo.png", raridade:"Legendário"},
+    { id:124, nome:"Ponney", desc:"", img:"ponney.png", raridade:"Legendário"},
+    { id:123, nome:"Macaco Tecnológico", desc:"", img:"macacotecnologico.png", raridade:"Legendário"},
+    { id:122, nome:"Morcego", desc:"", img:"morcego.png", raridade:"Legendário"},
+    { id:121, nome:"Tubarão", desc:"", img:"tubarao.png", raridade:"Legendário"},
+    { id:120, nome:"Raposa Rosa", desc:"", img:"raposarosa.png", raridade:"Legendário"},
+    { id:119, nome:"Pinguim na Prancha", desc:"", img:"pinguimnaprancha.png", raridade:"Legendário"},
+    { id:118, nome:"Ninja", desc:"", img:"ninja.png", raridade:"Legendário"},
+    { id:117, nome:"Coelho Dorminhoco", desc:"", img:"coelhodorminhoco.png", raridade:"Legendário"},
+    { id:116, nome:"Gato Chines", desc:"", img:"gatoChines.png", raridade:"Comum"},
+    { id:115, nome:"Magico", desc:"", img:"magico.png", raridade:"Raro"},
+    { id:114, nome:"Raposa Vermelha", desc:"", img:"raposavermelha.png", raridade:"Legendário"},
+    { id:113, nome:"Medusa", desc:"", img:"medusa.png", raridade:"Legendário"},
+    { id:112, nome:"Repolho", desc:"", img:"repolho.png", raridade:"Raro"},
+    { id:111, nome:"Pizza", desc:"", img:"pizza.png", raridade:"Comum"},
+    { id:110, nome:"Alien Verde", desc:"", img:"alienverde.png", raridade:"Legendário"},
+    { id:109, nome:"Disco Voador Moderno", desc:"", img:"discovoadormoderno.png", raridade:"Legendário"},
+    { id:108, nome:"Planeta Terra", desc:"", img:"PlanetaTerra.png", raridade:"Legendário"},
+    { id:107, nome:"Líder de Torcida", desc:"", img:"liderdetorcida.png", raridade:"Legendário"},
+    { id:106, nome:"Borboleta", desc:"", img:"borboleta.png", raridade:"Comum"},
+    { id:105, nome:"Baleia", desc:"", img:"baleia.png", raridade:"Raro"},
+    { id:104, nome:"Gênio", desc:"", img:"gênio.png", raridade:"Legendário"},
+    { id:103, nome:"Compricoptero", desc:"", img:"compricoptero.png", raridade:"Comum"},
+    { id:102, nome:"Cientista", desc:"", img:"cientista.png", raridade:"Legendário"},
+    { id:101, nome:"Cereja", desc:"", img:"cereja.png", raridade:"Raro"},
+    { id:100, nome:"Jarra de café", desc:"", img:"jarradecafe.png", raridade:"Comum"},
+    { id:99, nome:"Lua bebê", desc:"", img:"luaBebe.png", raridade:"Legendário"},
+    { id:98, nome:"Indio", desc:"", img:"indio.png", raridade:"Raro"},
+    { id:97, nome:"Gelea Grudenta", desc:"", img:"gosmaGrudente.png", raridade:"Comum"},
+    { id:96, nome:"Estrela", desc:"", img:"estrela.png", raridade:"Comum"},
+    { id:95, nome:"Troll", desc:"", img:"troll.png", raridade:"Legendário"},
+    { id:94, nome:"Yeti", desc:"", img:"yeti.png", raridade:"Legendário"},
+    { id:93, nome:"Papagaio", desc:"", img:"Papagaio.png", raridade:"Comum"},
+    { id:92, nome:"Cakto", desc:"", img:"cakto.png", raridade:"Legendário"},
+    { id:91, nome:"Mão Roxa", desc:"", img:"maoroxa.png", raridade:"Legendário"},
+    { id:90, nome:"Pinguim Azul", desc:"", img:"pinguimAzul.png", raridade:"Comum"},
+    { id:89, nome:"Cachorro Marron", desc:"", img:"cachorromarron.png", raridade:"Legendário"},
+    { id:88, nome:"Cadela Branca", desc:"", img:"cadelabranca.png", raridade:"Legendário"},
+    { id:87, nome:"Cupido Azul", desc:"", img:"cupidoazul.png", raridade:"Legendário"},
+    { id:86, nome:"Cupido Rosa", desc:"", img:"cupidorosa.png", raridade:"Legendário"},
+    { id:85, nome:"Flor Vermelha", desc:"", img:"florvermelha.png", raridade:"Legendário"},
+    { id:84, nome:"Flor Branca", desc:"", img:"florbranca.png", raridade:"Legendário"},
+    { id:83, nome:"Pirata", desc:"", img:"pirata.png", raridade:"Legendário"},
+    { id:82, nome:"Dragão Laranja de asa verde", desc:"", img:"dragãolaranjadeasaverde.png", raridade:"Raro"},
+    { id:81, nome:"Elefante Azul", desc:"", img:"elefante.png", raridade:"Comum"},
+    { id:80, nome:"Meia", desc:"", img:"meia.png", raridade:"Legendário"},
+    { id:79, nome:"Sino", desc:"", img:"sino.png", raridade:"Legendário"},
+    { id:78, nome:"Globo de Vidro", desc:"", img:"globodevidro.png", raridade:"Raro"},
+    { id:77, nome:"Batata Frita", desc:"", img:"batatinhaFrita.png", raridade:"Raro"},
+    { id:76, nome:"Tartaruga", desc:"", img:"tartaruga.png", raridade:"Comum"},
+    { id:75, nome:"Fantasma Azul", desc:"", img:"fantasma azul.png", raridade:"Legendário"},
+    { id:74, nome:"Galinha", desc:"", img:"galinha.png", raridade:"Legendário"},
+    { id:73, nome:"Porco", desc:"", img:"porco.png", raridade:"Raro"},
+    { id:72, nome:"Dragão Laranja", desc:"", img:"dragãolaranja.png", raridade:"Legendário"},
+    { id:71, nome:"Alien de três olhos", desc:"", img:"aliendetresolhos.png", raridade:"Legendário"},
+    { id:70, nome:"Cebola", desc:"", img:"cebola.png", raridade:"Legendário"},
+    { id:69, nome:"Água viva", desc:"", img:"aguaviva.png", raridade:"Raro"},
+    { id:68, nome:"Vaca", desc:"", img:"vaca.png", raridade:"Legendário"},
+    { id:67, nome:"Raposa", desc:"", img:"raposa.png", raridade:"Legendário"},
+    { id:66, nome:"Caixinha Supresa", desc:"", img:"caixinhasupresa.png", raridade:"Raro"},
+    { id:65, nome:"Fantasma", desc:"", img:"fantasma.png", raridade:"Raro"},
+    { id:64, nome:"Tambo", desc:"", img:"tambo.png", raridade:"Raro"},
+    { id:63, nome:"Abóbora", desc:"", img:"abóbora.png", raridade:"Legendário"},
+    { id:62, nome:"Árvore de Natal", desc:"", img:"arvoredenatal.png", raridade:"Legendário"},
+    { id:61, nome:"Croaçã", desc:"", img:"croaça.png", raridade:"Legendário"},
+    { id:60, nome:"Brioche", desc:"", img:"brioche.png", raridade:"Legendário"},
+    { id:59, nome:"Pedra Roxa", desc:"", img:"pedraroxa.png", raridade:"Legendário"},
+    { id:58, nome:"Kapkak", desc:"", img:"kapkak.png", raridade:"Legendário"},
+    { id:57, nome:"Bombinha", desc:"", img:"bomba.png", raridade:"Raro"},
+    { id:56, nome:"Chi Marron", desc:"", img:"chimarron.png", raridade:"Raro"},
+    { id:55, nome:"Caveira", desc:"", img:"caveira.png", raridade:"Comum"},
+    { id:54, nome:"Alien da Prancha", desc:"", img:"aliendaprancha.png", raridade:"Legendário"},
+    { id:53, nome:"Passarinho Rosa", desc:"", img:"passsarinhorosa.png", raridade:"Raro"},
+    { id:52, nome:"Passarinho Azul", desc:"", img:"passarinhoazul.png", raridade:"Raro"},
+    { id:51, nome:"Alien de choque Macho", desc:"", img:"aliendechoquemacho.png", raridade:"Legendário"},
+    { id:50, nome:"Alien de choque Femea", desc:"", img:"aliendechoquefema.png", raridade:"Legendário"}, 
+    { id:49, nome:"Polvo Femea", desc:"", img:"polvofemea.png", raridade:"Legendário"},
+    { id:48, nome:"Polvo Macho", desc:"", img:"polvomacho.png", raridade:"Legendário"},
+    { id:47, nome:"Sapo", desc:"", img:"sapo.png", raridade:"Legendário"},
+    { id:46, nome:"Hipopótamo", desc:"", img:"hipopótamo.png", raridade:"Legendário"},
+    { id:45, nome:"Urso Pardo", desc:"", img:"ursopardo.png", raridade:"Legendário"},
+    { id:44, nome:"Girafa", desc:"", img:"girafa.png", raridade:"Legendário"},
+    { id:43, nome:"Cachorro Amarelo", desc:"", img:"cachorroamarelo.png", raridade:"Legendário"},
+    { id:42, nome:"Leão", desc:"", img:"leão.png", raridade:"Legendário"},
+    { id:41, nome:"Gato Rosa", desc:"", img:"gatorosa.png", raridade:"Legendário"},
+    { id:40, nome:"Pato", desc:"", img:"pato.png", raridade:"Legendário"},
+    { id:39, nome:"Salulu", desc:"", img:"salulu.png", raridade:"Raro" },
+    { id:38, nome:"Boneco de neve", desc:"", img:"bonecodeneve.png", raridade:"Raro" },
+    { id:37, nome:"Biscoito de Genbibre", desc:"", img:"discoitodegengibre.png", raridade:"Legendário" },
+    { id:36, nome:"Pinguim", desc:"", img:"pinguim.png", raridade:"Comum" },
+    { id:35, nome:"Dino", desc:"", img:"dino.png", raridade:"Legendário" },
+    { id:34, nome:"Panda", desc:"", img:"panda.png", raridade:"Legendário" },
+    { id:33, nome:"Coruja", desc:"", img:"coruja.png", raridade:"Legendário" },
+    { id:32, nome:"Hamister", desc:"", img:"hamister.png", raridade:"Raro" },
+    { id:31, nome:"Gota colorida", desc:"", img:"gotacolorida.png", raridade:"Comum" },
+    { id:30, nome:"Gato Laranja", desc:"", img:"gatoLaranja.png", raridade:"Comum" },
+    { id:29, nome:"Lhama", desc:"", img:"lhama.png", raridade:"Raro" },
+    { id:28, nome:"Cachorro Caramelo", desc:"", img:"cachorroCaramelo.png", raridade:"Comum" },
+    { id:27, nome:"Ovelha", desc:"", img:"ovelha.png", raridade:"Legendário" },
+    { id:26, nome:"Baiano", desc:"", img:"baiano.png", raridade:"Legendário" },
+    { id:25, nome:"Gordo", desc:"", img:"gordo.png", raridade:"Raro" },
+    { id:24, nome:"gato de fone", desc:"", img:"gatodefone.png", raridade:"Comum" },
+    { id:23, nome:"stickman", desc:"", img:"stickman.png", raridade:"Comum" },
+
+    { id:16, nome:"Cachorro Ciano", desc:"", img:"cachorrociano.png", raridade:"Super Legendário" },
+    { id:17, nome:"Carangueijo", desc:"", img:"carangueijo.png", raridade:"Raro" },
+    { id:18, nome:"Robo", desc:"", img:"robo.png", raridade:"Raro" },
+    { id:19, nome:"Lula", desc:"", img:"lula.png", raridade:"Raro" },
+    { id:20, nome:"Disco Voador", desc:"", img:"discovoador.png", raridade:"Comum" },
+    { id:21, nome:"Stickgirl", desc:"", img:"stickgirl.png", raridade:"Comum" },
+    { id:22, nome:"Gosma Verde", desc:"", img:"gosmaverde.png", raridade:"Comum" },
+   
+    { id:-1, nome:"Mascote dos AC CLUBS.", desc:"", img:"Mascotedosacclubs.png", raridade:"Supremo Lendário" },
+    { id:0, nome:"Medalha da Missão.", desc:"", img:"Medalha.png", raridade:"Supremo Lendário" },
+    { id:1, nome:"Bandeira CastChat20.", desc:"", img:"bandeiracastchat2.0.png", raridade:"Supremo Lendário" },
+    { id:2, nome:"Cachorro com Osso", desc:"", img:"cachorrocomosso.png", raridade:"Incomum" },
+    { id:3, nome:"Among Vermelho", desc:"", img:"among.png", raridade:"Super Legendário" },
+    { id:4, nome:"Among Verde", desc:"", img:"among verde.png", raridade:"Legendário" },
+    { id:5, nome:"Among Amarelo", desc:"", img:"among amarelo.png", raridade:"Legendário" },
+    { id:6, nome:"Among Rosa", desc:"", img:"among rosa.png", raridade:"Legendário" },
+    { id:7, nome:"Among Azul", desc:"", img:"among azul.png", raridade:"Raro" },
+    { id:8, nome:"Among Laranja", desc:"", img:"among laranja.png", raridade:"Raro" },
+    { id:9, nome:"Among Cinza", desc:"", img:"among cinza.png", raridade:"Incomum" },
+    { id:10, nome:"Among Azul Claro", desc:"", img:"among azul claro.png", raridade:"Raro" },
+    { id:11, nome:"Among Marrom", desc:"", img:"among marron.png", raridade:"Comum" },
+    { id:12, nome:"Among Branco", desc:"", img:"among branco.png", raridade:"Incomum" },
+    { id:13, nome:"Among Roxo", desc:"", img:"among roxo.png", raridade:"Raro" },
+    { id:14, nome:"Among Cinza Escuro", desc:"", img:"among cinza escuro.png", raridade:"Incomum" },
+    { id:15, nome:"Among Magenta", desc:"", img:"among magenta.png", raridade:"Comum" }
+];
+
+// ===============================
+// CRIAR PERFIL PADRÃO
+// ===============================
+async function criarPerfilPadrao(uid) {
+
+  uid = String(uid);
+
+  const ref =
+    db.collection("usuarios")
+      .doc(uid);
+
+  const doc =
+    await ref.get();
+
+  const data =
+    doc.exists ? doc.data() || {} : {};
+
+  const isMaster =
+    uid === "10000";
+
+  const base = {
+    uid: uid,
+    atualizadoEm: Date.now()
+  };
+
+  if (!doc.exists) {
+
+    if (isMaster) {
+
+      await ref.set({
+        ...base,
+
+        nome: "AC Official 001",
+        nickname: "AC Official 001",
+        discordID: "908775623135219734",
+
+        bio: "Conta principal",
+
+        coins: 999999,
+        diamonds: 999999,
+        discordOrbs: 999999,
+
+        infinito: true,
+
+        selos: ["official"],
+
+        petsAdquiridos:
+          todosAnimais.map(p => String(p.id)),
+
+        petsEquipados: []
+
+      }, { merge:true });
+
+    } else {
+
+      await ref.set({
+        ...base,
+
+        nome: data.nome || `Usuário ${uid}`,
+        nickname: data.nickname || data.nome || `Usuário ${uid}`,
+        discordID: data.discordID || "",
+
+        bio: data.bio || "",
+
+        coins: data.coins ?? 0,
+        diamonds: data.diamonds ?? 0,
+        discordOrbs: data.discordOrbs ?? 0,
+
+        selos: data.selos || [],
+        petsAdquiridos: data.petsAdquiridos || ["2"],
+        petsEquipados: data.petsEquipados || []
+
+      }, { merge:true });
+
+    }
+
+    console.log("Perfil criado:", uid);
+    return;
+  }
+
+  const update = {
+    uid: data.uid || uid,
+    atualizadoEm: Date.now()
+  };
+
+  if (data.nickname === undefined) {
+    update.nickname =
+      data.nome || (isMaster ? "AC Official 001" : `Usuário ${uid}`);
+  }
+
+  if (data.nome === undefined) {
+    update.nome =
+      data.nickname || (isMaster ? "AC Official 001" : `Usuário ${uid}`);
+  }
+
+  if (data.discordID === undefined && isMaster) {
+    update.discordID = "908775623135219734";
+  }
+
+  if (data.selos === undefined) {
+    update.selos = isMaster ? ["official"] : [];
+  }
+
+  if (data.petsAdquiridos === undefined) {
+    update.petsAdquiridos =
+      isMaster
+        ? todosAnimais.map(p => String(p.id))
+        : ["2"];
+  }
+
+  if (data.petsEquipados === undefined) {
+    update.petsEquipados = [];
+  }
+
+  if (data.coins === undefined) {
+    update.coins = isMaster ? 999999 : 0;
+  }
+
+  if (data.diamonds === undefined) {
+    update.diamonds = isMaster ? 999999 : 0;
+  }
+
+  if (data.discordOrbs === undefined) {
+    update.discordOrbs = isMaster ? 999999 : 0;
+  }
+
+  if (isMaster && data.infinito === undefined) {
+    update.infinito = true;
+  }
+
+  await ref.set(update, { merge:true });
+
+  console.log("Perfil verificado:", uid);
+}
+
+/* =============================== 
+ABAS 
+================================ */ 
+document.querySelectorAll('.tab-btn').forEach(btn => { btn.addEventListener('click', () => { document.querySelectorAll('.tab-btn') .forEach(b => b.classList.remove('active')); document.querySelectorAll('.tab-content') .forEach(c => c.classList.remove('active')); btn.classList.add('active'); const tab = document.getElementById('tab-' + btn.dataset.tab); if (tab) { tab.classList.add('active'); } }); });
+
+/* ===============================
+   PETS
+==================================*/
+async function iniciarPets() {
+
+  const petsGrid = document.getElementById("petsGrid");
+  const perfilPets = document.getElementById("perfilPets");
+
+  if (!petsGrid || !perfilPets) return;
+
+  const MAX_PETS = 4;
+
+  const doc = await db.collection("usuarios")
+    .doc(String(meuPerfilID))
+    .get();
+
+  let petsEquipados =
+    doc.data()?.petsEquipados || [];
+
+  petsEquipados =
+    petsEquipados.map(id => String(id));
+
+  async function salvarPets() {
+
+    if (!meuPerfilID) return;
+
+    await db.collection("usuarios")
+      .doc(String(meuPerfilID))
+      .set({
+        petsEquipados
+      }, { merge: true });
+
+  }
+
+  function adicionarPetAoPerfil(card, petId) {
+
+    if (
+      perfilPets.querySelector(
+        `img[data-id="${petId}"]`
+      )
+    ) return;
+
+    const img =
+      card.querySelector(".pet-img")
+      .cloneNode(true);
+
+    img.dataset.id = petId;
+
+    img.classList.add("perfil-pet");
+
+    perfilPets.appendChild(img);
+
+  }
+
+  function removerPetDoPerfil(petId) {
+
+    const pet =
+      perfilPets.querySelector(
+        `img[data-id="${petId}"]`
+      );
+
+    if (pet) pet.remove();
+
+  }
+
+  function renderPets(lista) {
+
+    petsGrid.innerHTML = "";
+
+    perfilPets.innerHTML = "";
+
+    lista.forEach(pet => {
+
+      const petId = String(pet.id);
+
+      const isEquipped =
+        petsEquipados.includes(petId);
+
+      const card =
+        document.createElement("div");
+
+      card.className = "pet-card";
+
+      card.dataset.id = petId;
+
+      card.innerHTML = `
+        <div class="pet-rarity-icon">
+          <img src="${
+            isEquipped
+              ? "ic_topic_selected.png"
+              : "ic_unselect.png"
+          }">
+
+          <span>${pet.raridade}</span>
+        </div>
+
+        <img src="${pet.img}" class="pet-img">
+
+        <div class="pet-name">
+          ${pet.nome}
+        </div>
+
+        <button class="pet-equip-btn">
+          ${
+            isEquipped
+              ? "Desequipar"
+              : "Equipar"
+          }
+        </button>
+      `;
+
+      petsGrid.appendChild(card);
+
+      if (isEquipped) {
+        adicionarPetAoPerfil(card, petId);
+      }
+
+    });
+
+  }
+
+  petsGrid.onclick = async (e) => {
+
+    const equipBtn =
+      e.target.closest(".pet-equip-btn");
+
+    if (!equipBtn) return;
+
+    const card =
+      equipBtn.closest(".pet-card");
+
+    if (!card) return;
+
+    const petId =
+      String(card.dataset.id);
+
+    const icon =
+      card.querySelector(
+        ".pet-rarity-icon img"
+      );
+
+    // DESEQUIPAR
+    if (petsEquipados.includes(petId)) {
+
+      petsEquipados =
+        petsEquipados.filter(
+          id => id !== petId
+        );
+
+      await salvarPets();
+
+      icon.src = "ic_unselect.png";
+
+      equipBtn.textContent = "Equipar";
+
+      removerPetDoPerfil(petId);
+
+      return;
+    }
+
+    // LIMITE
+    if (petsEquipados.length >= MAX_PETS) {
+
+      alert("Máximo 4 pets.");
+
+      return;
+    }
+
+    // EQUIPAR
+    petsEquipados.push(petId);
+
+    await salvarPets();
+
+    icon.src =
+      "ic_topic_selected.png";
+
+    equipBtn.textContent =
+      "Desequipar";
+
+    adicionarPetAoPerfil(card, petId);
+
+  };
+
+ const petsAdquiridos =
+  doc.data()?.petsAdquiridos || [];
+
+const petsDisponiveis =
+  petsAdquiridos
+    .map(id =>
+      todosAnimais.find(p =>
+        String(p.id) === String(id)
+      )
+    )
+    .filter(Boolean);
+ 
+renderPets(petsDisponiveis);
+
+}
+
+/* ===============================
+   PERFIL (DADOS)
+=============================== */
+function carregarPerfil() {
+
+  if (!userData) return;
+
+  const nicknameEl =
+    document.getElementById("perfilNickname");
+
+  const pronounEl =
+    document.getElementById("perfilPronoun");
+
+  const uidEl =
+    document.getElementById("perfilUID");
+
+  const ageEl =
+    document.getElementById("perfilAge");
+
+  const signoEl =
+    document.getElementById("perfilSigno");
+
+  const countryEl =
+    document.getElementById("perfilCountry");
+
+  const schoolEl =
+    document.getElementById("perfilSchool");
+
+  const bioEl =
+    document.getElementById("perfilBio");
+
+  // NOME
+   if (nicknameEl) {
+    nicknameEl.textContent =
+      userData.nickname || userData.nome || "Sem nome";
+  }
+
+  if (pronounEl) {
+    pronounEl.textContent =
+      userData.pronoun || "";
+  }
+
+  if (uidEl) {
+    uidEl.textContent =
+      userData.uid || perfilUID || meuPerfilID || "";
+  }
+
+  if (ageEl) {
+    ageEl.textContent =
+      userData.age ? userData.age + " anos" : "";
+  }
+
+  if (signoEl) {
+    signoEl.textContent =
+      userData.signo || "";
+  }
+
+  if (countryEl) {
+    countryEl.textContent =
+      userData.country || "";
+  }
+
+  if (schoolEl) {
+    schoolEl.textContent =
+      userData.school || "";
+  }
+
+  if (bioEl) {
+    bioEl.textContent =
+      userData.bio || "";
+  }
+
+}
+
+/* ===============================
+   BOTÃO SALVAR
+=============================== */
+const salvarPerfilBtn =
+  document.getElementById("salvarPerfilBtn");
+
+if (salvarPerfilBtn) {
+
+  salvarPerfilBtn.onclick = salvarPerfil;
+
+}
+
+/* ===============================
+   SALVAR PERFIL
+=============================== */
+async function salvarPerfil() {
+
+  if (!meuPerfilID) return;
+
+  try {
+
+    const nickname =
+      document.getElementById("editNickname")?.value || "";
+
+    const age =
+      document.getElementById("editAge")?.value || "";
+
+    const signo =
+      document.getElementById("editSigno")?.value || "";
+
+    const country =
+      document.getElementById("editCountry")?.value || "";
+
+    const school =
+      document.getElementById("editSchool")?.value || "";
+
+    const bio =
+      document.getElementById("editBio")?.value || "";
+
+    const discordID =
+      document.getElementById("editDiscord")?.value || "";
+
+await db.collection("usuarios")
+  .doc(String(meuPerfilID))
+  .set({
+
+    uid: String(meuPerfilID),
+
+    nickname,
+    age,
+    signo,
+    country,
+    school,
+    bio,
+    discordID,
+    pronoun
+
+  }, { merge:true });;
+
+    console.log("Perfil atualizado");
+
+  } catch(err) {
+
+    console.error(
+      "Erro salvando perfil:",
+      err
+    );
+
+  }
+
+}
+
+/* ===============================
+   BADGES (COM ÍCONES)
+=============================== */
+
+const icons = {
+
+  verifyPadrao:"ic_settings_verify.png",
+  verifyAmarelo:"ic_settings_verify_amarelo.png",
+  verifyVermelho:"ic_settings_verify_vermelho.png",
+  verifyVerdeEscuro:"ic_settings_verifyverdeescuro.png",
+
+  proBronze:"PRO Bronze.png",
+  premium7:"ic_premium_not_activated.png",
+  avatarPro:"ic_avatar_pro.png",
+
+  official:"ic_official.png",
+  support:"Support.png",
+  streamer:"strimer.png",
+  parceria:"parceria.png",
+
+  djacclub:"ic_club_dj.png",
+  nitroBasico:"nitrobasico01.png",
+  nitroBronze:"nitrobronze.png",
+  nitroPrata:"nitroprata.png",
+  nitroOuro:"nitroouro.png",
+  nitroPlatina:"nitroplatina.png",
+  nitroDiamante:"nitrodiamante.png",
+  nitroEsmeralda:"nitroesmeralda.png",
+  nitroRubi:"nitrorubi.png",
+  nitroOpal:"nitroopal.png",
+
+};
+
+function renderBadges() {
+
+  const badgesArea =
+    document.getElementById("badgesArea");
+
+  if (!badgesArea) return;
+
+  badgesArea.innerHTML = "";
+
+  if (!userData) {
+    console.log("Sem userData ainda");
+    return;
+  }
+
+  const badges =
+    Array.isArray(userData.selos)
+      ? userData.selos
+      : [];
+
+  console.log("UID aberto:", perfilUID);
+  console.log("Meu UID:", meuPerfilID);
+  console.log("SELOS DO PERFIL:", badges);
+
+  badges.forEach(id => {
+
+    const icon =
+      icons[id];
+
+    if (!icon) {
+      console.warn("Selo sem ícone:", id);
+      return;
+    }
+
+    const img =
+      document.createElement("img");
+
+    img.src = icon;
+    img.title = id;
+    img.alt = id;
+
+    let size = "20px";
+
+    if (
+      ["official", "support", "streamer", "parceria"]
+        .includes(id)
+    ) {
+      size = "60px";
+    } else if (id.startsWith("nitro")) {
+      size = "30px";
+    }
+
+    img.style.width = size;
+    img.style.height = "auto";
+    img.style.marginLeft = "4px";
+    img.style.verticalAlign = "middle";
+    img.style.objectFit = "contain";
+
+    badgesArea.appendChild(img);
+
+  });
+
+}
+
+/* ===============================
+   AVATAR CUSTOM / REFRESH
+================================ */
+document.addEventListener("DOMContentLoaded", () => {
+
+  const refreshBtn = document.getElementById("refreshBtn");
+  const avatarOptions = document.getElementById("avatarOptions");
+  const closeAvatarCard = document.getElementById("closeAvatarCard");
+
+  const cameraOption = document.getElementById("cameraOption");
+  const galleryOption = document.getElementById("galleryOption");
+  const gifOption = document.getElementById("gifOption");
+
+  const cameraInput = document.getElementById("cameraInput");
+  const galleryInput = document.getElementById("galleryInput");
+  const gifInput = document.getElementById("gifInput");
+
+  if (!refreshBtn || !avatarOptions) return;
+
+  avatarOptions.style.display = "none";
+
+  refreshBtn.onclick = () => {
+    avatarOptions.style.display = "flex";
+    document.body.classList.add("blur-active");
+  };
+
+  if (closeAvatarCard) {
+    closeAvatarCard.onclick = () => {
+      avatarOptions.style.display = "none";
+      document.body.classList.remove("blur-active");
+    };
+  }
+
+  function isAdmin() {
+    return String(meuPerfilID) === "10000";
+  }
+
+  function podeUsarAvatar() {
+    if (meuPerfilID || isAdmin()) return true;
+
+    mostrarMensagemBloqueio("Faça login");
+    return false;
+  }
+
+  function podeUsarGif() {
+    if (isAdmin()) return true;
+
+    if (!meuPerfilID) {
+      mostrarMensagemBloqueio("Faça login");
+      return false;
+    }
+
+    if (
+      !Array.isArray(userBadges) ||
+      !userBadges.includes("verifyPadrao")
+    ) {
+      mostrarMensagemBloqueio(
+        "Você precisa desse selo para usar GIF",
+        "ic_settings_verify.png"
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  async function salvarAvatar(file) {
+
+    if (!file) return;
+
+    if (!podeUsarAvatar()) return;
+
+    const reader = new FileReader();
+
+    reader.onload = async (e) => {
+
+      await db.collection("usuarios")
+        .doc(String(meuPerfilID))
+        .set({
+          avatarUpload: e.target.result,
+          avatarEquipado: null
+        }, { merge:true });
+
+      userData = userData || {};
+      userData.avatarUpload = e.target.result;
+      userData.avatarEquipado = null;
+
+      avatarOptions.style.display = "none";
+      document.body.classList.remove("blur-active");
+
+      aplicarAvatar();
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  if (cameraOption && cameraInput) {
+    cameraOption.onclick = () => {
+      if (!podeUsarAvatar()) return;
+      cameraInput.click();
+    };
+  }
+
+  if (galleryOption && galleryInput) {
+    galleryOption.onclick = () => {
+      if (!podeUsarAvatar()) return;
+      galleryInput.click();
+    };
+  }
+
+  if (gifOption && gifInput) {
+    gifOption.onclick = () => {
+      if (!podeUsarGif()) return;
+      gifInput.click();
+    };
+  }
+
+  if (cameraInput) {
+    cameraInput.onchange = (e) => {
+      salvarAvatar(e.target.files[0]);
+      e.target.value = "";
+    };
+  }
+
+  if (galleryInput) {
+    galleryInput.onchange = (e) => {
+      salvarAvatar(e.target.files[0]);
+      e.target.value = "";
+    };
+  }
+
+  if (gifInput) {
+    gifInput.onchange = (e) => {
+      salvarAvatar(e.target.files[0]);
+      e.target.value = "";
+    };
+  }
+
+});
+
+
+/* ===============================
+   APLICAR AVATAR
+================================ */
+function aplicarAvatar() {
+
+  const avatarImg = document.getElementById("avatarImg");
+
+  if (!avatarImg || !userData) return;
+
+  // 1. Avatar enviado pela câmera/galeria/gif
+  if (userData.avatarUpload) {
+    avatarImg.src = userData.avatarUpload;
+    return;
+  }
+
+  // 2. Avatar equipado da loja
+  if (
+    userData.avatarEquipado &&
+    userData.avatarEquipado.valor
+  ) {
+    avatarImg.src = userData.avatarEquipado.valor;
+    return;
+  }
+
+  // 3. Avatar padrão
+  avatarImg.src = "avatarpreto01.png";
+}
+
+/*============================
+Registros de login e sem login
+==============================*/
+function atualizarEstadoLogin() {
+
+  const assinarBtn =
+    document.getElementById("assinarBtn");
+
+  const proBtn =
+    document.getElementById("proBtn");
+
+  const logoutBtn =
+    document.getElementById("logoutBtn");
+
+  const nicknameEl =
+    document.getElementById("perfilNickname");
+
+  const uid =
+    userData?.uid || perfilUID || meuPerfilID;
+
+  const estaLogado =
+    currentUser && currentUser.tipo !== "visitante";
+
+  if (estaLogado) {
+
+    if (assinarBtn) assinarBtn.style.display = "none";
+    if (logoutBtn) logoutBtn.style.display = "block";
+
+    if (nicknameEl) {
+      nicknameEl.textContent =
+        userData.nickname || userData.nome || `Usuário ${uid}`;
+    }
+
+  } else {
+
+    if (assinarBtn) assinarBtn.style.display = "inline-flex";
+    if (logoutBtn) logoutBtn.style.display = "none";
+
+    if (nicknameEl) {
+      nicknameEl.textContent = String(uid);
+    }
+
+    if (assinarBtn) {
+      assinarBtn.onclick = () => {
+        window.location.href = "login.html";
+      };
+    }
+
+  }
+
+}
+
+function abrirPRO(){
+  window.location.href = "pro.html";
+}
+
+/*==================================
+INICIALIZAÇÃO
+====================================*/
+function initApp() {
+
+  if (typeof iniciarPerfil === "function") iniciarPerfil();
+  if (typeof iniciarPets === "function") iniciarPets();
+
+  if (typeof carregarAvatares === "function") carregarAvatares();
+  if (typeof carregarCores === "function") carregarCores();
+  if (typeof carregarMolduras === "function") carregarMolduras();
+  if (typeof carregarCosmetics === "function") carregarCosmetics();
+
+  if (typeof atualizarEstadoLogin === "function")
+  atualizarEstadoLogin();
+
+}
+
+/*====================
+ATUALIZAÇÕES
+======================*/
+function updateUI() {
+
+  if (typeof carregarPerfil === "function") carregarPerfil();
+  if (typeof renderBadges === "function") renderBadges();
+
+  if (typeof aplicarAvatar === "function") aplicarAvatar();
+  if (typeof aplicarMoldura === "function") aplicarMoldura();
+  if (typeof aplicarChapeu === "function") aplicarChapeu();
+  if (typeof aplicarRoupa === "function") aplicarRoupa();
+
+  if (typeof iniciarPets === "function") iniciarPets();
+
+}
+</script>
+</body>
+</html>
