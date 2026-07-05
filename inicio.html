@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Carregando</title>
+
+<style>
+
+body{
+margin:0;
+background:#000;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+font-family:Arial;
+}
+
+/* FORMATO DE CELULAR */
+
+.phone{
+
+width:420px;
+max-width:95%;
+height:720px;
+
+border-radius:20px;
+
+background:url("bg_login.png") center/cover no-repeat;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+box-shadow:0 0 40px rgba(0,0,0,0.8);
+
+position:relative;
+
+overflow:hidden;
+
+}
+
+/* LOGO */
+
+.logo{
+
+position:absolute;
+bottom:40px;
+
+font-size:32px;
+font-weight:bold;
+
+text-shadow:0 0 10px rgba(0,0,0,0.7);
+
+}
+
+/* CORES */
+
+.among{
+color:#ffd900;
+}
+
+.chat{
+color:#ff3030;
+}
+
+.ver{
+color:white;
+}
+
+/* LOADING */
+
+.loading{
+
+position:absolute;
+bottom:10px;
+
+color:white;
+font-size:14px;
+opacity:0.8;
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="phone">
+
+<div class="logo">
+<span class="among">Cast</span><span class="chat">Chat</span><span class="ver">2.0</span>
+</div>
+
+<div class="loading">
+Junte-se a um time, jogue e divirta-se!
+</div>
+
+</div>
+
+<script>
+
+/* TROCAR PARA INDEX EM 4 SEGUNDOS */
+
+setTimeout(function(){
+
+window.location.href = "index.html";
+
+},4000);
+
+</script>
+
+</body>
+</html>
