@@ -1,1 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CastChat - Mensagens</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  body { background:#000; color:#fff; margin:0; font-family:sans-serif; }
+  .app{display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+  .content{flex:1;width:100%;max-width:420px;padding:16px;}
 
+  .card{background:#141414;padding:16px;border-radius:12px;margin-bottom:12px;
+        display:flex;align-items:center;gap:12px;cursor:pointer;}
+  .card img{width:32px;height:32px;}
+  .card h3{margin:0;font-size:15px;color:#ffd700;}
+  .card p{margin:2px 0 0;font-size:13px;color:#bbb;}
+
+  /* Modal */
+  .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+         background:rgba(0,0,0,0.6);align-items:center;justify-content:center;}
+  .modal-content{background:#141414;padding:20px;border-radius:12px;width:80%;max-width:300px;text-align:center;}
+  .modal-content h2{margin-top:0;color:#ffd700;}
+  .modal-content button{margin-top:12px;padding:10px 16px;border:none;border-radius:20px;cursor:pointer;font-weight:bold;}
+  .btn-resgatar{background:#ffd700;color:#000;}
+  .btn-fechar{background:#333;color:#fff;margin-left:8px;}
+
+  /* Barra inferior */
+  .bottombar{display:flex;justify-content:space-around;align-items:center;
+             padding:10px 6px;width:100%;max-width:420px;background:#111;
+             border-top:1px solid #222;}
+  .bottombar img{width:28px;height:28px;}
+
+  .offline{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+  background:#000;
+  color:#aaa;
+}
+
+.offline img{
+  width:140px;
+  margin-bottom:12px;
+}
+</style>
+</head>
+<body>
+
+<div id="offline" class="offline">
+  <img src="ic_empty_default.png" alt="Sem conexão">
+  <p>Sem conexão com a internet</p>
+</div>
+
+<!-- ONLINE -->
+<div id="online" style="display:none;">
+  <!-- TODO O CONTEÚDO DA PÁGINA FICA AQUI -->
+</div>
+
+<div class="app">
+
+  <div class="content">
+    <!-- Mensagem interativa -->
+    <div class="card">
+      <img src="ic_feed_msg.png" alt="msg">
+      <div>
+        <h3>Mensagem Interativa</h3>
+        <p>Converse com seus amigos de forma divertida</p>
+      </div>
+    </div>
+
+    <!-- Presente de moedas -->
+    <div class="card" id="presenteCard" style="display:none;" onclick="abrirPresente()">
+      <img src="ic_gift_coin.png" alt="gift">
+      <div>
+        <h3>Você recebeu um presente</h3>
+        <p>O AC enviou moedas para você</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal do presente -->
+  <div id="modalPresente" class="modal">
+    <div class="modal-content">
+      <h2>🎁 Presente Recebido</h2>
+      <p id="textoPresente"></p>
+      <button class="btn-resgatar" onclick="resgatarMoedas()">Resgatar</button>
+      <button class="btn-fechar" onclick="fecharPresente()">Fechar</button>
+    </div>
+  </div>
+
+  <!-- Barra inferior -->
+  <div class="bottombar">
+    <button><a href="home.html"><img src="icon_home_selected.png" alt="home"></a></button>
+    <a href="animal.html"><img src="icon_pet_game_selected.png" alt="pets"></a>
+    <a href="missao.html"><img src="icon_friends_selected.png" alt="missões"></a>
+    <button><img src="icon_dm_selected.png" alt="chat"></button>
+    <button><a href="perfil.html"><img src="icon_profile_selected.png" alt="perfil"></a></button>
+  </div>
+</div>
+
+<script>
+  const modalPresente = document.getElementById("modalPresente");
+  const textoPresente = document.getElementById("textoPresente");
+  const presenteCard = document.getElementById("presenteCard");
+
+  // Ciclo de valores de presente
+  let valores = [20,40,60,80,100];
+  let indice = parseInt(localStorage.getItem("castchat_presente_indice") || "0");
+  let jaResgatado = localStorage.getItem("castchat_presente_resgatado") === "true";
+  let ultimoResgate = parseInt(localStorage.getItem("castchat_presente_last") || "0");
+
+  // 2 semanas em ms
+  const duasSemanas = 14 * 24 * 60 * 60 * 1000;
+  const agora = Date.now();
+
+  // Mostrar card só se passou 2 semanas desde o último resgate
+  if (!jaResgatado && (agora - ultimoResgate >= duasSemanas || ultimoResgate === 0)) {
+    presenteCard.style.display = "flex";
+  }
+
+  function abrirPresente(){
+    textoPresente.textContent = "O AC enviou " + valores[indice] + " moedas!";
+    modalPresente.style.display = "flex";
+  }
+
+  function fecharPresente(){
+    modalPresente.style.display = "none";
+  }
+
+  function resgatarMoedas(){
+    let moedasAtuais = parseInt(localStorage.getItem("castchat_coins") || "0");
+    let ganho = valores[indice];
+
+    moedasAtuais += ganho;
+    localStorage.setItem("castchat_coins", moedasAtuais);
+
+    // marca resgatado e salva hora
+    localStorage.setItem("castchat_presente_resgatado", "true");
+    localStorage.setItem("castchat_presente_last", agora);
+
+    alert("✅ Você resgatou " + ganho + " moedas! Saldo atual: " + moedasAtuais);
+
+    modalPresente.style.display = "none";
+    presenteCard.style.display = "none";
+
+    // avança no ciclo
+    indice++;
+    if(indice >= valores.length){ indice = 0; }
+    localStorage.setItem("castchat_presente_indice", indice);
+  }
+
+  function atualizarEstadoInternet(){
+  const onlineBox = document.getElementById("online");
+  const offlineBox = document.getElementById("offline");
+
+  if(navigator.onLine){
+    offlineBox.style.display = "none";
+    onlineBox.style.display = "block";
+
+    if(typeof carregarPagina === "function"){
+      carregarPagina();
+    }
+
+  }else{
+    offlineBox.style.display = "flex";
+    onlineBox.style.display = "none";
+  }
+}
+
+window.addEventListener("online", atualizarEstadoInternet);
+window.addEventListener("offline", atualizarEstadoInternet);
+
+atualizarEstadoInternet();
+</script>
+</body>
+</html>
