@@ -1,1 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CastChat - Início</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<style>
 
+body{
+margin:0;
+background:#000;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+font-family:Arial;
+color:white;
+}
+
+/* FORMATO DE CELULAR */
+
+.phone{
+
+width:420px;
+max-width:95%;
+height:720px;
+
+border-radius:20px;
+
+background:#0b0b0b;
+
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+
+box-shadow:0 0 40px rgba(0,0,0,0.8);
+
+position:relative;
+
+overflow:hidden;
+
+padding:20px;
+
+text-align:center;
+
+}
+
+/* TITULO */
+
+.titulo{
+font-size:36px;
+font-weight:900;
+}
+
+.cast{
+color:#ffd700;
+}
+
+.chat{
+color:#ff3030;
+}
+
+.ver{
+color:white;
+font-size:40px;
+margin-left:4px;
+}
+
+/* SUBTEXTO */
+
+.sub{
+margin-top:10px;
+font-size:16px;
+opacity:0.9;
+}
+
+/* BOTÃO */
+
+.btn{
+
+margin-top:25px;
+
+padding:14px 25px;
+
+border:none;
+border-radius:10px;
+
+font-size:18px;
+font-weight:bold;
+
+cursor:pointer;
+
+background:#ffd700;
+color:#000;
+
+transition:0.2s;
+
+}
+
+.btn:hover{
+transform:scale(1.05);
+}
+
+/* LOGIN TEXTO */
+
+.login-text{
+
+margin-top:20px;
+
+font-size:14px;
+
+}
+
+.login-text a{
+color:#ffd700;
+text-decoration:none;
+font-weight:bold;
+}
+
+</style>
+<body>
+<div class="phone">
+  <div class="titulo">
+  <span class="cast">CAST</span><span class="chat">CHAT</span>
+  <div class="versao">2.0</div>
+</div>
+  <p class="sub center">Forme uma equipe, jogue e divirta-se!</p>
+  <a href="idade.html"><button class="btn btn-amarelo">👋 Começar</button></a>
+  <div class="login-text">Já tem uma conta? <a href="login.html">Assinar em</a></div>
+
+<script>
+if(!localStorage.getItem("CASTCHAT_UID")){
+  fetch("among.php?action=create")
+    .then(res => res.json())
+    .then(data => {
+      localStorage.setItem("CASTCHAT_UID", data.uid);
+    });
+}
+</script>
+</body>
+</html>
