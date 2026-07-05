@@ -1,1 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CastChat - Admin Supremo</title>
 
+<style>
+body{
+  background:#000;
+  margin:0;
+  font-family:sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+/* 📱 Moldura celular */
+.phone{
+  width:380px;
+  height:95vh;
+  background:#000;
+  border:3px solid #ffd700;
+  border-radius:30px;
+  padding:20px;
+  overflow-y:auto;
+  box-shadow:0 0 30px #ffd70033;
+  position:relative;
+  color:#fff;
+}
+
+/* ❌ botão fechar */
+.closeBtn{
+  position:absolute;
+  top:15px;
+  right:20px;
+  font-size:22px;
+  color:#ffd700;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+h2{
+  color:#ffd700;
+  margin-top:10px;
+}
+
+.box{
+  background:#111;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:15px;
+}
+
+button{
+  background:#ffd700;
+  border:none;
+  padding:10px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+  width:100%;
+  margin-top:5px;
+}
+
+button:hover{
+  opacity:0.85;
+}
+
+input{
+  width:100%;
+  padding:8px;
+  margin:5px 0 10px 0;
+  border-radius:6px;
+  border:none;
+}
+
+.switch{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.goPerfil{
+  margin-top:20px;
+  background:#00c853;
+  color:#000;
+}
+</style>
+</head>
+
+<body>
+
+<div class="phone">
+
+<div class="closeBtn" onclick="fecharPainel()">✖</div>
+
+<h2>Painel Supremo</h2>
+
+<div class="box">
+  <div class="switch">
+    <label>Modo Infinito (ID 10000)</label>
+    <input type="checkbox" id="toggleInfinito">
+  </div>
+</div>
+
+<div class="box">
+  <h3>Dar Moedas</h3>
+  <input id="uidCoins" placeholder="ID do usuário">
+  <input id="quantCoins" placeholder="Quantidade">
+  <button onclick="darCoins()">Enviar</button>
+</div>
+
+<div class="box">
+  <h3>Dar Diamantes</h3>
+  <input id="uidDiamonds" placeholder="ID do usuário">
+  <input id="quantDiamonds" placeholder="Quantidade">
+  <button onclick="darDiamonds()">Enviar</button>
+</div>
+
+<div class="box">
+  <h3>Dar Discord Orbs</h3>
+  <input id="uidOrbs" placeholder="ID do usuário">
+  <input id="quantOrbs" placeholder="Quantidade">
+  <button onclick="darOrbs()">Enviar</button>
+</div>
+
+<div class="box">
+  <h3>Dar Pet</h3>
+  <input id="uidPet" placeholder="ID do usuário">
+  <input id="petID" placeholder="ID do pet (ex: ovelha)">
+  <input id="quantPet" placeholder="Quantidade">
+  <button onclick="darPet()">Enviar Pet</button>
+</div>
+
+<button class="goPerfil" onclick="irPerfil()">Ir para Perfil</button>
+
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBAOQC_mEjF-m5fdEO2no1-XfsQUjZc2mU",
+  authDomain: "amongchat-848f9.firebaseapp.com",
+  projectId: "amongchat-848f9",
+  storageBucket: "amongchat-848f9.firebasestorage.app",
+  messagingSenderId: "317096866187",
+  appId: "1:317096866187:web:fc4be8871cc5a9e7f43f8e",
+  measurementId: "G-ZFE9C5E595"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const db = firebase.firestore();
+
+const UID_MASTER = "10000";
+const DISCORD_MASTER = "908775623135219734";
+
+let adminLiberado = false;
+
+/* ==============================
+   PROTEÇÃO FIRESTORE
+============================== */
+async function verificarAdmin(){
+
+  const loginAtualDoc =
+    await db.collection("config")
+      .doc("loginAtual")
+      .get();
+
+  if (!loginAtualDoc.exists) {
+    alert("Acesso negado.");
+    window.location.href = "home.html";
+    return false;
+  }
+
+  const loginAtual =
+    loginAtualDoc.data() || {};
+
+  let perfilID = null;
+
+  if (loginAtual.tipo === "google") {
+    perfilID = loginAtual.perfilID;
+  }
+
+  if (loginAtual.tipo === "discord") {
+    perfilID = loginAtual.uid;
+  }
+
+  if (String(perfilID) !== UID_MASTER) {
+    alert("Acesso negado.");
+    window.location.href = "home.html";
+    return false;
+  }
+
+  const userDoc =
+    await db.collection("usuarios")
+      .doc(UID_MASTER)
+      .get();
+
+  if (!userDoc.exists) {
+    alert("Perfil admin não encontrado.");
+    window.location.href = "home.html";
+    return false;
+  }
+
+  const user =
+    userDoc.data() || {};
+
+  if (String(user.discordID) !== DISCORD_MASTER) {
+    alert("Acesso negado.");
+    window.location.href = "home.html";
+    return false;
+  }
+
+  adminLiberado = true;
+  return true;
+}
+
+/* ==============================
+   MODO INFINITO
+============================== */
+function iniciarModoInfinito(){
+
+  const toggle =
+    document.getElementById("toggleInfinito");
+
+  db.collection("usuarios").doc(UID_MASTER)
+    .onSnapshot(doc => {
+      if (doc.exists) {
+        toggle.checked = doc.data().infinito === true;
+      }
+    });
+
+  toggle.addEventListener("change", async () => {
+
+    if (!adminLiberado) return;
+
+    await db.collection("usuarios")
+      .doc(UID_MASTER)
+      .set({
+        infinito: toggle.checked
+      }, { merge:true });
+
+    alert(
+      toggle.checked
+        ? "Modo Infinito ATIVADO 👑"
+        : "Modo Infinito DESATIVADO"
+    );
+
+  });
+
+}
+
+/* ==============================
+   FUNÇÕES ADMIN
+============================== */
+async function darCoins(){
+
+  if (!adminLiberado) return;
+
+  const uid = document.getElementById("uidCoins").value.trim();
+  const q = parseInt(document.getElementById("quantCoins").value);
+
+  if (!uid || !q) return alert("Preencha corretamente");
+
+  await db.collection("usuarios").doc(uid).set({
+    coins: firebase.firestore.FieldValue.increment(q)
+  }, { merge:true });
+
+  alert("Moedas enviadas");
+}
+
+async function darDiamonds(){
+
+  if (!adminLiberado) return;
+
+  const uid = document.getElementById("uidDiamonds").value.trim();
+  const q = parseInt(document.getElementById("quantDiamonds").value);
+
+  if (!uid || !q) return alert("Preencha corretamente");
+
+  await db.collection("usuarios").doc(uid).set({
+    diamonds: firebase.firestore.FieldValue.increment(q)
+  }, { merge:true });
+
+  alert("Diamantes enviados");
+}
+
+async function darOrbs(){
+
+  if (!adminLiberado) return;
+
+  const uid = document.getElementById("uidOrbs").value.trim();
+  const q = parseInt(document.getElementById("quantOrbs").value);
+
+  if (!uid || !q) return alert("Preencha corretamente");
+
+  await db.collection("usuarios").doc(uid).set({
+    discordOrbs: firebase.firestore.FieldValue.increment(q)
+  }, { merge:true });
+
+  alert("Orbs enviados");
+}
+
+async function darPet(){
+
+  if (!adminLiberado) return;
+
+  const uid = document.getElementById("uidPet").value.trim();
+  const petID = document.getElementById("petID").value.trim();
+  const q = parseInt(document.getElementById("quantPet").value || "1");
+
+  if (!uid || !petID || !q) {
+    return alert("Preencha corretamente");
+  }
+
+  const ref = db.collection("usuarios").doc(uid);
+  const doc = await ref.get();
+  const data = doc.exists ? doc.data() || {} : {};
+
+  let petsAdquiridos = Array.isArray(data.petsAdquiridos)
+    ? data.petsAdquiridos.map(id => String(id))
+    : [];
+
+  for (let i = 0; i < q; i++) {
+    petsAdquiridos.push(String(petID));
+  }
+
+  await ref.set({
+    petsAdquiridos: petsAdquiridos
+  }, { merge:true });
+
+  alert("Pet enviado para o perfil");
+}
+
+/* ==============================
+   BOTÕES
+============================== */
+function fecharPainel(){
+  window.location.href = "home.html";
+}
+
+function irPerfil(){
+  window.location.href = "perfil.html";
+}
+
+/* ==============================
+   INICIAR
+============================== */
+(async () => {
+
+  const ok =
+    await verificarAdmin();
+
+  if (!ok) return;
+
+  iniciarModoInfinito();
+
+})();
+</script>
+
+</body>
+</html>
