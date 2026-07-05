@@ -1,1 +1,662 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CastChat - Notificações</title>
+<link rel="stylesheet" href="style.css">
 
+<style>
+  :root { --yellow: #ffd700; }
+
+  body { background:#000; color:#fff; margin:0; font-family:sans-serif; }
+  .app{display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+
+  /* ----- TOPO ----- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    width:100%;max-width:420px;padding:10px;background:#111;border-bottom:1px solid #222;
+  }
+  .topbar h2{margin:0;font-size:16px;color:#fff;flex:1;text-align:center;}
+  .topbar button{background:none;border:none;cursor:pointer;}
+  .topbar img{width:22px;height:22px;}
+
+  /* ----- ABAS ----- */
+  .tabs{
+    display:flex;justify-content:center;width:100%;max-width:420px;
+    border-bottom:1px solid #222;background:#111;
+  }
+  .tab{
+    flex:1;text-align:center;padding:12px;font-weight:bold;color:#888;cursor:pointer;
+  }
+  .tab.active{color:var(--yellow);border-bottom:2px solid var(--yellow);}
+
+  /* ----- CONTEÚDO ----- */
+  .content{
+    flex:1;width:100%;max-width:420px;flex-direction:column;padding:16px;
+  }
+  .card{
+    background:#1a1a1a;padding:16px;border-radius:12px;margin-bottom:12px;
+  }
+
+  /* --------------------------------------------- */
+  /* LAYOUT DO PET: IMAGEM À ESQUERDA + TEXTO À DIREITA */
+  .pet-box {
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+
+  .pet-box img{
+    width:80px;
+    height:auto;
+    margin:0;
+  }
+
+  .pet-text{
+    flex:1;
+    color:#ccc;
+    font-size:14px;
+    line-height:1.35;
+  }
+
+  .pet-text h3{
+    margin:0;
+    font-size:18px;
+    color:#fff;
+  }
+  /* --------------------------------------------- */
+
+  /* Imagem do banner welcome */
+  .card img[src="welcome_banner.png"] {
+    width:100%;
+    max-width:340px;
+    border-radius:12px;
+    display:block;
+    margin:10px auto;
+  }
+
+  .card .link{
+    margin-top:10px;font-size:13px;color:#888;text-align:center;
+  }
+
+.link{
+  margin-top:12px;
+  color:#ffd700;
+  font-weight:bold;
+  cursor:pointer;
+  text-decoration:none;
+  display:inline-block;
+  transition:0.2s;
+}
+
+.link:hover{
+  transform:scale(1.05);
+  text-shadow:0 0 8px #ffd700;
+}
+
+.notif-img{
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  border-radius:12px;
+  margin-bottom:10px;
+}
+
+.notif-icon{
+  width:18px;
+  height:18px;
+  object-fit:contain;
+}
+</style>
+</head>
+
+<body>
+<div class="app tela notificacao-screen">
+
+  <!-- TOPO -->
+  <div class="topbar">
+    <button onclick="window.location.href='home.html'">
+      <img src="ic_back.png" alt="voltar">
+    </button>
+    <h2>Aviso</h2>
+    <div style="width:22px;"></div>
+  </div>
+
+  <!-- ABAS -->
+  <div class="tabs">
+    <div id="tabNotificacao" class="tab active" onclick="abrirTab('notificacao')">Notificação</div>
+    <div id="tabSeguidores" class="tab" onclick="abrirTab('seguidores')">Seguidores</div>
+  </div>
+
+  <!-- BOTÃO CRIAR -->
+  <div style="width:100%;max-width:420px;padding:10px;">
+    <button onclick="abrirCriador()" style="
+      width:100%;
+      background:#ffd700;
+      border:none;
+      padding:10px;
+      border-radius:8px;
+      font-weight:bold;
+      cursor:pointer;
+    ">
+      ⚙️ Criar Notificação
+    </button>
+  </div>
+
+  <!-- PAINEL CRIADOR -->
+  <div id="painelCriador" style="
+    display:none;
+    width:100%;
+    max-width:420px;
+    background:#111;
+    padding:15px;
+    border-top:1px solid #222;
+  ">
+
+    <h3 style="margin-top:0;">Nova Notificação</h3>
+
+    <select id="tipoNotificacao" onchange="alternarCampos()" style="width:100%;margin-bottom:10px;">
+      <option value="todos">Notificação para Todos</option>
+      <option value="evento">Evento</option>
+      <option value="recompensa">Recompensa</option>
+      <option value="aleatoria">Aleatória</option>
+      <option value="individual">Individual (Privada)</option>
+    </select>
+
+    <input id="idUsuario" placeholder="ID do usuário (apenas individual)" 
+      style="width:100%;margin-bottom:10px;display:none;">
+
+    <input id="tituloNotif" placeholder="Título" 
+      style="width:100%;margin-bottom:10px;">
+
+    <textarea id="mensagemNotif" placeholder="Descrição" 
+      style="width:100%;margin-bottom:10px;"></textarea>
+
+    <label style="display:block;margin-bottom:5px;">
+      <input type="checkbox" id="switchImagem" onchange="toggleImagem()"> Usar imagem
+    </label>
+
+    <input id="imagemNotif" placeholder="URL da imagem"
+      style="width:100%;margin-bottom:10px;display:none;">
+
+    <label style="display:block;margin-bottom:5px;">
+      <input type="checkbox" id="switchLink" onchange="toggleLink()"> Usar link
+    </label>
+
+    <input id="linkNotif" placeholder="Link de redirecionamento"
+      style="width:100%;margin-bottom:10px;display:none;">
+
+    <button onclick="enviarNotificacao()" style="
+      width:100%;
+      background:#ffd700;
+      border:none;
+      padding:10px;
+      border-radius:8px;
+      font-weight:bold;
+      cursor:pointer;
+    ">
+      🚀 Enviar Notificação
+    </button>
+
+  </div>
+
+  <!-- CONTEÚDO -->
+  <div class="content" id="conteudo"></div>
+
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+/* =========================
+   FIREBASE CONFIG
+========================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyBAOQC_mEjF-m5fdEO2no1-XfsQUjZc2mU",
+  authDomain: "amongchat-848f9.firebaseapp.com",
+  projectId: "amongchat-848f9",
+  storageBucket: "amongchat-848f9.firebasestorage.app",
+  messagingSenderId: "317096866187",
+  appId: "1:317096866187:web:fc4be8871cc5a9e7f43f8e",
+  measurementId: "G-ZFE9C5E595"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+/* =========================
+   PEGAR USUÁRIO REAL PELO FIRESTORE
+========================== */
+let usuarioAtual = {
+  id: "0",
+  nome: "Usuário"
+};
+
+async function carregarUsuarioAtual(){
+
+  const loginAtualDoc =
+    await db.collection("config")
+      .doc("loginAtual")
+      .get();
+
+  if (!loginAtualDoc.exists) {
+    console.log("Nenhum login ativo.");
+    return;
+  }
+
+  const loginAtual =
+    loginAtualDoc.data() || {};
+
+  let perfilID = null;
+
+  if (loginAtual.tipo === "google") {
+    perfilID = loginAtual.perfilID;
+  }
+
+  if (loginAtual.tipo === "discord") {
+    perfilID = loginAtual.uid;
+  }
+
+  if (!perfilID) return;
+
+  const userDoc =
+    await db.collection("usuarios")
+      .doc(String(perfilID))
+      .get();
+
+  if (!userDoc.exists) return;
+
+  const data =
+    userDoc.data() || {};
+
+    const btnCriar =
+  document.querySelector(
+    'button[onclick="abrirCriador()"]'
+  );
+
+const podeCriar =
+  String(perfilID) === "10000" &&
+  String(data.discordID) === "908775623135219734";
+
+if (btnCriar) {
+  btnCriar.style.display =
+    podeCriar ? "block" : "none";
+}
+
+  usuarioAtual = {
+    id: String(perfilID),
+    nome:
+      data.nickname ||
+      data.nome ||
+      `Usuário ${perfilID}`
+  };
+
+  console.log("Usuário notificações:", usuarioAtual);
+
+}
+
+/* =========================
+   CARDS FIXOS
+========================== */
+const notificacaoPet = `
+  <div class="card">
+    <div class="pet-text" style="text-align:left;margin-bottom:10px;">
+      <h3>UAU!</h3>
+      <p>
+        Parabéns por ter seu primeiro Animal de Estimação do CastChat 2.0!</strong><br>
+        Aproveite essa jornada junto do AC Space.
+      </p>
+    </div>
+    <img src="Cachorrocomosso.png" style="width:100px;">
+    <a href="perfil.html" class="link">Clique para ir ➜</a>
+  </div>
+`;
+
+const notificacaoBoasVindas = `
+<div class="card">
+  <img src="welcome_banner.png">
+  <h2>Bem-vindo ao CastChat 2.0</h2>
+  <h3>Estamos esperando há tanto tempo!</h3>
+      <p>✨ Você já ouviu falar do momento checkpoint? Ele se refere basicamente àquele momento da vida em que tudo parece estar certo.</p>
+      <p>💖 Nosso objetivo é fazer você se sentir bem-vindo e seguro. Mesmo quando a vida não for perfeita, o CastChat será sua pequena âncora de amizade.</p>
+      <p>🌟 Aqui está o que não permitimos:</p>
+      <p>🚫 Extremismo violento<br>🚫 Comportamento de ódio<br>🚫 Assédio e bullying<br>🚫 Conteúdo sexual ou pornográfico</p>
+      <p>🙌 Estamos sempre melhorando para você!</p>
+</div>
+`;
+
+/* =========================
+   CONFIGURAÇÃO DOS SELOS
+========================== */
+
+const seloConfig = {
+  verifyPadrao: "ic_settings_verify.png",
+  verifyAmarelo: "ic_settings_verify_amarelo.png",
+  verifyVermelho: "ic_settings_verify_vermelho.png",
+  proBronze: "PRO Bronze.png",
+  premium7: "ic_premium_not_activated.png",
+  avatarPro: "ic_avatar_pro.png",
+  nitroBasico: "nitrobasico01.png",
+  nitroBronze: "nitrobronze.png",
+  nitroPrata: "nitroprata.png",
+  nitroOuro: "nitroouro.png",
+  nitroPlatina: "nitroplatina.png",
+  nitroDiamante: "nitrodiamante.png",
+  nitroEsmeralda: "nitroesmeralda.png",
+  nitroRubi: "nitrorubi.png",
+  nitroOpal: "nitroopal.png",
+  official: "ic_official.png",
+  support: "Support.png"
+};
+
+const selosFuncionarios = ["official", "support"];
+
+function criarCardSelo(tipo, seloID){
+
+  const imagem = seloConfig[seloID];
+  if(!imagem) return "";
+
+  /* =========================
+     GANHOU SELO NORMAL
+  ========================== */
+  if(tipo === "ganhou" && !selosFuncionarios.includes(seloID)){
+    return `
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <img src="${imagem}" style="width:70px;">
+          <div>
+            <h2>Uma nova recompensa acaba de ser enviada para você</h2>
+            <p>Surpresa🥳👻 Você acaba de receber um emblema exclusivo</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /* =========================
+     GANHOU FUNCIONÁRIO
+  ========================== */
+  if(tipo === "ganhou" && selosFuncionarios.includes(seloID)){
+    return `
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <img src="${imagem}" style="width:70px;">
+          <div>
+            <h2>Parabéns agora você é um funcionário do CastChat2.0!🥳🥳🥳</h2>
+            <p>Agora você terá que ter muita responsabilidade e deverá mostrar que é digno desse selo. Se você arrumar qualquer problema, nós o removeremos permanentemente.</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /* =========================
+     PERDEU SELO NORMAL
+  ========================== */
+  if(tipo === "perdeu" && !selosFuncionarios.includes(seloID)){
+    return `
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <img src="${imagem}" style="width:70px;">
+          <div>
+            <h2>Essa não, perdi meu emblema exclusivo <img src="ic_surprised.png" style="width:20px;"></h2>
+            <p>Infelizmente tivemos que remover seu emblema, porque você quebrou uma de nossas regras</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /* =========================
+     PERDEU FUNCIONÁRIO
+  ========================== */
+  if(tipo === "perdeu" && selosFuncionarios.includes(seloID)){
+    return `
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <img src="${imagem}" style="width:70px;">
+          <div>
+            <h2>Você perdeu esse selo permanentemente e não tem como recuperá-lo <img src="emoji_muted.png" style="width:20px;"></h2>
+            <p>Seu selo foi removido por você tentar quebrar a empresa e o aplicativo, você não o merece mais</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+}
+
+/*=================
+notificações lidas
+===================*/
+async function marcarNotificacoesComoLidas(){
+
+  if (!usuarioAtual.id || usuarioAtual.id === "0") return;
+
+  await db.collection("notificacoes_lidas")
+    .doc(String(usuarioAtual.id))
+    .set({
+      ultimaLeitura: Date.now()
+    }, { merge:true });
+
+}
+
+/* =========================
+   NOTIFICAÇÕES EM TEMPO REAL
+========================== */
+function carregarNotificacoes(){
+
+  const conteudo = document.getElementById("conteudo");
+
+  db.collection("notificacoes")
+    .orderBy("data","desc")
+    .onSnapshot(snapshot=>{
+
+      conteudo.innerHTML = "";
+
+      if(snapshot.empty){
+
+        conteudo.innerHTML += `
+          <div class="card">
+            <p>Nenhuma notificação ainda.</p>
+          </div>
+        `;
+
+      }
+
+      snapshot.forEach(doc=>{
+
+        const n = doc.data();
+
+        const destino = String(n.idConta);
+        const meuID = String(usuarioAtual.id);
+
+        /* FILTRO DE DESTINO */
+        if(destino !== "todos" && destino !== meuID){
+          return;
+        }
+
+        /* =========================
+           CARD DE SELO
+        ========================== */
+
+        if(n.seloID && n.tipo){
+
+          conteudo.innerHTML += criarCardSelo(n.tipo, n.seloID);
+          return;
+
+        }
+
+        /* =========================
+           CARD NORMAL
+        ========================== */
+
+        conteudo.innerHTML += `
+          <div class="card">
+
+            ${n.imagem ? `<img src="${n.imagem}" class="notif-img">` : ""}
+
+            <h3>${n.titulo || ""}</h3>
+
+            <p>${n.mensagem || ""}</p>
+
+            ${n.link ? `<a href="${n.link}" class="link">Abrir ➜</a>` : ""}
+
+          </div>
+        `;
+
+      });
+
+      /* =========================
+         CARDS FIXOS
+      ========================== */
+
+      conteudo.innerHTML += notificacaoPet + notificacaoBoasVindas;
+
+    });
+
+}
+
+/* =========================
+   SEGUIDORES
+========================== */
+function carregarSeguidores(){
+
+  const conteudo = document.getElementById("conteudo");
+
+  conteudo.innerHTML = `
+    <div class="card">
+      <h3>Seguidores</h3>
+      <p>Em breve...</p>
+    </div>
+  `;
+
+}
+
+
+/* =========================
+   ABAS
+========================== */
+function abrirTab(tab){
+
+  document.getElementById("tabNotificacao")
+    .classList.toggle("active", tab==="notificacao");
+
+  document.getElementById("tabSeguidores")
+    .classList.toggle("active", tab==="seguidores");
+
+  if(tab === "notificacao"){
+    carregarNotificacoes();
+  }else{
+    carregarSeguidores();
+  }
+
+}
+
+
+/* =========================
+   CRIADOR
+========================== */
+function abrirCriador(){
+
+  const painel = document.getElementById("painelCriador");
+
+  painel.style.display =
+    painel.style.display === "none" ? "block" : "none";
+
+}
+
+
+function alternarCampos(){
+
+  const tipo = document.getElementById("tipoNotificacao").value;
+  const idInput = document.getElementById("idUsuario");
+
+  idInput.style.display =
+    (tipo === "individual") ? "block" : "none";
+
+}
+
+
+function toggleImagem(){
+
+  document.getElementById("imagemNotif").style.display =
+    document.getElementById("switchImagem").checked ? "block" : "none";
+
+}
+
+
+function toggleLink(){
+
+  document.getElementById("linkNotif").style.display =
+    document.getElementById("switchLink").checked ? "block" : "none";
+
+}
+
+
+/* =========================
+   ENVIAR NOTIFICAÇÃO
+========================== */
+async function enviarNotificacao(){
+
+  const titulo = document.getElementById("tituloNotif").value;
+  const mensagem = document.getElementById("mensagemNotif").value;
+  const usarImagem = document.getElementById("switchImagem").checked;
+  const usarLink = document.getElementById("switchLink").checked;
+
+  const imagem = usarImagem ? document.getElementById("imagemNotif").value : "";
+  const link = usarLink ? document.getElementById("linkNotif").value : "";
+
+  const tipo = document.getElementById("tipoNotificacao").value;
+  const idUsuario = document.getElementById("idUsuario").value;
+
+  let destino = "todos";
+
+  if(tipo === "individual"){
+    if(!idUsuario){
+      alert("Digite o ID do usuário!");
+      return;
+    }
+    destino = idUsuario;
+  }
+
+  try{
+
+    await db.collection("notificacoes").add({
+
+      titulo: titulo,
+      mensagem: mensagem,
+      imagem: imagem,
+      link: link,
+      idConta: destino,
+
+      /* MUITO IMPORTANTE */
+      data: Date.now()
+
+    });
+
+    alert("Notificação enviada 🚀");
+
+  }catch(err){
+    console.error(err);
+  }
+
+}
+
+
+/* =========================
+   INICIAR PÁGINA
+========================== */
+(async () => {
+  await carregarUsuarioAtual();
+  await marcarNotificacoesComoLidas();
+  carregarNotificacoes();
+})();
+
+</script>
+
+</body>
+</html>
