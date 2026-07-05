@@ -100,16 +100,6 @@ app.use(
 );
 
 // ===============================
-// POLÍTICAS
-// ===============================
-
-app.get('/politicas.html', (req, res) => {
-  res.sendFile(
-    path.join(__dirname, 'politicas.html')
-  );
-});
-
-// ===============================
 // TOKEN
 // ===============================
 
@@ -887,6 +877,23 @@ app.get('/me', (req, res) => {
       isACClub: decoded.isACClub || false
     }
   });
+
+});
+
+// ===============================
+// PUBLIC
+// ===============================
+app.get('/:arquivo', (req, res) => {
+
+  const arquivo = req.params.arquivo;
+
+  if (!arquivo.endsWith('.html')) {
+    return res.status(404).send('Not Found');
+  }
+
+  res.sendFile(
+    path.join(__dirname, arquivo)
+  );
 
 });
 
