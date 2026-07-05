@@ -1,1 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editar Perfil - CastChat 2.0</title>
 
+<style>
+:root{
+  --bg:#000;
+  --card:#141414;
+  --muted:#bfbfbf;
+  --yellow:#ffd700;
+}
+
+html,body{
+  margin:0;
+  padding:0;
+  background:var(--bg);
+  color:#fff;
+  font-family:Inter,Roboto,Arial,sans-serif;
+}
+
+.container{
+  max-width:420px;
+  margin:auto;
+  padding:20px;
+}
+
+h2{
+  margin-bottom:20px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  margin-bottom:14px;
+}
+
+.field label{
+  font-size:14px;
+  margin-bottom:6px;
+  color:var(--muted);
+}
+
+.field input,
+.field select,
+.field textarea{
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  background:#1a1a1a;
+  color:#fff;
+  font-size:14px;
+}
+
+.field textarea{
+  resize:none;
+  height:80px;
+}
+
+.actions{
+  display:flex;
+  justify-content:space-between;
+  margin-top:20px;
+}
+
+.btn{
+  padding:10px 16px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.btn.cancel{
+  background:#333;
+  color:#fff;
+}
+
+.btn.save{
+  background:var(--yellow);
+  color:#000;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h2>Editar Perfil</h2>
+
+  <div class="field">
+    <label>Nome / Apelido</label>
+    <input type="text" id="editNickname">
+  </div>
+
+  <div class="field">
+    <label>Data de nascimento</label>
+    <input type="date" id="editBirthday">
+  </div>
+
+  <div class="field">
+    <label>Pronome</label>
+    <select id="editPronoun">
+      <option value="">Selecionar</option>
+      <option value="Ele">Ele</option>
+      <option value="Ela">Ela</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>País</label>
+    <input type="text" id="editCountry" placeholder="Brasil">
+  </div>
+
+  <div class="field">
+    <label>Escola</label>
+    <input type="text" id="editSchool">
+  </div>
+
+  <div class="field">
+    <label>Biografia</label>
+    <textarea id="editBio"></textarea>
+  </div>
+
+  <div class="actions">
+    <button class="btn cancel" id="cancelBtn">Cancelar</button>
+    <button class="btn save" id="saveBtn">Salvar</button>
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+
+// ===============================
+// FIREBASE
+// ===============================
+const firebaseConfig = {
+  apiKey: "AIzaSyBAOQC_mEjF-m5fdEO2no1-XfsQUjZc2mU",
+  authDomain: "amongchat-848f9.firebaseapp.com",
+  projectId: "amongchat-848f9",
+  storageBucket: "amongchat-848f9.firebasestorage.app",
+  messagingSenderId: "317096866187",
+  appId: "1:317096866187:web:fc4be8871cc5a9e7f43f8e"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+  const editNickname = document.getElementById("editNickname");
+  const editBirthday = document.getElementById("editBirthday");
+  const editPronoun  = document.getElementById("editPronoun");
+  const editCountry  = document.getElementById("editCountry");
+  const editSchool   = document.getElementById("editSchool");
+  const editBio      = document.getElementById("editBio");
+
+  const saveBtn   = document.getElementById("saveBtn");
+  const cancelBtn = document.getElementById("cancelBtn");
+
+  const COUNTRY_DEFAULT = "Brasil";
+
+  // =========================
+// PEGA ID DO PERFIL PELO FIRESTORE
+// =========================
+const loginAtualDoc =
+  await db.collection("config")
+    .doc("loginAtual")
+    .get();
+
+if (!loginAtualDoc.exists) {
+  alert("Perfil não encontrado");
+  return;
+}
+
+const loginAtual =
+  loginAtualDoc.data() || {};
+
+let meuPerfilID = null;
+
+if (loginAtual.tipo === "google") {
+  meuPerfilID = loginAtual.perfilID;
+}
+
+if (loginAtual.tipo === "discord") {
+  meuPerfilID = loginAtual.uid;
+}
+
+if (!meuPerfilID) {
+  alert("Perfil não encontrado");
+  return;
+}
+
+meuPerfilID = String(meuPerfilID);
+
+  // =========================
+  // CARREGAR DADOS FIREBASE
+  // =========================
+  try {
+
+    const doc = await db
+      .collection("usuarios")
+      .doc(String(meuPerfilID))
+      .get();
+
+    if (doc.exists) {
+
+      const data = doc.data();
+
+      editNickname.value = data.nickname || "";
+      editBirthday.value = data.birth || "";
+      editPronoun.value  = data.pronoun || "";
+      editCountry.value  = data.country || COUNTRY_DEFAULT;
+      editSchool.value   = data.school || "";
+      editBio.value      = data.bio || "";
+
+    } else {
+
+      editCountry.value = COUNTRY_DEFAULT;
+
+    }
+
+  } catch(err) {
+
+    console.error(err);
+
+  }
+
+  // =========================
+  // CANCELAR
+  // =========================
+  cancelBtn.addEventListener("click", () => {
+
+    window.location.href = "perfil.html";
+
+  });
+
+  // =========================
+  // SALVAR
+  // =========================
+  saveBtn.addEventListener("click", async () => {
+
+    try {
+
+      if (!editBirthday.value) {
+
+        alert("Informe sua data de nascimento.");
+        return;
+
+      }
+
+      const idade = calcularIdade(
+        editBirthday.value
+      );
+
+      const nasc = new Date(
+        editBirthday.value
+      );
+
+      const signo = getSigno(
+        nasc.getDate(),
+        nasc.getMonth()
+      );
+
+      await db.collection("usuarios")
+        .doc(String(meuPerfilID))
+        .set({
+
+          nickname:
+            editNickname.value.trim(),
+
+          birth:
+            editBirthday.value,
+
+          age:
+            idade,
+
+          signo:
+            signo,
+
+          pronoun:
+            editPronoun.value,
+
+          country:
+            editCountry.value || COUNTRY_DEFAULT,
+
+          school:
+            editSchool.value.trim(),
+
+          bio:
+            editBio.value.trim()
+
+        }, { merge:true });
+
+      console.log("Perfil salvo");
+
+      window.location.href =
+        "perfil.html";
+
+    } catch(err) {
+
+      console.error(
+        "Erro salvando:",
+        err
+      );
+
+    }
+
+  });
+
+});
+
+// =========================
+// CALCULAR IDADE
+// =========================
+function calcularIdade(data) {
+
+  const nasc = new Date(data);
+  const hoje = new Date();
+
+  let idade =
+    hoje.getFullYear() -
+    nasc.getFullYear();
+
+  const m =
+    hoje.getMonth() -
+    nasc.getMonth();
+
+  if (
+    m < 0 ||
+    (m === 0 &&
+     hoje.getDate() <
+     nasc.getDate())
+  ) {
+
+    idade--;
+
+  }
+
+  return idade;
+
+}
+
+// =========================
+// SIGNO
+// =========================
+function getSigno(dia, mes) {
+
+  const signos = [
+
+    { nome:"Capricórnio", fim:19 },
+    { nome:"Aquário", fim:18 },
+    { nome:"Peixes", fim:20 },
+    { nome:"Áries", fim:19 },
+    { nome:"Touro", fim:20 },
+    { nome:"Gêmeos", fim:20 },
+    { nome:"Câncer", fim:22 },
+    { nome:"Leão", fim:22 },
+    { nome:"Virgem", fim:22 },
+    { nome:"Libra", fim:22 },
+    { nome:"Escorpião", fim:21 },
+    { nome:"Sagitário", fim:21 }
+
+  ];
+
+  return dia > signos[mes].fim
+    ? signos[(mes + 1) % 12].nome
+    : signos[mes].nome;
+
+}
+
+</script>
+
+</body>
+</html>
