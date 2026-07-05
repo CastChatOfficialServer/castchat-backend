@@ -1,1 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Selos CastChat 2.0</title>
 
+<style>
+body{
+  background:#000;
+  color:white;
+  font-family:Arial, sans-serif;
+  margin:0;
+  max-width:420px;
+  margin:auto;
+  padding:15px;
+}
+
+.top-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.close-btn{
+  cursor:pointer;
+  font-size:22px;
+  font-weight:bold;
+}
+
+.badge-box{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+  padding:12px;
+  background:#111;
+  border-radius:12px;
+}
+
+.badge-box img{
+  width:40px;
+}
+
+.badge-box span{
+  flex:1;
+  font-size:14px;
+}
+
+input{
+  width:90px;
+  padding:6px;
+  background:#1a1a1a;
+  border:1px solid #333;
+  color:white;
+  border-radius:6px;
+  text-align:center;
+}
+
+button{
+  padding:6px 10px;
+  background:#ffd700;
+  border:none;
+  border-radius:6px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:active{
+  transform:scale(0.95);
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h2>Gerenciar Selos</h2>
+  <div class="close-btn" onclick="window.location.href='perfil.html'">✕</div>
+</div>
+
+<div id="badgesContainer"></div>
+
+<div style="margin-top:30px;text-align:center;">
+  <button onclick="window.location.href='admin_infinito.html'" style="background:black;color:#ffd700;border:1px solid #ffd700;">
+    ⚙️ Painel Interno
+  </button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+
+/* =========================
+   UID MASTER
+========================== */
+const UID_MASTER = 10000;
+
+/* =========================
+   PEGA UID REAL
+========================== */
+const profileData =
+  JSON.parse(
+    localStorage.getItem("profileData") || "{}"
+  );
+
+const currentUID =
+  Number(profileData.uid) ||
+  Number(localStorage.getItem("perfilID")) ||
+  0;
+
+/* =========================
+   LISTA DE SELOS
+========================== */
+const badges = [
+
+  {
+    id:"verifyPadrao",
+    name:"Verificado",
+    icon:"ic_settings_verify.png"
+  },
+
+  {
+    id:"verifyAmarelo",
+    name:"Verificado Amarelo",
+    icon:"ic_settings_verify_amarelo.png"
+  },
+
+  {
+    id:"verifyVermelho",
+    name:"Verificado Vermelho",
+    icon:"ic_settings_verify_vermelho.png"
+  },
+
+  {
+    id:"verifyVerdeEscuro",
+    name:"Verificado Verde Escuro",
+    icon:"ic_settings_verifyverdeescuro.png"
+  },
+
+  {
+    id:"proBronze",
+    name:"PRO Bronze",
+    icon:"PRO Bronze.png"
+  },
+
+  {
+    id:"premium7",
+    name:"Premium 7 Dias",
+    icon:"ic_premium_not_activated.png"
+  },
+
+  {
+    id:"avatarPro",
+    name:"Avatar PRO",
+    icon:"ic_avatar_pro.png"
+  },
+
+  {
+    id:"official",
+    name:"Selo Oficial",
+    icon:"ic_official.png"
+  },
+
+  {
+    id:"support",
+    name:"Selo de Suporte",
+    icon:"Support.png"
+  },
+
+  {
+    id:"streamer",
+    name:"Selo Streamer",
+    icon:"strimer.png"
+  },
+
+  {
+    id:"parceria",
+    name:"Selo Parceria",
+    icon:"parceria.png"
+  },
+
+  {
+    id:"djacclub",
+    name:"Selo DJ AC CLUB",
+    icon:"ic_club_dj.png"
+  },
+
+  {
+    id:"nitroBasico",
+    name:"Nitro Básico",
+    icon:"nitrobasico01.png"
+  },
+
+  {
+    id:"nitroBronze",
+    name:"Nitro Bronze",
+    icon:"nitrobronze.png"
+  },
+
+  {
+    id:"nitroPrata",
+    name:"Nitro Prata",
+    icon:"nitroprata.png"
+  },
+
+  {
+    id:"nitroOuro",
+    name:"Nitro Ouro",
+    icon:"nitroouro.png"
+  },
+
+  {
+    id:"nitroPlatina",
+    name:"Nitro Platina",
+    icon:"nitroplatina.png"
+  },
+
+  {
+    id:"nitroDiamante",
+    name:"Nitro Diamante",
+    icon:"nitrodiamante.png"
+  },
+
+  {
+    id:"nitroEsmeralda",
+    name:"Nitro Esmeralda",
+    icon:"nitroesmeralda.png"
+  },
+
+  {
+    id:"nitroRubi",
+    name:"Nitro Rubi",
+    icon:"nitrorubi.png"
+  },
+
+  {
+    id:"nitroOpal",
+    name:"Nitro Opal",
+    icon:"nitroopal.png"
+  }
+
+];
+
+/* =========================
+   FIREBASE
+========================== */
+const firebaseConfig = {
+
+  apiKey: "AIzaSyBAOQC_mEjF-m5fdEO2no1-XfsQUjZc2mU",
+
+  authDomain:
+    "amongchat-848f9.firebaseapp.com",
+
+  projectId:
+    "amongchat-848f9",
+
+  storageBucket:
+    "amongchat-848f9.firebasestorage.app",
+
+  messagingSenderId:
+    "317096866187",
+
+  appId:
+    "1:317096866187:web:fc4be8871cc5a9e7f43f8e",
+
+  measurementId:
+    "G-ZFE9C5E595"
+
+};
+
+if (!firebase.apps.length) {
+
+  firebase.initializeApp(firebaseConfig);
+
+}
+
+const db = firebase.firestore();
+
+/* =========================
+   CONTAINER
+========================== */
+const container =
+  document.getElementById("badgesContainer");
+
+/* =========================
+   RENDERIZA SELOS
+========================== */
+badges.forEach(badge => {
+
+  const div =
+    document.createElement("div");
+
+  div.className = "badge-box";
+
+  div.innerHTML = `
+
+    <img src="${badge.icon}">
+
+    <span>${badge.name}</span>
+
+    <input
+      type="number"
+      placeholder="UID"
+      min="10000"
+    >
+
+    <button>
+      Aplicar
+    </button>
+
+  `;
+
+  const input =
+    div.querySelector("input");
+
+  const btn =
+    div.querySelector("button");
+
+  /* =========================
+     CLICK
+  ========================== */
+  btn.addEventListener("click", async () => {
+
+    try {
+
+      /* =========================
+         SOMENTE UID 10000
+      ========================== */
+     if (currentUID !== UID_MASTER) {
+  alert("Sem permissão.");
+  return;
+}
+
+      const uidRaw =
+        input.value.trim();
+
+      if (!uidRaw) return;
+
+      if (!/^\d+$/.test(uidRaw)) {
+
+        alert("UID inválido");
+
+        return;
+
+      }
+
+      const uidNumber =
+        parseInt(uidRaw);
+
+      if (uidNumber < 10000) {
+
+        alert("UID inválido");
+
+        return;
+
+      }
+
+      /* =========================
+         REFERÊNCIA USUÁRIO
+      ========================== */
+      const userRef =
+        db.collection("usuarios")
+          .doc(uidRaw);
+
+      let userDoc =
+        await userRef.get();
+
+      /* =========================
+         CRIA PERFIL SE NÃO EXISTIR
+      ========================== */
+      if (!userDoc.exists) {
+
+        await userRef.set({
+
+          uid: uidRaw,
+
+          nickname:
+            `Usuário ${uidRaw}`,
+
+          pronoun: "",
+
+          bio: "",
+
+          selos: [],
+
+          criadoEm: Date.now()
+
+        });
+
+        userDoc =
+          await userRef.get();
+
+      }
+
+      /* =========================
+         PEGA SELOS
+      ========================== */
+      let selos = [];
+
+      const data =
+        userDoc.data() || {};
+
+      if (
+        Array.isArray(data.selos)
+      ) {
+
+        selos = data.selos;
+
+      }
+
+      /* =========================
+         REMOVE / ADICIONA
+      ========================== */
+      if (
+        selos.includes(badge.id)
+      ) {
+
+        selos =
+          selos.filter(
+            s => s !== badge.id
+          );
+
+      } else {
+
+        selos.push(badge.id);
+
+      }
+
+      /* =========================
+         SALVA FIRESTORE
+      ========================== */
+      await userRef.set({
+
+        selos: selos
+
+      }, { merge:true });
+
+      /* =========================
+         BOTÃO
+      ========================== */
+      btn.innerText =
+        selos.includes(badge.id)
+          ? "Remover aplicação"
+          : "Aplicar";
+
+      console.log(
+        "Selos atualizados:",
+        uidRaw,
+        selos
+      );
+
+      input.value = "";
+
+    } catch (err) {
+
+      console.error(
+        "Erro badge:",
+        err
+      );
+
+    }
+
+  });
+
+  container.appendChild(div);
+
+});
+
+</script>
+
+</body>
+</html>
