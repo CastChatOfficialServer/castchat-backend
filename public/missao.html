@@ -1,1 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Missões - CastChat 2.0</title>
 
+<style>
+body{
+  margin:0;
+  background:#000;
+  font-family:Arial, sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.phone{
+  width:380px;
+  height:95vh;
+  background:#0f0f0f;
+  border-radius:30px;
+  padding:20px;
+  box-shadow:0 0 30px #000;
+  overflow-y:auto;
+  color:white;
+}
+
+h1{
+  text-align:center;
+  color:#ffd700;
+  margin-bottom:15px;
+}
+
+.mission-box{
+  background:#111;
+  padding:15px;
+  border-radius:15px;
+  margin-bottom:15px;
+}
+
+.mission-box h2{
+  color:#ffd700;
+  font-size:16px;
+  margin:0 0 8px;
+}
+
+.mission-box p{
+  color:#ccc;
+  font-size:14px;
+  margin:0;
+}
+
+.form-group{
+  margin:12px 0;
+}
+
+label{
+  font-size:13px;
+  color:#aaa;
+  display:block;
+  margin-bottom:5px;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  background:#1a1a1a;
+  border:none;
+  border-radius:10px;
+  color:white;
+  outline:none;
+}
+
+button{
+  width:100%;
+  background:#ffd700;
+  color:#000;
+  border:none;
+  padding:14px;
+  border-radius:30px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:10px;
+}
+
+button:hover{
+  opacity:0.9;
+}
+
+.success{ color:#0f0; margin-top:10px; }
+.error{ color:#f00; margin-top:10px; }
+
+.finalizado{
+  text-align:center;
+  color:#0f0;
+  font-weight:bold;
+  margin-top:20px;
+}
+
+.offline{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+  background:#000;
+  color:#aaa;
+}
+
+.offline img{
+  width:140px;
+  margin-bottom:12px;
+}
+</style>
+</head>
+<body>
+
+<div id="offline" class="offline">
+  <img src="ic_empty_default.png">
+  <p>Sem conexão com a internet</p>
+</div>
+
+<div id="online" style="display:none;">
+  <div class="phone">
+
+    <h1>Missões CastChat 2.0</h1>
+
+    <div id="areaMissao" style="display:none;">
+
+      <div class="mission-box">
+        <h2>Missão Atual:</h2>
+        <p id="missionDesc">Carregando...</p>
+      </div>
+
+      <div class="form-group">
+        <label>ID da Conta Encontrada:</label>
+        <input type="number" id="idConta" placeholder="Ex: 10000" min="10000">
+      </div>
+
+      <div class="form-group">
+        <label>Envie seu print:</label>
+        <input type="file" id="screenshot" accept="image/*">
+      </div>
+
+      <button id="enviarBtn">Enviar Missão</button>
+      <p id="statusMsg"></p>
+
+      <div id="fimMissoes" class="finalizado" style="display:none;">
+        🎉 Todas as missões foram concluídas!
+      </div>
+
+    </div>
+
+    <!-- BOTÃO AGORA FICA EMBAIXO -->
+    <button id="ativarBtn">Ativar Missões</button>
+
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "SUA_AUTH_DOMAIN",
+  projectId: "SEU_PROJECT_ID",
+  storageBucket: "SEU_STORAGE_BUCKET",
+  messagingSenderId: "SEU_SENDER_ID",
+  appId: "SEU_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+const profile = JSON.parse(localStorage.getItem("profileData"));
+const userId = profile ? profile.uid : null;
+
+if(!userId || userId < 10000){
+  alert("UID inválido.");
+}
+
+const missoes = [
+  { id:1, descricao:"Procure a Bandeira do CastChat 2.0" },
+  { id:2, descricao:"Procure o Mascote dos AC CLUBs" },
+  { id:3, descricao:"Encontre a Medalha Lendária" }
+];
+
+let missaoAtual = 1;
+let missoesAtivas = false;
+
+function atualizarMissao(){
+  if(missaoAtual > missoes.length){
+    document.getElementById("areaMissao").style.display="none";
+    document.getElementById("fimMissoes").style.display="block";
+    return;
+  }
+  document.getElementById("missionDesc").textContent =
+    missoes[missaoAtual-1].descricao;
+}
+
+/* TOGGLE ATIVAR/DESATIVAR */
+document.getElementById("ativarBtn").addEventListener("click",()=>{
+  const area = document.getElementById("areaMissao");
+  const btn = document.getElementById("ativarBtn");
+
+  missoesAtivas = !missoesAtivas;
+
+  if(missoesAtivas){
+    area.style.display="block";
+    btn.textContent="Desativar Missões";
+    atualizarMissao();
+  }else{
+    area.style.display="none";
+    btn.textContent="Ativar Missões";
+  }
+});
+
+/* ENVIAR MISSÃO */
+document.getElementById("enviarBtn").addEventListener("click", async()=>{
+
+  const idConta = document.getElementById("idConta").value.trim();
+  const file = document.getElementById("screenshot").files[0];
+  const status = document.getElementById("statusMsg");
+
+  if(!idConta || idConta < 10000){
+    status.textContent="Digite um UID válido (10000+)";
+    status.className="error";
+    return;
+  }
+
+  if(!file){
+    status.textContent="Selecione uma imagem!";
+    status.className="error";
+    return;
+  }
+
+  try{
+    status.textContent="Enviando...";
+    status.className="";
+
+    const fileRef = storage.ref().child(
+      `missoes/${userId}_${Date.now()}_${file.name}`
+    );
+
+    await fileRef.put(file);
+    const fileUrl = await fileRef.getDownloadURL();
+
+    await db.collection("missoes_enviadas").add({
+      idConta,
+      missao: missaoAtual,
+      userId,
+      fileUrl,
+      status:"pendente",
+      dataEnvio: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    status.textContent="Missão enviada! Aguarde aprovação.";
+    status.className="success";
+
+    document.getElementById("idConta").value="";
+    document.getElementById("screenshot").value="";
+
+  }catch(e){
+    status.textContent="Erro ao enviar.";
+    status.className="error";
+  }
+
+});
+
+/* ONLINE / OFFLINE */
+function atualizarEstadoInternet(){
+  const online = document.getElementById("online");
+  const offline = document.getElementById("offline");
+
+  if(navigator.onLine){
+    offline.style.display="none";
+    online.style.display="block";
+  }else{
+    offline.style.display="flex";
+    online.style.display="none";
+  }
+}
+
+window.addEventListener("online", atualizarEstadoInternet);
+window.addEventListener("offline", atualizarEstadoInternet);
+atualizarEstadoInternet();
+</script>
+
+</body>
+</html>
