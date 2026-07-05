@@ -883,19 +883,7 @@ app.get('/me', (req, res) => {
 // ===============================
 // PUBLIC
 // ===============================
-app.get('/:arquivo', (req, res) => {
 
-  const arquivo = req.params.arquivo;
-
-  if (!arquivo.endsWith('.html')) {
-    return res.status(404).send('Not Found');
-  }
-
-  res.sendFile(
-    path.join(__dirname, arquivo)
-  );
-
-});
 
 // ===============================
 // SUCCESS PAGE
