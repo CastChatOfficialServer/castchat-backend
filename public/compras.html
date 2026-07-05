@@ -1,1 +1,1717 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CastChat - Compras</title>
+<link rel="stylesheet" href="style.css">
 
+<style>
+:root{
+  --bg:#000;
+  --card:#141414;
+  --muted:#bbb;
+  --yellow:#ffd700;
+  --purple:#6f49ff;
+}
+
+html,body{
+  height:100%;
+  margin:0;
+  background:var(--bg);
+  color:#fff;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+}
+
+.app{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:100vh;
+}
+
+/* Topbar */
+.topbar{
+  width:100%;
+  max-width:420px;
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#111;
+  border-bottom:1px solid #222;
+}
+
+.saldo{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  font-weight:700;
+}
+
+.saldo img{
+  width:18px;
+  height:18px;
+}
+
+.saldo span{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.close-btn{
+  background:none;
+  border:none;
+  color:var(--yellow);
+  font-weight:700;
+  cursor:pointer;
+}
+
+/* Conteúdo */
+.content{
+  width:100%;
+  max-width:420px;
+  padding:12px 12px 24px;
+  box-sizing:border-box;
+}
+
+h2.section{
+  color:var(--yellow);
+  text-align:left;
+  margin:12px 0;
+  font-size:16px;
+}
+
+/* Ovos */
+.eggs-row{
+  display:flex;
+  gap:10px;
+  justify-content:space-between;
+  margin-bottom:14px;
+}
+
+.egg-card{
+  flex:1;
+  background:var(--card);
+  border-radius:12px;
+  text-align:center;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:space-between;
+
+  min-height:140px;
+  padding:10px;
+}
+
+.egg-card img.egg{
+  width:64px;
+  height:64px;
+  object-fit:contain;
+  margin:6px 0;
+}
+
+.price-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:var(--purple);
+  color:#fff;
+  padding:6px 10px;
+  border-radius:20px;
+  font-weight:700;
+  font-size:13px;
+}
+
+.price-pill img{
+  width:14px;
+  height:14px;
+}
+
+.egg-top-badge{
+  position:absolute;
+  left:8px;
+  top:8px;
+  background:rgba(255,255,255,0.12);
+  padding:6px 10px;
+  border-radius:10px;
+  font-size:14px;
+  font-weight:800;
+  cursor:pointer;
+  z-index:999;
+  pointer-events:all;
+}
+
+.eggs-row .egg-card[style]{
+  max-width:160px;
+}
+
+/* Responsivo */
+@media (max-width:360px){
+  .egg-card img.egg{
+    width:54px;
+    height:54px;
+  }
+  .egg-card{
+    min-height:120px;
+    padding:8px;
+  }
+  .price-pill{
+    font-size:12px;
+    padding:5px 8px;
+  }
+  .egg-cta button{
+    padding:5px 6px;
+    font-size:12px;
+  }
+}
+
+/* Diamonds */
+.diamond-row{
+  display:flex;
+  gap:12px;
+  justify-content:space-between;
+  margin:12px 0;
+}
+
+.diamond-card{
+  flex:1;
+  background:var(--card);
+  padding:14px;
+  border-radius:12px;
+  text-align:center;
+  position:relative;
+}
+
+.diamond-card img{
+  width:54px;
+  height:54px;
+  margin:0 auto 8px;
+  display:block;
+}
+
+.buy-yellow{
+  background:var(--yellow);
+  border:none;
+  padding:8px 12px;
+  border-radius:22px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.small-note{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:8px;
+}
+
+/* Footer */
+.bottombar{
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  padding:10px 6px;
+  width:100%;
+  max-width:420px;
+  background:#111;
+  border-top:1px solid #222;
+}
+
+.bottombar img{
+  width:28px;
+  height:28px;
+}
+
+/* --------------------- */
+/* MODAL PET INFO FINAL */
+/* --------------------- */
+
+.pet-info-modal{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:36px 12px;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(4px);
+  z-index:1200;
+}
+.pet-info-modal.hidden{
+  display:none;
+}
+
+.pet-info-panel{
+  width:92%;
+  max-width:420px;
+  background:#0f0f10;
+  border-radius:12px;
+  overflow:hidden;
+  color:#fff;
+  box-shadow:0 10px 40px rgba(0,0,0,0.6);
+  position:relative;
+  padding-bottom:18px;
+  animation:pop 0.25s ease;
+}
+
+.pet-info-close{
+  position:absolute;
+  right:12px;
+  top:8px;
+  background:transparent;
+  border:none;
+  color:#fff;
+  font-size:18px;
+  cursor:pointer;
+  z-index:5;
+}
+
+.pet-info-banner{
+  width:100%;
+  height:160px;
+  object-fit:cover;
+  display:block;
+  background:linear-gradient(180deg,rgba(0,0,0,0.3),rgba(0,0,0,0.6));
+}
+
+.pet-info-title{
+  margin:14px 18px 8px;
+  font-size:18px;
+  font-weight:700;
+}
+
+.pet-info-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:0 12px 12px;
+}
+
+.pet-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:#161616;
+  border-radius:10px;
+  padding:10px;
+  border:1px solid rgba(255,255,255,0.03);
+}
+
+.pet-item img.pet-thumb{
+  width:56px;
+  height:56px;
+  object-fit:contain;
+  border-radius:8px;
+  background:rgba(255,255,255,0.02);
+  padding:6px;
+}
+
+.pet-meta{
+  flex:1;
+  min-width:0;
+}
+
+.pet-name{
+  font-weight:700;
+  font-size:15px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.pet-desc{
+  font-size:13px;
+  color:#c7c7c7;
+  margin-top:4px;
+  max-height:36px;
+  overflow:hidden;
+}
+
+/* Cores de raridade */
+.pet-rarity{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.rarity-superlegend{
+  background:linear-gradient(90deg,#ffd700,#ffb400);
+  color:#000;
+}
+.rarity-legend{
+  background:#b388ff;
+  color:#0b0020;
+}
+.rarity-rare{
+  background:#7bdff6;
+  color:#001822;
+}
+.rarity-uncommon{
+  background:#9ef08a;
+  color:#042a00;
+}
+.rarity-common{
+  background:#e6e6e6;
+  color:#041018;
+}
+
+#popup-ovo {
+  position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(3px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999; /* <- RESOLVE AGORA */
+}
+
+#popup-ovo .conteudo-ovo {
+    background: #111;
+    padding: 20px;
+    border-radius: 15px;
+    width: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
+    z-index: 1000000;
+}
+
+#popup-ovo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    z-index: 99999999;
+}
+
+/* --- Card central --- */
+#popup-ovo-card {
+    width: 380px;
+    max-height: 80vh;
+    background: #111;
+    border-radius: 18px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.7);
+}
+
+/* --- Título --- */
+#popup-ovo-card h2 {
+    margin: 0;
+    font-size: 22px;
+    color: white;
+    text-align: center;
+}
+
+/* --- Lista com scroll --- */
+#lista-pets-ovo {
+    overflow-y: auto;
+    max-height: 60vh;
+    padding-right: 5px;
+}
+
+/* --- Estilo de cada pet --- */
+.pet-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    margin-bottom: 8px;
+}
+
+.pet-item img {
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+}
+
+.pet-item span {
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+/* --- Scroll bonitinho --- */
+#lista-pets-ovo::-webkit-scrollbar {
+    width: 8px;
+}
+
+#lista-pets-ovo::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 10px;
+}
+
+.egg-top-badge img {
+  width: 15px;
+  height: 15px;
+  pointer-events: none;
+}
+
+.pix-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.pix-modal.hidden {
+  display: none;
+}
+
+.pix-box {
+  background: #111;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  width: 280px;
+}
+
+.pix-qrcode {
+  width: 200px;
+  margin: 12px 0;
+}
+
+.pix-valor {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.close-btn {
+  margin-top: 8px;
+  background: none;
+  border: none;
+  color: #aaa;
+}
+
+.diamond-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.diamond-card {
+  background: #111;
+  border-radius: 16px;
+  padding: 14px 10px;
+  text-align: center;
+}
+
+.diamond-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.diamond-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.diamond-card {
+  background: #111;
+  border-radius: 16px;
+  padding: 14px 10px;
+  text-align: center;
+}
+
+.pix-box {
+  position: relative;
+}
+
+.pix-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+}
+</style>
+
+</head>
+<body>
+
+<div class="app">
+
+  <div class="topbar">
+    <div class="saldo">
+      <span><img src="coin_rotate_06.png" alt="coins"><strong id="coins">0</strong></span>
+      <span><img src="discordorbs.gif" alt="discordorbs"><span id="discordorbs">0</span></span>
+      <span><img src="ic_diamond.png" alt="diamonds"><strong id="diamonds">0</strong></span>
+    </div>
+    <button class="close-btn" onclick="window.location.href='animal.html'">✖</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ovos -->
+  <h2 class="section">Gachapon de Animais</h2>
+
+  <div class="eggs-row">
+  <!-- Ovo 500 - Super Legendário -->
+  <div class="egg-card" id="egg500">
+    <div class="egg-top-badge" onclick="abrirModalOvoRaridade('Ovo vermelho','Super Legendário')">
+      <img src="ic_egg_desc.png" alt="info">
+    </div>
+    <img class="egg" src="Ovo vermelho.png" alt="Ovo 500">
+    <button class="price-pill" onclick="comprarOvo('Ovo vermelho',500)">
+      <img src="ic_diamond.png" alt="d"> 500
+    </button>
+  </div>
+
+  <!-- Ovo 400 - Legendário -->
+  <div class="egg-card" id="egg400">
+    <div class="egg-top-badge" onclick="abrirModalOvoRaridade('Ovo rosa','Legendário')">
+      <img src="ic_egg_desc.png" alt="info">
+    </div>
+    <img class="egg" src="Ovo rosa.png" alt="Ovo 400">
+    <button class="price-pill" onclick="comprarOvo('Ovo rosa',400)">
+      <img src="ic_diamond.png" alt="d"> 400
+    </button>
+  </div>
+
+  <!-- Ovo 100 - Raro -->
+  <div class="egg-card" id="egg100">
+    <div class="egg-top-badge" onclick="abrirModalOvoRaridade('Ovo roxo','Raro')">
+      <img src="ic_egg_desc.png" alt="info">
+    </div>
+    <img class="egg" src="Ovo roxo.png" alt="Ovo 100">
+    <button class="price-pill" onclick="comprarOvo('Ovo roxo',100)">
+      <img src="ic_diamond.png" alt="d"> 100
+    </button>
+  </div>
+</div>
+
+<!-- Segunda linha -->
+<div class="eggs-row" style="justify-content:center;">
+
+  <!-- Ovo Azul - Comum -->
+  <div class="egg-card" style="max-width:180px;">
+    <div class="egg-top-badge" onclick="abrirModalOvoRaridade('Ovo azul','Comum')">
+      <img src="ic_egg_desc.png" alt="info">
+    </div>
+    <img class="egg" src="Ovo azul.png" alt="Ovo 50">
+    <button class="price-pill" onclick="comprarOvo('Ovo azul',50)">
+      <img src="ic_diamond.png" alt="d"> 50
+    </button>
+  </div>
+
+  <!-- Ovo Laranja - Incomum -->
+  <div class="egg-card" style="max-width:180px;">
+    <div class="egg-top-badge" onclick="abrirModalOvoRaridade('Ovo laranja','Incomum')">
+      <img src="ic_egg_desc.png" alt="info">
+    </div>
+    <img class="egg" src="Ovo laranja.png" alt="Ovo moedas">
+    <button class="price-pill" onclick="comprarMoedas('Ovo laranja',400)">
+      <img src="coin_rotate_06.png" alt="coin"> 400
+    </button>
+  </div>
+
+</div>
+
+<!-- Diamonds -->
+<h2 class="section">Diamantes</h2>
+
+<div class="diamond-columns">
+
+  <!-- COLUNA 1 -->
+  <div class="diamond-col">
+    <div class="diamond-card">
+      <div class="small-note">x10</div>
+      <img src="diamantes10.png" alt="x10">
+      <button id="freeBtn" class="buy-yellow" onclick="assistirAnuncio()">
+        <img id="adIcon" src="ic_ad_white.png" style="width:18px;height:18px">
+        <span id="freeTimer"></span>
+      </button>
+    </div>
+
+    <div class="diamond-card">
+      <div class="small-note">x4000</div>
+      <img src="diamantes4000.png" alt="4000">
+      <button class="buy-yellow" onclick="abrirPix(4000,'R$ 114,99')">R$ 114,99</button>
+    </div>
+  </div>
+
+  <!-- COLUNA 2 -->
+  <div class="diamond-col">
+    <div class="diamond-card">
+      <div class="small-note">x200</div>
+      <img src="diamantes200.png" alt="200">
+      <button class="buy-yellow" onclick="abrirPix(200,'R$ 9,99')">R$ 9,99</button>
+    </div>
+
+    <div class="diamond-card">
+      <div class="small-note">x6000</div>
+      <img src="diamantes6000.png" alt="6000">
+      <button class="buy-yellow" onclick="abrirPix(6000,'R$ 214,99')">R$ 214,99</button>
+    </div>
+  </div>
+
+  <!-- COLUNA 3 -->
+  <div class="diamond-col">
+    <div class="diamond-card">
+      <div class="small-note">x800</div>
+      <img src="diamantes800.png" alt="800">
+      <button class="buy-yellow" onclick="abrirPix(800,'R$ 25,99')">R$ 25,99</button>
+    </div>
+
+    <div class="diamond-card">
+      <div class="small-note">x13000</div>
+      <img src="diamantes13000.png" alt="13000">
+      <button class="buy-yellow" onclick="abrirPix(13000,'R$ 429,99')">R$ 429,99</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL PIX -->
+<div id="pixModal" class="pix-modal hidden">
+  <div class="pix-box">
+
+    <!-- Botão X -->
+    <button class="pix-close" onclick="fecharPix()">✕</button>
+
+    <h3>Pagamento via PIX</h3>
+
+    <img src="qrcode_pix.png" alt="PIX QR Code" class="pix-qrcode">
+
+    <p id="pixValor" class="pix-valor">R$ 0,00</p>
+
+    <p class="pix-info">
+      Após o pagamento, os diamantes serão liberados automaticamente.
+    </p>
+
+  </div>
+</div>
+
+  </div> <!-- fim content -->
+
+</div> <!-- fim app -->
+
+
+<!-- =============================== -->
+<!-- MODAL PET INFO (VERSÃO FINAL) -->
+<!-- =============================== -->
+<div id="petInfoModal" class="pet-info-modal hidden" aria-hidden="true">
+  <div class="pet-info-panel">
+    <button class="pet-info-close" aria-label="Fechar" onclick="closePetInfo()">✖</button>
+    <img src="bg_invite_pet.png" alt="" class="pet-info-banner">
+    <h2 id="petInfoTitle" class="pet-info-title">Possíveis Pets</h2>
+    <div id="petInfoList" class="pet-info-list"></div>
+  </div>
+</div>
+
+<div id="popup-ovo" class="popup">
+   <div class="popup-conteudo">
+      <span onclick="fecharPopupPets()" class="fechar">×</span>
+      <h2 id="titulo-popup-ovo"></h2>
+      <div id="lista-pets-ovo"></div>
+   </div>
+</div>
+
+<div id="popup-ovo">
+    <div id="popup-ovo-card">
+        <h2 id="titulo-popup-ovo">Possíveis pets</h2>
+
+        <div id="lista-pets-ovo"></div>
+
+        <button onclick="fecharPopupPets()" 
+                style="padding:10px;background:#e63946;border:none;
+                       border-radius:10px;color:white;font-size:16px;cursor:pointer;">
+            Fechar
+        </button>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBAOQC_mEjF-m5fdEO2no1-XfsQUjZc2mU",
+  authDomain: "amongchat-848f9.firebaseapp.com",
+  projectId: "amongchat-848f9",
+  storageBucket: "amongchat-848f9.firebasestorage.app",
+  messagingSenderId: "317096866187",
+  appId: "1:317096866187:web:fc4be8871cc5a9e7f43f8e",
+  measurementId: "G-ZFE9C5E595"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const db = firebase.firestore();
+
+let meuPerfilID = null;
+
+async function carregarPerfilCompras(){
+
+  const loginAtualDoc =
+    await db.collection("config")
+      .doc("loginAtual")
+      .get();
+
+  if (!loginAtualDoc.exists) return;
+
+  const loginAtual = loginAtualDoc.data() || {};
+
+  if (loginAtual.tipo === "google") {
+    meuPerfilID = String(loginAtual.perfilID);
+  }
+
+  if (loginAtual.tipo === "discord") {
+    meuPerfilID = String(loginAtual.uid);
+  }
+
+}
+
+function iniciarCarteira(){
+
+  if (!meuPerfilID) return;
+
+  db.collection("usuarios")
+    .doc(String(meuPerfilID))
+    .onSnapshot(async (doc) => {
+
+      if (!doc.exists) return;
+
+      const data = doc.data() || {};
+
+      const infinitoAtivo =
+        String(meuPerfilID) === "10000" &&
+        String(data.discordID) === "908775623135219734" &&
+        data.infinito === true;
+
+      let coins = Number(data.coins || 0);
+      let diamonds = Number(data.diamonds || 0);
+      let orbs = Number(data.discordOrbs || 0);
+
+      if (infinitoAtivo) {
+        coins = 999999;
+        diamonds = 999999;
+        orbs = 999999;
+
+        await db.collection("usuarios")
+          .doc("10000")
+          .set({
+            coins: 999999,
+            diamonds: 999999,
+            discordOrbs: 999999
+          }, { merge:true });
+      }
+
+      const coinEl = document.getElementById("coins");
+      const diamondEl = document.getElementById("diamonds");
+      const orbEl = document.getElementById("discordorbs");
+
+      if (coinEl) coinEl.textContent = coins;
+      if (diamondEl) diamondEl.textContent = formatDiamonds(diamonds);
+      if (orbEl) orbEl.textContent = orbs;
+
+    });
+
+}
+
+/* ===========================
+      FUNÇÕES DE UTILIDADE
+   =========================== */
+
+function formatDiamonds(val) {
+  if (val < 10000) return val;
+  return Math.floor(val / 1000) + "K";
+}
+
+function secondsToHMS(secs) {
+  const h = Math.floor(secs / 3600).toString().padStart(2, '0');
+  const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
+  const s = Math.floor(secs % 60).toString().padStart(2, '0');
+  return `${h}:${m}:${s}`;
+}
+
+/* ===========================
+      SALDO & UI
+   =========================== */
+function atualizarSaldoUI() {
+  // Agora o saldo é atualizado automaticamente
+  // pelo iniciarCarteira() usando Firestore.
+}
+
+/* ===========================
+      COMPRAS
+   =========================== */
+async function comprarOvo(nome, custo) {
+
+  if (!meuPerfilID) {
+    alert("Erro ao identificar o usuário.");
+    return;
+  }
+
+  const ref =
+    db.collection("usuarios")
+      .doc(String(meuPerfilID));
+
+  const doc =
+    await ref.get();
+
+  if (!doc.exists) {
+    alert("Perfil não encontrado.");
+    return;
+  }
+
+  const data = doc.data() || {};
+
+  const infinitoAtivo =
+    String(meuPerfilID) === "10000" &&
+    String(data.discordID) === "908775623135219734" &&
+    data.infinito === true;
+
+  const diamonds =
+    Number(data.diamonds || 0);
+
+  if (!infinitoAtivo && diamonds < custo) {
+    alert("💎 Diamantes insuficientes!");
+    return;
+  }
+
+  if (!infinitoAtivo) {
+    await ref.set({
+      diamonds: diamonds - custo
+    }, { merge:true });
+  }
+
+  let raridade = "Comum";
+
+  if (nome.includes("vermelho")) raridade = "Super Legendário";
+  else if (nome.includes("rosa")) raridade = "Legendário";
+  else if (nome.includes("roxo")) raridade = "Raro";
+  else if (nome.includes("azul")) raridade = "Comum";
+  else if (nome.includes("laranja")) raridade = "Incomum";
+
+  await sortearPetPorRaridade(raridade);
+
+}
+
+/* ===========================
+   FREE DIAMONDS (ANÚNCIO)
+   =========================== */
+
+const FREE_KEY = 'shop_free_ts_v2';
+const COOLDOWN = 60 * 60 * 1000;
+
+async function assistirAnuncio() {
+
+  const now = Date.now();
+
+  if (!meuPerfilID) {
+    alert("Erro ao identificar o usuário.");
+    return;
+  }
+
+  const ref =
+    db.collection("usuarios")
+      .doc(String(meuPerfilID));
+
+  const doc =
+    await ref.get();
+
+  if (!doc.exists) {
+    alert("Perfil não encontrado.");
+    return;
+  }
+
+  const data = doc.data() || {};
+
+  const last =
+    Number(data.freeAdTimestamp || 0);
+
+  if (last && now - last < COOLDOWN) {
+    alert("⏳ Aguarde o tempo acabar para assistir outro anúncio.");
+    return;
+  }
+
+  const infinitoAtivo =
+    String(meuPerfilID) === "10000" &&
+    String(data.discordID) === "908775623135219734" &&
+    data.infinito === true;
+
+  let diamonds =
+    Number(data.diamonds || 0);
+
+  if (!infinitoAtivo) {
+    diamonds += 10;
+
+    await ref.set({
+      diamonds: diamonds,
+      freeAdTimestamp: now
+    }, { merge:true });
+  } else {
+    await ref.set({
+      freeAdTimestamp: now
+    }, { merge:true });
+  }
+
+  updateFreeTimerUI();
+
+  alert("✨ Você assistiu o anúncio e ganhou 10 diamantes!");
+
+}
+
+async function updateFreeTimerUI() {
+
+  const adIcon =
+    document.getElementById("adIcon");
+
+  const timer =
+    document.getElementById("freeTimer");
+
+  if (!meuPerfilID) return;
+
+  const doc =
+    await db.collection("usuarios")
+      .doc(String(meuPerfilID))
+      .get();
+
+  const data =
+    doc.exists ? doc.data() || {} : {};
+
+  const last =
+    Number(data.freeAdTimestamp || 0);
+
+  const now =
+    Date.now();
+
+  if (!last || now - last >= COOLDOWN) {
+
+    if (adIcon)
+      adIcon.style.display = "inline";
+
+    if (timer)
+      timer.textContent = "";
+
+  } else {
+
+    const remaining =
+      Math.ceil(
+        (COOLDOWN - (now - last)) / 1000
+      );
+
+    if (adIcon)
+      adIcon.style.display = "none";
+
+    if (timer)
+      timer.textContent =
+        secondsToHMS(remaining);
+
+  }
+
+}
+
+updateFreeTimerUI();
+setInterval(updateFreeTimerUI, 1000);
+
+/* ===========================
+   SISTEMA GLOBAL DE PETS
+   FIRESTORE
+=========================== */
+
+async function addPet(id, name, icon) {
+
+  if (!meuPerfilID) {
+    alert("Erro ao identificar o usuário.");
+    return;
+  }
+
+  const petId = String(id);
+
+  const ref =
+    db.collection("usuarios")
+      .doc(String(meuPerfilID));
+
+  const doc =
+    await ref.get();
+
+  if (!doc.exists) {
+    alert("Perfil não encontrado.");
+    return;
+  }
+
+  const data =
+    doc.data() || {};
+
+  const petsAdquiridos =
+    data.petsAdquiridos || [];
+
+  if (petsAdquiridos.includes(petId)) {
+    alert("🐾 Você já possui este pet!");
+    return;
+  }
+
+  await ref.set({
+    petsAdquiridos:
+      firebase.firestore.FieldValue.arrayUnion(petId)
+  }, { merge:true });
+
+  alert("🐾 Pet adicionado!");
+
+}
+
+async function obterPet(id, nome, img) {
+  await addPet(id, nome, img);
+}
+
+async function sortearPetPorRaridade(raridade) {
+
+  const candidatos =
+    todosAnimais.filter(
+      p => p.raridade === raridade
+    );
+
+  if (candidatos.length === 0) {
+    alert("Nenhum pet disponível para essa raridade.");
+    return;
+  }
+
+  const sorteado =
+    candidatos[
+      Math.floor(Math.random() * candidatos.length)
+    ];
+
+  await addPet(
+    sorteado.id,
+    sorteado.nome,
+    sorteado.img
+  );
+
+}
+
+/* ===========================
+   NORMALIZAÇÃO DE RARIDADE
+   =========================== */
+
+function normalizeStr(s) {
+  return s ? s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase() : "";
+}
+
+function mapRarityKey(r) {
+  const n = normalizeStr(r);
+
+  if (n.includes("super")) return "Super Legendário";
+  if (n.includes("legend")) return "Legendário";
+  if (n.includes("raro")) return "Raro";
+  if (n.includes("incomum")) return "Incomum";
+  return "Comum";
+}
+
+function rarityBadgeClass(r) {
+  const n = normalizeStr(r);
+
+  if (n.includes("super")) return "rarity-superlegend";
+  if (n.includes("legend")) return "rarity-legend";
+  if (n.includes("raro")) return "rarity-rare";
+  if (n.includes("incomum")) return "rarity-uncommon";
+  return "rarity-common";
+}
+
+/* ===========================
+   MODAL: FILTRAR POR RARIDADE
+   =========================== */
+
+function abrirModalOvoRaridade(eggName, raridadeFilter) {
+  const modal = document.getElementById("petInfoModal");
+  const list = document.getElementById("petInfoList");
+  const title = document.getElementById("petInfoTitle");
+
+  title.textContent = `Possíveis pets do ${eggName}`;
+  list.innerHTML = "";
+
+  const target = normalizeStr(mapRarityKey(raridadeFilter));
+
+  const data = window.todosAnimais || [];
+
+  const filtrados = data.filter(p =>
+    normalizeStr(mapRarityKey(p.raridade)).includes(target)
+  );
+
+  if (filtrados.length === 0) {
+    list.innerHTML = `<div style="padding:12px;color:#ccc">Nenhum pet encontrado.</div>`;
+    modal.classList.remove("hidden");
+    return;
+  }
+
+  filtrados.sort((a, b) => a.nome.localeCompare(b.nome));
+
+  filtrados.forEach(p => {
+    const item = document.createElement("div");
+    item.className = "pet-item";
+
+    item.innerHTML = `
+      <img class="pet-thumb" src="${p.img}" alt="">
+      <div class="pet-meta">
+        <div class="pet-name">${p.nome}</div>
+      </div>
+      <div class="pet-rarity ${rarityBadgeClass(p.raridade)}">${p.raridade}</div>
+    `;
+
+    list.appendChild(item);
+  });
+
+  modal.classList.remove("hidden");
+}
+
+/* ================================
+   MOSTRAR LISTA DE PETS POR OVO
+================================ */
+
+const mapaOvos = {
+    vermelho: "Super Legendário",
+    rosa: "Legendário",
+    roxo: "Raro",
+    azul: "Comum",
+    laranja: "Incomum"
+};
+
+// Função chamada ao clicar no botão "?"
+function abrirPopupPets(corDoOvo) {
+    const raridade = mapaOvos[corDoOvo]; 
+    const petsFiltrados = todosAnimais.filter(p => p.raridade === raridade);
+
+    const lista = document.getElementById("lista-pets-ovo");
+    const titulo = document.getElementById("titulo-popup-ovo");
+
+    titulo.textContent = `Possíveis pets do Ovo ${corDoOvo}`;
+
+    if (petsFiltrados.length === 0) {
+        lista.innerHTML = `<p style="opacity:0.8">Nenhum pet encontrado.</p>`;
+    } else {
+        lista.innerHTML = petsFiltrados
+            .map(p => `
+                <div class="pet-item">
+                    <img src="${p.img}" class="pet-img">
+                    <span>${p.nome}</span>
+                </div>
+            `)
+            .join("");
+    }
+
+    document.getElementById("popup-ovo").style.display = "flex";
+}
+
+function fecharPopupPets() {
+    document.getElementById("popup-ovo").style.display = "none";
+}
+
+/* ===========================
+      FECHAR MODAL
+   =========================== */
+
+function closePetInfo() {
+  const modal = document.getElementById("petInfoModal");
+  if (modal) modal.classList.add("hidden");
+}
+
+async function comprarMoedas(item, custo) {
+
+  if (!meuPerfilID) {
+    alert("Erro ao identificar o usuário.");
+    return;
+  }
+
+  const ref = db.collection("usuarios").doc(String(meuPerfilID));
+  const doc = await ref.get();
+
+  if (!doc.exists) {
+    alert("Perfil não encontrado.");
+    return;
+  }
+
+  const data = doc.data() || {};
+
+  const infinitoAtivo =
+    String(meuPerfilID) === "10000" &&
+    String(data.discordID) === "908775623135219734" &&
+    data.infinito === true;
+
+  const coins = Number(data.coins || 0);
+
+  if (!infinitoAtivo && coins < custo) {
+    alert("🪙 Moedas insuficientes.");
+    return;
+  }
+
+  if (!infinitoAtivo) {
+    await ref.set({
+      coins: coins - custo
+    }, { merge:true });
+  }
+
+  await sortearPetPorRaridade("Incomum");
+
+  alert("✅ Você comprou " + item);
+}
+
+/* ===========================
+      LISTA GLOBAL
+   =========================== */
+  const todosAnimais = [
+    { id:347, nome:"Águia", desc:"", img:"aguia.png", raridade:"Super Legendário"},
+    { id:346, nome:"Onça pintada", desc:"", img:"onçapintada.png", raridade:"Super Legendário"},
+    { id:345, nome:"Alce", desc:"", img:"alce.png", raridade:"Super Legendário"},
+    { id:344, nome:"Ovelha Roxa", desc:"", img:"ovelharoxo.png", raridade:"Legendário"},
+    { id:343, nome:"Ovelha Marron", desc:"", img:"ovelhamarron.png", raridade:"Legendário"},
+    { id:342, nome:"Ovelha Rosa", desc:"", img:"ovelharosa.png", raridade:"Raro"},
+    { id:341, nome:"Ovelha Rosa Choque", desc:"", img:"ovelharosachoque.png", raridade:"Raro"},
+    { id:340, nome:"Ovelha Azul Escuro", desc:"", img:"ovelhaazulescuro.png", raridade:"Comum"},
+    { id:339, nome:"Ovelha Azul Claro", desc:"", img:"ovelhaazulclaro.png", raridade:"Comum"},
+    { id:338, nome:"Ovelha Azul Celeste", desc:"", img:"ovelhaazulceleste.png", raridade:"Incomum"},
+    { id:337, nome:"Ovelha Verde Escuro", desc:"", img:"ovelhaverdeescuro.png", raridade:"Incomum"},
+    { id:336, nome:"Ovelha Verde Claro", desc:"", img:"ovelhaverdeclara.png", raridade:"Raro"},
+    { id:335, nome:"Ovelha Amarela", desc:"", img:"ovelhaamarela.png", raridade:"Raro"},
+    { id:334, nome:"Ovelha Laranja", desc:"", img:"ovelhalaranja.png", raridade:"Legendário"},
+    { id:333, nome:"Ovelha Vermelha", desc:"", img:"ovelhavermelha.png", raridade:"Legendário"},
+    { id:332, nome:"Ovelha Vinho", desc:"", img:"ovelhavinho.png", raridade:"Raro"},
+    { id:331, nome:"Ovelha Cinza Escuro", desc:"", img:"ovelhacinzaescuro.png", raridade:"Comum"},
+    { id:330, nome:"Ovelha Cinza", desc:"", img:"ovelhacinza.png", raridade:"Incomum"},
+    { id:329, nome:"Axolote", desc:"", img:"axolte.png", raridade:"Lendário"},
+    { id:328, nome:"Biscoito Natalino", desc:"", img:"biscoito natalino.png", raridade:"Raro"},
+    { id:327, nome:"Kit de Maquiagem", desc:"", img:"kitdemaquiagem.png", raridade:"Comum"},
+    { id:326, nome:"Guirlanda", desc:"", img:"guirlanda.png", raridade:"Super Lendário"},
+    { id:325, nome:"Guizo", desc:"", img:"guizo.png", raridade:"Legendário"},
+    { id:324, nome:"Peixe Palhaço", desc:"", img:"peixepalhaço.png", raridade:"Raro"},
+    { id:323, nome:"Banana", desc:"", img:"banana.png", raridade:"Raro"},
+    { id:322, nome:"Munmia", desc:"", img:"mumia.png", raridade:"Comum"},
+    { id:321, nome:"Elfo", desc:"", img:"elfo.png", raridade:"Incomum"},
+    { id:320, nome:"Pantera Negra", desc:"", img:"panteranegra.png", raridade:"Legendário"},
+    { id:319, nome:"Aranha de Cartola", desc:"", img:"aranhadecartola.png", raridade:"Raro"},
+    { id:318, nome:"Caveira de chapéu", desc:"", img:"caveiradechapeu.png", raridade:"Raro"},
+    { id:317, nome:"Sapo de luvabox", desc:"", img:"sapobox.png", raridade:"Comum"},
+    { id:316, nome:"Joaninha", desc:"", img:"joaninha.png", raridade:"Legendário"},
+    { id:315, nome:"Coala", desc:"", img:"coala.png", raridade:"Raro"},
+    { id:314, nome:"Sol", desc:"", img:"sol.png", raridade:"Comum"},
+    { id:313, nome:"Lua", desc:"", img:"lua.png", raridade:"Comum"},
+    { id:312, nome:"Siclop", desc:"", img:"siclop.png", raridade:"Legendário"},
+    { id:311, nome:"Mega Polvo", desc:"", img:"megapolvo.png", raridade:"Raro"},
+    { id:310, nome:"Mega Polvo Femenino", desc:"", img:"megapolvofemea.png", raridade:"Raro"},
+    { id:309, nome:"Suco de Laranja", desc:"", img:"sucodelaranja.png", raridade:"Comum"},
+    { id:308, nome:"Rinoceronte", desc:"", img:"rinoceronte.png", raridade:"Legendário"},
+    { id:307, nome:"Caranguejo com concha", desc:"", img:"lagosta.png", raridade:"Raro"},
+    { id:306, nome:"Mineiro", desc:"", img:"mineiro.png", raridade:"Comum"},
+    { id:305, nome:"Guinomio", desc:"", img:"guinomio.png", raridade:"Incomum"},
+    { id:304, nome:"Unicornio", desc:"", img:"unicornio.png", raridade:"Raro"},
+    { id:303, nome:"Tigre", desc:"", img:"onça.png", raridade:"Legendário"},
+    { id:302, nome:"Abacachi", desc:"", img:"abacachi.png", raridade:"Incomum"},
+    { id:301, nome:"Peixe das Profundesas", desc:"", img:"peixedasprofundesas.png", raridade:"Comum"},
+    { id:300, nome:"Cachorro Quente", desc:"", img:"salsicha.png", raridade:"Incomum"},
+    { id:299, nome:"Camaleão", desc:"", img:"camaleao.png", raridade:"Comum"},
+    { id:298, nome:"Urso Polar", desc:"", img:"ursopolar.png", raridade:"Legendário"},
+    { id:297, nome:"Gelatina de Morango", desc:"", img:"gelatinademorango.png", raridade:"Raro"},
+    { id:296, nome:"Largata", desc:"", img:"largata.png", raridade:"Incomum"},
+    { id:295, nome:"Camelo", desc:"", img:"camelo.png", raridade:"Raro"},
+    { id:294, nome:"Pinguindino", desc:"", img:"pinguindino.png", raridade:"Legendário"},
+    { id:293, nome:"Porquinho", desc:"", img:"porquinho.png", raridade:"Comum"},
+    { id:292, nome:"Jacaré", desc:"", img:"jacare.png", raridade:"Raro"},
+    { id:291, nome:"Cubo de Gelo", desc:"", img:"cubodegeloderretido.png", raridade:"Incomum"},
+    { id:290, nome:"Caveira Dourada", desc:"", img:"caveiradourada.png", raridade:"Legendário"},
+    { id:289, nome:"Coelho azul com boné", desc:"", img:"coelhoazulcombone.png", raridade:"Comum"},
+
+    { id:288, nome:"Bandeira de Israel", desc:"", img:"israel.png", raridade:"Legendário"},
+    { id:287, nome:"Bandeira do Brasil", desc:"", img:"brasil.png", raridade:"Legendário"},
+    { id:286, nome:"Bandeira dos Estados Unidos", desc:"", img:"estadosunidos.png", raridade:"Legendário"},
+    { id:285, nome:"Bandeira da França", desc:"", img:"frança.png", raridade:"Raro"},
+    { id:284, nome:"Bandeira do Canada", desc:"", img:"canada.png", raridade:"Legendário"},
+    { id:283, nome:"Bandeira da Inglaterra", desc:"", img:"inglaterra.png", raridade:"Legendário" },
+    { id:282, nome:"Bandeira da Alemanha", desc:"", img:"alemanha.png", raridade:"Incomum"},
+    { id:281, nome:"Bandeira da Bélgica", desc:"", img:"belgica.png", raridade:"Raro"},
+    { id:280, nome:"Bandeira da Italia", desc:"", img:"italia.png", raridade:"Raro"},
+    { id:279, nome:"Bandeira do México", desc:"", img:"mexico.png", raridade:"Legendário"},
+    { id:278, nome:"Bandeira da Colombia", desc:"", img:"colombia.png", raridade:"Raro" },
+    { id:277, nome:"Bandeira da Coreia do Norte", desc:"", img:"coreiadonorte.png", raridade:"Raro" },
+    { id:276, nome:"Bandeira da Coreia do Sul", desc:"", img:"coreiadosul.png", raridade:"Comum" },
+    { id:275, nome:"Bandeira da Suécia", desc:"", img:"suecia.png", raridade:"Raro" },
+    { id:274, nome:"Bandeira da Argentina", desc:"", img:"argentina.png", raridade:"Incomum" },
+    { id:273, nome:"Bandeira da Aftoca", desc:"", img:"africa.gif", raridade:"Incomum" },
+    { id:272, nome:"Bandeira do Japão", desc:"", img:"japao.png", raridade:"Legendário"},
+    { id:271, nome:"Bandeira da Jamaica", desc:"", img:"jamaica.png", raridade:"Incomum" },
+    { id:270, nome:"Bandeira da Turquia", desc:"", img:"turquia.png", raridade:"Comum" },
+    { id:269, nome:"Bandeira da Escócia", desc:"", img:"escocia.png", raridade:"Incomum" },
+    { id:268, nome:"Bandeira da Australia", desc:"", img:"australia.png", raridade:"Comum" },
+    { id:267, nome:"Bandeira da Costa do Marfin", desc:"", img:"costadomarfim.png", raridade:"Raro" },
+
+    { id:266, nome:"Únicornio de Balanço", desc:"", img:"unicorniosebalancando.png", raridade:"Icomum"},
+    { id:265, nome:"Clone das Sombras", desc:"", img:"clonedassombras.png", raridade:"Legendário"},
+    { id:264, nome:"Abóbora com Lanterna", desc:"", img:"aboboracomlanterna.png", raridade:"Raro"},
+    { id:263, nome:"Barrio de Bebidas", desc:"", img:"tanque.png", raridade:"Comum"},
+    { id:262, nome:"Cogumélo Maior", desc:"", img:"cogumelomaior.png", raridade:"Legendário"},
+    { id:261, nome:"Chama", desc:"", img:"chama.png", raridade:"Raro"},
+    { id:260, nome:"Geada", desc:"", img:"geada.png", raridade:"Comum"},
+    { id:259, nome:"Espirito", desc:"", img:"espirito.png", raridade:"Legendário"},
+    { id:258, nome:"Filhote de Caranguejo", desc:"", img:"filhotedecaranguejo.png", raridade:"Raro"},
+    { id:257, nome:"Pinóquio", desc:"", img:"pinoquio.png", raridade:"Comum"},
+    { id:256, nome:"Filhote", desc:"", img:"filhote.png", raridade:"Incomum"},
+    { id:255, nome:"Arroz Doce", desc:"", img:"arrozdoce.png", raridade:"Legendário"},
+    { id:254, nome:"Torradeira", desc:"", img:"torradeira.png", raridade:"Raroo"},
+    { id:253, nome:"Abacate", desc:"", img:"abacate.png", raridade:"Comum"},
+    { id:252, nome:"Origami", desc:"", img:"origami.png", raridade:"Legendário"},
+    { id:251, nome:"Espuma", desc:"", img:"espoma.png", raridade:"Raro"},
+    { id:250, nome:"Felicidade", desc:"", img:"felicidade.png", raridade:"Comum"},
+    { id:249, nome:"Casa", desc:"", img:"casa.png", raridade:"Legendário"},
+    { id:248, nome:"Pequeno Cavaleiro", desc:"", img:"pequenocavaleiro.png", raridade:"Raro"},
+    { id:247, nome:"Guaxinim", desc:"", img:"guaxinim.png", raridade:"Comum"},
+    { id:246, nome:"Rei do Coração", desc:"", img:"reicoracao.png", raridade:"Incomum"},
+    { id:245, nome:"Vasinhame com Hamster", desc:"", img:"vasilhacomhamster.png", raridade:"Legendário"},
+    { id:244, nome:"Alfinete Cavalheiro", desc:"", img:"alfinete.png", raridade:"Raro"},
+    { id:243, nome:"Tecelador de Sonhos", desc:"", img:"tecelador.png", raridade:"Comum"},
+    { id:242, nome:"Ampulheta", desc:"", img:"ampulheta.png", raridade:"Legendário"},
+    { id:241, nome:"Bolsa com Moedas", desc:"", img:"bolsacommoedas.png", raridade:"Raro"},
+    { id:240, nome:"Urso Cabeça de Maçã", desc:"", img:"ursocabecademaca.png", raridade:"Comum"},
+    { id:239, nome:"Espelho de Pé", desc:"", img:"espelhodepe.png", raridade:"Legendário"},
+    { id:238, nome:"Gatinho dentro da Caixa", desc:"", img:"gatinhodentrodacaixa.png", raridade:"Raro"},
+    { id:237, nome:"Saco de Lixo", desc:"", img:"sacoladelixo.png", raridade:"Comum"},
+    { id:236, nome:"Caldeirão de Fogo", desc:"", img:"caldeirao.png", raridade:"Comum"},
+    { id:235, nome:"Televisão", desc:"", img:"televisao.png", raridade:"Legendário"},
+    { id:234, nome:"Torrada", desc:"", img:"torrada.png", raridade:"Legendário"},
+    { id:233, nome:"Saco de Vento", desc:"", img:"sacodevento.png", raridade:"Raro"},
+    { id:232, nome:"Baiacu", desc:"", img:"baiacu.png", raridade:"Raro"},
+    { id:231, nome:"Tritão Ancião", desc:"", img:"tritaoanciao.png", raridade:"Comum"},
+    { id:230, nome:"Tentáculo Bllop", desc:"", img:"tentaculobloop.png", raridade:"Comum"},
+    { id:229, nome:"Rato", desc:"", img:"rato.png", raridade:"Legendário"},
+    { id:228, nome:"Macaco com Banana", desc:"", img:"macacocombanana.png", raridade:"Raro"},
+    { id:227, nome:"Corvo", desc:"", img:"corvo.png", raridade:"Comum"},
+    { id:226, nome:"Rosa no vazo", desc:"", img:"rosanovazo.png", raridade:"Incomum"},
+    { id:225, nome:"Lápis", desc:"", img:"lapis.png", raridade:"Legendário"},
+    { id:224, nome:"Guardião Robô", desc:"", img:"guardarobo.png", raridade:"Raro"},
+    { id:223, nome:"Pedra com Vestido", desc:"", img:"pedracomvestido.png", raridade:"Comum"},
+    { id:222, nome:"Hipnotizador", desc:"", img:"hipnotizador.png", raridade:"Comum"},
+    { id:221, nome:"Pintinho Gordo", desc:"", img:"pintinhogordo.png", raridade:"Raro"},
+    { id:220, nome:"Vulcão", desc:"", img:"vulcao.png", raridade:"Legendário"},
+    { id:219, nome:"Koala", desc:"", img:"koala.png", raridade:"Comum"},
+    { id:218, nome:"Mamadeira", desc:"", img:"mamadeira.png", raridade:"Legendário"},
+    { id:217, nome:"Conha Andarilha", desc:"", img:"conchaandarilha.png", raridade:"Raro"},
+    { id:216, nome:"Aroma de Feijão", desc:"", img:"aromadefeijao.png", raridade:"Comum"},
+    { id:215, nome:"Topeira", desc:"", img:"topeira.png", raridade:"Legendário"},
+    { id:214, nome:"Esquilo Fofinho", desc:"", img:"esquiloFofinho.png", raridade:"Raro"},
+    { id:213, nome:"Pata", desc:"", img:"pata.png", raridade:"Comum"},
+    { id:212, nome:"Abajur", desc:"", img:"abajur.png", raridade:"Legendário"},
+    { id:211, nome:"Coco", desc:"", img:"coco.png", raridade:"Raro"},
+    { id:210, nome:"Ervilha", desc:"", img:"ervilha.png", raridade:"Comum"},
+    { id:209, nome:"Livro de Receita", desc:"", img:"livrodeReceita.png", raridade:"Comum"},
+    { id:208, nome:"Bobo da Corte", desc:"", img:"bobodacorte.png", raridade:"Legendário"},
+    { id:207, nome:"Ornitorrinco", desc:"", img:"ornitorrinco.png", raridade:"Raro"},
+    { id:206, nome:"Video Gama", desc:"", img:"videogame.png", raridade:"Comum"},
+    { id:205, nome:"Aranha", desc:"", img:"aranha.png", raridade:"Legendário"},
+    { id:204, nome:"Frasco de perfume", desc:"", img:"potecomqueijo.png", raridade:"Raro"},
+    { id:203, nome:"Pintinho", desc:"", img:"pintinho.png", raridade:"Comum"},
+    { id:202, nome:"Cristal", desc:"", img:"cristal.png", raridade:"Comum"},
+    { id:201, nome:"Polvo Policial", desc:"", img:"polvoPolicial.png", raridade:"Legendário"},
+    { id:200, nome:"Baú", desc:"", img:"bau.png", raridade:"Raro"},
+    { id:199, nome:"Gamba", desc:"", img:"gamba.png", raridade:"Comum"},
+    { id:198, nome:"Cadela Caramelo", desc:"", img:"cadelacaramela.png", raridade:"Legendário"},
+    { id:197, nome:"Lampada", desc:"", img:"lampada.png", raridade:"Raro"},
+    { id:196, nome:"Pombo", desc:"", img:"feijao.png", raridade:"Comum"},
+    { id:195, nome:"Burrito", desc:"", img:"burrito.png", raridade:"Comum"},
+    { id:194, nome:"Esfinge", desc:"", img:"esfingeegipcia.png", raridade:"Legendário"},
+    { id:193, nome:"Ostra", desc:"", img:"ostra.png", raridade:"Raro"},
+    { id:192, nome:"Chicara de Xá", desc:"", img:"chiracadexa.png", raridade:"Comum"},
+    { id:191, nome:"Alienigena", desc:"", img:"alienigena.png", raridade:"Legendário"},
+    { id:190, nome:"Nós", desc:"", img:"nos.png", raridade:"Raro"},
+    { id:189, nome:"Fogueira", desc:"", img:"fogueira.png", raridade:"Raro"},
+    { id:188, nome:"Sorvete", desc:"", img:"sorvete.png", raridade:"Comum"},
+    { id:187, nome:"Astronalta", desc:"", img:"astronalta.png", raridade:"Legendário"},
+    { id:186, nome:"Zebra", desc:"", img:"zebra.png", raridade:"Raro"},
+    { id:185, nome:"Hamburguer", desc:"", img:"hamburguer.png", raridade:"Comum"},
+    { id:184, nome:"Garrafa", desc:"", img:"garrafacomroupa.png", raridade:"Legendário"},
+    { id:183, nome:"Dama Chocolate", desc:"", img:"damaChocolate.png", raridade:"Raro"},
+    { id:182, nome:"Caixa de Leite", desc:"", img:"caixadeleite.png", raridade:"Comum"},
+    { id:181, nome:"Coca Cola", desc:"", img:"cocaCola.png", raridade:"Comum"},
+    { id:180, nome:"Morte", desc:"", img:"morte.png", raridade:"Legendário"},
+    { id:179, nome:"Geleia Verde de Bone com Fone", desc:"", img:"geleiaverdedebonecomfone.png", raridade:"Raro"},
+    { id:178, nome:"Preguiça", desc:"", img:"preguiça.png", raridade:"Comum"},
+    { id:177, nome:"Livro", desc:"", img:"livro.png", raridade:"Legendário"},
+    { id:176, nome:"Balão", desc:"", img:"balão.png", raridade:"Raro"},
+    { id:175, nome:"Bailarina", desc:"", img:"bailarina.png", raridade:"Comum"},
+    { id:174, nome:"Nuvem", desc:"", img:"nuvem.png", raridade:"Legendário"},
+    { id:173, nome:"Toca Disco", desc:"", img:"tocaDiscos.png", raridade:"Raro"},
+    { id:172, nome:"Dino de Pelucia", desc:"", img:"Dinodepelucia.png", raridade:"Comum"},
+    { id:171, nome:"Foca", desc:"", img:"Foca.png", raridade:"Legendário"},
+    { id:170, nome:"Coelho da Cartola", desc:"", img:"coelhodacartola.png", raridade:"Raro"},
+    { id:169, nome:"Cogumelo", desc:"", img:"cogumelo.png", raridade:"Comum"},
+    { id:168, nome:"Pipoca", desc:"", img:"pipoca.png", raridade:"Comum"},
+    { id:167, nome:"Porco Apaixonado", desc:"", img:"porcoApaixonado.png", raridade:"Legendário"},
+    { id:166, nome:"Guachinim Vermelho", desc:"", img:"guachinimVermelho.png", raridade:"Legendário"},
+    { id:165, nome:"Planta Carnivora", desc:"", img:"plantaCarnivora.png", raridade:"Raro"},
+    { id:164, nome:"Serpente", desc:"", img:"cobra.png", raridade:"Raro"},
+    { id:163, nome:"Cavalo Marinho", desc:"", img:"cavaloMarinho.png", raridade:"Comum"},
+    { id:162, nome:"Golfinho", desc:"", img:"golfinho.png", raridade:"Comum"},
+    { id:161, nome:"Bruxa", desc:"", img:"bruxa.png", raridade:"Legendário"},
+    { id:160, nome:"Gato Estelar", desc:"", img:"gatoestelar.png", raridade:"Raro"},
+    { id:159, nome:"Pudim", desc:"", img:"pudim.png", raridade:"Raro"},
+    { id:158, nome:"Beringela", desc:"", img:"beringela.png", raridade:"Comum"},
+    { id:157, nome:"Guitarrista", desc:"", img:"guitarrista.png", raridade:"Legendário"},
+    { id:156, nome:"Tritão", desc:"", img:"tritão.png", raridade:"Raro"},
+    { id:155, nome:"Boneca", desc:"", img:"bonecadepano.png", raridade:"Comum"},
+    { id:154, nome:"Dragão Verde", desc:"", img:"dragãoVerde.png", raridade:"Legendário"},
+    { id:153, nome:"Frango", desc:"", img:"chester.png", raridade:"Raro"},
+    { id:152, nome:"Rena", desc:"", img:"rena.png", raridade:"Comum"},
+    { id:151, nome:"Cavalo", desc:"", img:"cavalinho.png", raridade:"Comum"},
+    { id:150, nome:"Guarda Nacional", desc:"", img:"guardanacional.png", raridade:"Legendário"},
+    { id:149, nome:"Caracol", desc:"", img:"caracol.png", raridade:"Raro"},
+    { id:148, nome:"Gatuno", desc:"", img:"gatuno.png", raridade:"Comum"},
+    { id:147, nome:"Anjo", desc:"", img:"anjo.png", raridade:"Legendário"},
+    { id:146, nome:"Bolacha", desc:"", img:"bolacha.png", raridade:"Comum"},
+    { id:145, nome:"Maçã partida ao Meio", desc:"", img:"macapartidaaomeio.png", raridade:"Comum"},
+    { id:144, nome:"Maçã Nariguda", desc:"", img:"macanariguda.png", raridade:"Raro"},
+    { id:143, nome:"Trem", desc:"", img:"trem.png", raridade:"Legendário"},
+    { id:142, nome:"Gelatina Amarela", desc:"", img:"gelatinaamarela.png", raridade:"Raro"},
+    { id:141, nome:"Brocolis", desc:"", img:"brocolis.png", raridade:"Comum"},
+    { id:140, nome:"Rocha", desc:"", img:"rocha.png", raridade:"Raro"},
+    { id:139, nome:"Fantasma Alegre", desc:"", img:"fantasmaalegre.png", raridade:"Comum"},
+    { id:138, nome:"Malevola", desc:"", img:"malevola.png", raridade:"Legendário"},
+    { id:137, nome:"Sr Abóbora", desc:"", img:"srAbóbora.png", raridade:"Comum"},
+    { id:136, nome:"Bolinho", desc:"", img:"bolinho.png", raridade:"Raro"},
+    { id:135, nome:"Vela", desc:"", img:"vela.png", raridade:"Raro"},
+    { id:134, nome:"Espadachim", desc:"", img:"espadachim.png", raridade:"Raro"},
+    { id:133, nome:"Mimico", desc:"", img:"mimico.png", raridade:"Legendário"},
+    { id:132, nome:"Cabra", desc:"", img:"cabra.png", raridade:"Comum"},
+    { id:131, nome:"Bomba Potente", desc:"", img:"bombapotente.png", raridade:"Legendário"},
+    { id:130, nome:"Robô da Atualidade ", desc:"", img:"robodaatualidade.png", raridade:"Raro"},
+    { id:129, nome:"Geleia no Balde", desc:"", img:"geleianoBalde.png", raridade:"Comum"},
+    { id:128, nome:"Tamandoa", desc:"", img:"tamandoa.png", raridade:"Comum"},
+    { id:127, nome:"Pinguim Pescador", desc:"", img:"pinguimpescador.png", raridade:"Raro"},
+    { id:126, nome:"Vampiro", desc:"", img:"vampiro.png", raridade:"Legendário"},
+    { id:125, nome:"Esquilo", desc:"", img:"esquilo.png", raridade:"Legendário"},
+    { id:124, nome:"Ponney", desc:"", img:"ponney.png", raridade:"Legendário"},
+    { id:123, nome:"Macaco Tecnológico", desc:"", img:"macacotecnologico.png", raridade:"Legendário"},
+    { id:122, nome:"Morcego", desc:"", img:"morcego.png", raridade:"Legendário"},
+    { id:121, nome:"Tubarão", desc:"", img:"tubarao.png", raridade:"Legendário"},
+    { id:120, nome:"Raposa Rosa", desc:"", img:"raposarosa.png", raridade:"Legendário"},
+    { id:119, nome:"Pinguim na Prancha", desc:"", img:"pinguimnaprancha.png", raridade:"Legendário"},
+    { id:118, nome:"Ninja", desc:"", img:"ninja.png", raridade:"Legendário"},
+    { id:117, nome:"Coelho Dorminhoco", desc:"", img:"coelhodorminhoco.png", raridade:"Legendário"},
+    { id:116, nome:"Gato Chines", desc:"", img:"gatoChines.png", raridade:"Comum"},
+    { id:115, nome:"Magico", desc:"", img:"magico.png", raridade:"Raro"},
+    { id:114, nome:"Raposa Vermelha", desc:"", img:"raposavermelha.png", raridade:"Legendário"},
+    { id:113, nome:"Medusa", desc:"", img:"medusa.png", raridade:"Legendário"},
+    { id:112, nome:"Repolho", desc:"", img:"repolho.png", raridade:"Raro"},
+    { id:111, nome:"Pizza", desc:"", img:"pizza.png", raridade:"Comum"},
+    { id:110, nome:"Alien Verde", desc:"", img:"alienverde.png", raridade:"Legendário"},
+    { id:109, nome:"Disco Voador Moderno", desc:"", img:"discovoadormoderno.png", raridade:"Legendário"},
+    { id:108, nome:"Planeta Terra", desc:"", img:"PlanetaTerra.png", raridade:"Legendário"},
+    { id:107, nome:"Líder de Torcida", desc:"", img:"liderdetorcida.png", raridade:"Legendário"},
+    { id:106, nome:"Borboleta", desc:"", img:"borboleta.png", raridade:"Comum"},
+    { id:105, nome:"Baleia", desc:"", img:"baleia.png", raridade:"Raro"},
+    { id:104, nome:"Gênio", desc:"", img:"gênio.png", raridade:"Legendário"},
+    { id:103, nome:"Compricoptero", desc:"", img:"compricoptero.png", raridade:"Comum"},
+    { id:102, nome:"Cientista", desc:"", img:"cientista.png", raridade:"Legendário"},
+    { id:101, nome:"Cereja", desc:"", img:"cereja.png", raridade:"Raro"},
+    { id:100, nome:"Jarra de café", desc:"", img:"jarradecafe.png", raridade:"Comum"},
+    { id:99, nome:"Lua bebê", desc:"", img:"luaBebe.png", raridade:"Legendário"},
+    { id:98, nome:"Indio", desc:"", img:"indio.png", raridade:"Raro"},
+    { id:97, nome:"Gelea Grudenta", desc:"", img:"gosmaGrudente.png", raridade:"Comum"},
+    { id:96, nome:"Estrela", desc:"", img:"estrela.png", raridade:"Comum"},
+    { id:95, nome:"Troll", desc:"", img:"troll.png", raridade:"Legendário"},
+    { id:94, nome:"Yeti", desc:"", img:"yeti.png", raridade:"Legendário"},
+    { id:93, nome:"Papagaio", desc:"", img:"Papagaio.png", raridade:"Comum"},
+    { id:92, nome:"Cakto", desc:"", img:"cakto.png", raridade:"Legendário"},
+    { id:91, nome:"Mão Roxa", desc:"", img:"maoroxa.png", raridade:"Legendário"},
+    { id:90, nome:"Pinguim Azul", desc:"", img:"pinguimAzul.png", raridade:"Comum"},
+    { id:89, nome:"Cachorro Marron", desc:"", img:"cachorromarron.png", raridade:"Legendário"},
+    { id:88, nome:"Cadela Branca", desc:"", img:"cadelabranca.png", raridade:"Legendário"},
+    { id:87, nome:"Cupido Azul", desc:"", img:"cupidoazul.png", raridade:"Legendário"},
+    { id:86, nome:"Cupido Rosa", desc:"", img:"cupidorosa.png", raridade:"Legendário"},
+    { id:85, nome:"Flor Vermelha", desc:"", img:"florvermelha.png", raridade:"Legendário"},
+    { id:84, nome:"Flor Branca", desc:"", img:"florbranca.png", raridade:"Legendário"},
+    { id:83, nome:"Pirata", desc:"", img:"pirata.png", raridade:"Legendário"},
+    { id:82, nome:"Dragão Laranja de asa verde", desc:"", img:"dragãolaranjadeasaverde.png", raridade:"Raro"},
+    { id:81, nome:"Elefante Azul", desc:"", img:"elefante.png", raridade:"Comum"},
+    { id:80, nome:"Meia", desc:"", img:"meia.png", raridade:"Legendário"},
+    { id:79, nome:"Sino", desc:"", img:"sino.png", raridade:"Legendário"},
+    { id:78, nome:"Globo de Vidro", desc:"", img:"globodevidro.png", raridade:"Raro"},
+    { id:77, nome:"Batata Frita", desc:"", img:"batatinhaFrita.png", raridade:"Raro"},
+    { id:76, nome:"Tartaruga", desc:"", img:"tartaruga.png", raridade:"Comum"},
+    { id:75, nome:"Fantasma Azul", desc:"", img:"fantasma azul.png", raridade:"Legendário"},
+    { id:74, nome:"Galinha", desc:"", img:"galinha.png", raridade:"Legendário"},
+    { id:73, nome:"Porco", desc:"", img:"porco.png", raridade:"Raro"},
+    { id:72, nome:"Dragão Laranja", desc:"", img:"dragãolaranja.png", raridade:"Legendário"},
+    { id:71, nome:"Alien de três olhos", desc:"", img:"aliendetresolhos.png", raridade:"Legendário"},
+    { id:70, nome:"Cebola", desc:"", img:"cebola.png", raridade:"Legendário"},
+    { id:69, nome:"Água viva", desc:"", img:"aguaviva.png", raridade:"Raro"},
+    { id:68, nome:"Vaca", desc:"", img:"vaca.png", raridade:"Legendário"},
+    { id:67, nome:"Raposa", desc:"", img:"raposa.png", raridade:"Legendário"},
+    { id:66, nome:"Caixinha Supresa", desc:"", img:"caixinhasupresa.png", raridade:"Raro"},
+    { id:65, nome:"Fantasma", desc:"", img:"fantasma.png", raridade:"Raro"},
+    { id:64, nome:"Tambo", desc:"", img:"tambo.png", raridade:"Raro"},
+    { id:63, nome:"Abóbora", desc:"", img:"abóbora.png", raridade:"Legendário"},
+    { id:62, nome:"Árvore de Natal", desc:"", img:"arvoredenatal.png", raridade:"Legendário"},
+    { id:61, nome:"Croaçã", desc:"", img:"croaça.png", raridade:"Legendário"},
+    { id:60, nome:"Brioche", desc:"", img:"brioche.png", raridade:"Legendário"},
+    { id:59, nome:"Pedra Roxa", desc:"", img:"pedraroxa.png", raridade:"Legendário"},
+    { id:58, nome:"Kapkak", desc:"", img:"kapkak.png", raridade:"Legendário"},
+    { id:57, nome:"Bombinha", desc:"", img:"bomba.png", raridade:"Raro"},
+    { id:56, nome:"Chi Marron", desc:"", img:"chimarron.png", raridade:"Raro"},
+    { id:55, nome:"Caveira", desc:"", img:"caveira.png", raridade:"Comum"},
+    { id:54, nome:"Alien da Prancha", desc:"", img:"aliendaprancha.png", raridade:"Legendário"},
+    { id:53, nome:"Passarinho Rosa", desc:"", img:"passsarinhorosa.png", raridade:"Raro"},
+    { id:52, nome:"Passarinho Azul", desc:"", img:"passarinhoazul.png", raridade:"Raro"},
+    { id:51, nome:"Alien de choque Macho", desc:"", img:"aliendechoquemacho.png", raridade:"Legendário"},
+    { id:50, nome:"Alien de choque Femea", desc:"", img:"aliendechoquefema.png", raridade:"Legendário"}, 
+    { id:49, nome:"Polvo Femea", desc:"", img:"polvofemea.png", raridade:"Legendário"},
+    { id:48, nome:"Polvo Macho", desc:"", img:"polvomacho.png", raridade:"Legendário"},
+    { id:47, nome:"Sapo", desc:"", img:"sapo.png", raridade:"Legendário"},
+    { id:46, nome:"Hipopótamo", desc:"", img:"hipopótamo.png", raridade:"Legendário"},
+    { id:45, nome:"Urso Pardo", desc:"", img:"ursopardo.png", raridade:"Legendário"},
+    { id:44, nome:"Girafa", desc:"", img:"girafa.png", raridade:"Legendário"},
+    { id:43, nome:"Cachorro Amarelo", desc:"", img:"cachorroamarelo.png", raridade:"Legendário"},
+    { id:42, nome:"Leão", desc:"", img:"leão.png", raridade:"Legendário"},
+    { id:41, nome:"Gato Rosa", desc:"", img:"gatorosa.png", raridade:"Legendário"},
+    { id:40, nome:"Pato", desc:"", img:"pato.png", raridade:"Legendário"},
+    { id:39, nome:"Salulu", desc:"", img:"salulu.png", raridade:"Raro" },
+    { id:38, nome:"Boneco de neve", desc:"", img:"bonecodeneve.png", raridade:"Raro" },
+    { id:37, nome:"Biscoito de Genbibre", desc:"", img:"discoitodegengibre.png", raridade:"Legendário" },
+    { id:36, nome:"Pinguim", desc:"", img:"pinguim.png", raridade:"Comum" },
+    { id:35, nome:"Dino", desc:"", img:"dino.png", raridade:"Legendário" },
+    { id:34, nome:"Panda", desc:"", img:"panda.png", raridade:"Legendário" },
+    { id:33, nome:"Coruja", desc:"", img:"coruja.png", raridade:"Legendário" },
+    { id:32, nome:"Hamister", desc:"", img:"hamister.png", raridade:"Raro" },
+    { id:31, nome:"Gota colorida", desc:"", img:"gotacolorida.png", raridade:"Comum" },
+    { id:30, nome:"Gato Laranja", desc:"", img:"gatoLaranja.png", raridade:"Comum" },
+    { id:29, nome:"Lhama", desc:"", img:"lhama.png", raridade:"Raro" },
+    { id:28, nome:"Cachorro Caramelo", desc:"", img:"cachorroCaramelo.png", raridade:"Comum" },
+    { id:27, nome:"Ovelha", desc:"", img:"ovelha.png", raridade:"Legendário" },
+    { id:26, nome:"Baiano", desc:"", img:"baiano.png", raridade:"Legendário" },
+    { id:25, nome:"Gordo", desc:"", img:"gordo.png", raridade:"Raro" },
+    { id:24, nome:"gato de fone", desc:"", img:"gatodefone.png", raridade:"Comum" },
+    { id:23, nome:"stickman", desc:"", img:"stickman.png", raridade:"Comum" },
+
+    { id:16, nome:"Cachorro Ciano", desc:"", img:"cachorrociano.png", raridade:"Super Legendário" },
+    { id:17, nome:"Carangueijo", desc:"", img:"carangueijo.png", raridade:"Raro" },
+    { id:18, nome:"Robo", desc:"", img:"robo.png", raridade:"Raro" },
+    { id:19, nome:"Lula", desc:"", img:"lula.png", raridade:"Raro" },
+    { id:20, nome:"Disco Voador", desc:"", img:"discovoador.png", raridade:"Comum" },
+    { id:21, nome:"Stickgirl", desc:"", img:"stickgirl.png", raridade:"Comum" },
+    { id:22, nome:"Gosma Verde", desc:"", img:"gosmaverde.png", raridade:"Comum" },
+   
+    { id:2, nome:"Cachorro com Osso", desc:"", img:"cachorrocomosso.png", raridade:"Incomum" },
+    { id:3, nome:"Among Vermelho", desc:"", img:"among.png", raridade:"Super Legendário" },
+    { id:4, nome:"Among Verde", desc:"", img:"among verde.png", raridade:"Legendário" },
+    { id:5, nome:"Among Amarelo", desc:"", img:"among amarelo.png", raridade:"Legendário" },
+    { id:6, nome:"Among Rosa", desc:"", img:"among rosa.png", raridade:"Legendário" },
+    { id:7, nome:"Among Azul", desc:"", img:"among azul.png", raridade:"Raro" },
+    { id:8, nome:"Among Laranja", desc:"", img:"among laranja.png", raridade:"Raro" },
+    { id:9, nome:"Among Cinza", desc:"", img:"among cinza.png", raridade:"Incomum" },
+    { id:10, nome:"Among Azul Claro", desc:"", img:"among azul claro.png", raridade:"Raro" },
+    { id:11, nome:"Among Marrom", desc:"", img:"among marron.png", raridade:"Comum" },
+    { id:12, nome:"Among Branco", desc:"", img:"among branco.png", raridade:"Incomum" },
+    { id:13, nome:"Among Roxo", desc:"", img:"among roxo.png", raridade:"Raro" },
+    { id:14, nome:"Among Cinza Escuro", desc:"", img:"among cinza escuro.png", raridade:"Incomum" },
+    { id:15, nome:"Among Magenta", desc:"", img:"among magenta.png", raridade:"Comum" }
+];
+
+function abrirModalOvoRaridade(nomeOvo, raridade) {
+    const lista = document.getElementById("lista-pets-ovo");
+    const titulo = document.getElementById("titulo-popup-ovo");
+
+    titulo.textContent = `Possíveis pets do ${nomeOvo}`;
+
+    const pets = todosAnimais.filter(p => p.raridade === raridade);
+
+    if (pets.length === 0) {
+        lista.innerHTML = `<p style="color:white;">Nenhum pet encontrado.</p>`;
+    } else {
+        lista.innerHTML = pets.map(p => `
+            <div class="pet-item">
+                <img src="${p.img}">
+                <span>${p.nome}</span>
+            </div>
+        `).join("");
+    }
+
+    document.getElementById("popup-ovo").style.display = "flex";
+}
+
+function fecharPopupPets() {
+    document.getElementById("popup-ovo").style.display = "none";
+}
+
+let pixDiamantes = 0;
+
+function abrirPix(diamantes, valor) {
+  pixDiamantes = diamantes;
+  document.getElementById("pixValor").textContent = valor;
+  document.getElementById("pixModal").classList.remove("hidden");
+}
+
+function fecharPix() {
+  pixDiamantes = 0;
+  document.getElementById("pixModal").classList.add("hidden");
+}
+
+async function confirmarPagamentoPix() {
+
+  if (!pixDiamantes) return;
+
+  if (!meuPerfilID) {
+    alert("Erro ao identificar o usuário.");
+    return;
+  }
+
+  const ref = db.collection("usuarios").doc(String(meuPerfilID));
+
+  const doc = await ref.get();
+
+  if (!doc.exists) {
+    alert("Perfil não encontrado.");
+    return;
+  }
+
+  const data = doc.data() || {};
+
+  let diamonds = Number(data.diamonds || 0);
+
+  diamonds += Number(pixDiamantes);
+
+  await ref.set({
+    diamonds: diamonds
+  }, { merge: true });
+
+  alert("✅ Pagamento confirmado!");
+  fecharPix();
+
+}
+
+
+(async () => {
+  await carregarPerfilCompras();
+  iniciarCarteira();
+})();
+
+</script>
+
+</body>
+</html>
