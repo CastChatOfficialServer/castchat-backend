@@ -639,15 +639,16 @@ app.get('/auth/discord/callback', async (req, res) => {
       generateSuccessPage(token)
     );
 
-  } catch (err) {
+ catch (err) {
 
-    console.error('ERRO DISCORD CALLBACK:', err);
+  console.error('ERRO DISCORD CALLBACK:', err);
 
-    res.sendFile(
-      path.join(__dirname, 'auth_error.html')
-    );
+  res.send(`
+    <h1>Erro Discord</h1>
+    <pre>${err.stack || err}</pre>
+  `);
 
-  }
+}
 
 });
 
@@ -879,11 +880,6 @@ app.get('/me', (req, res) => {
   });
 
 });
-
-// ===============================
-// PUBLIC
-// ===============================
-
 
 // ===============================
 // SUCCESS PAGE
