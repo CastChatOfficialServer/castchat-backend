@@ -1,1 +1,1216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CastChat - Home</title>
+<link rel="stylesheet" href="style.css">
 
+<style>
+:root { --yellow:#ffd700; }
+
+body{
+  background:#000;
+  color:#fff;
+  margin:0;
+  font-family:sans-serif;
+
+  display:flex;
+  justify-content:center; /* 👈 ISSO RESOLVE */
+}
+
+.app{
+  width:100%;
+  max-width:420px;
+  min-height:100vh;
+  background:#000;
+}
+
+/* TOPO */
+.topbar{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  width:100%;
+  max-width:420px;
+  padding:10px;
+  background:#111;
+  border-bottom:1px solid #222;
+  gap:16px;
+}
+
+.eventos-btn{
+  font-size:14px;
+  color:#ffd700;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.topbar-right{
+  display:flex;
+  gap:16px;
+}
+
+.topbar button{
+  background:none;
+  border:none;
+  cursor:pointer;
+}
+
+.topbar img{
+  width:24px;
+  height:24px;
+}
+
+/* CONTEÚDO */
+.content{
+  flex:1;
+  width:100%;
+  max-width:420px;
+  padding:16px;
+  padding-top:8px;
+}
+
+/* EVENTO */
+.evento-img{
+  width:100%;
+  border-radius:12px;
+  margin-bottom:14px;
+  cursor:pointer;
+  display:block;
+}
+
+/* DJ */
+.dj-section{
+  background:#111;
+  border:1px solid #222;
+  border-radius:12px;
+  margin-bottom:14px;
+  padding:10px;
+  position:relative;
+  text-align:center;
+}
+
+.dj-banner{
+  width:100%;
+  border-radius:10px;
+  display:block;
+  margin-top:25px;
+}
+
+.dj-overlay{
+  position:absolute;
+  top:-4px;
+  left:12px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  z-index:10;
+}
+
+.dj-overlay img{
+  display:inline-block;
+  height:22px;
+  width:auto;
+  object-fit:contain;
+}
+
+.dj-overlay span{
+  font-weight:bold;
+  font-size:14px;
+  color:#ffd700;
+}
+
+.btn-criar{
+  margin-top:10px;
+  background:#ffd700;
+  border:none;
+  color:#000;
+  font-weight:bold;
+  border-radius:10px;
+  padding:8px 16px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.btn-criar:hover{
+  background:#ffea70;
+}
+
+/* TEXTOS */
+.section-title {
+  font-size:15px;
+  color:var(--yellow);
+  margin-top:10px;
+  margin-bottom:4px;
+}
+
+.section-text {
+  font-size:13px;
+  color:#bbb;
+  margin-bottom:14px;
+}
+
+/* RODAPÉ */
+.bottombar{
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  padding:10px 6px;
+  width:100%;
+  max-width:420px;
+  background:#111;
+  border-top:1px solid #222;
+}
+
+.bottombar img{
+  width:28px;
+  height:28px;
+}
+
+.bottombar a{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* MODAL */
+.modal{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.85);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+}
+
+.hidden{
+  display:none;
+}
+
+.modal-card{
+  background:#111;
+  width:90%;
+  max-width:380px;
+
+  max-height:85vh;
+  border-radius:16px;
+  padding:15px;
+
+  box-shadow:0 0 30px rgba(0,0,0,0.8);
+
+  display:flex;
+  flex-direction:column;
+
+  overflow:hidden; /* 🔥 agora sim correto */
+  min-height:0; /* 🔥 ESSENCIAL */
+}
+
+.modal-card h2{
+  margin:0 0 12px;
+  color:#ffd700;
+  text-align:center;
+  font-size:16px;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px;
+  background:#111;
+  border-bottom:1px solid #222;
+  font-weight:bold;
+}
+
+.modal-header button{
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:18px;
+  cursor:pointer;
+}
+
+.modal-body{
+  padding:14px;
+
+  overflow-y:auto;
+  max-height:100%;
+
+  min-height:0; /* 🔥 ESSENCIAL */
+}
+
+/* GRID */
+.modal-section{
+  margin-bottom:18px;
+}
+
+.modal-section h3{
+  margin:6px 0 10px;
+  font-size:14px;
+  color:#ffd700;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
+  gap:10px;
+  width:100%;
+}
+
+.card{
+  background:#1a1a1a;
+  border-radius:12px;
+
+  padding:14px 8px;
+
+  text-align:center;
+  font-weight:bold;
+
+  cursor:pointer;
+  transition:0.2s;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  min-height:60px;
+  word-break:break-word;
+}
+
+.card:hover{
+  background:#ffd700;
+  color:#000;
+}
+
+/* SEARCH */
+.search-user{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:#1a1a1a;
+  padding:10px;
+  border-radius:10px;
+}
+
+.search-user-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.search-user img.avatar{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+}
+
+.search-user-info{
+  display:flex;
+  flex-direction:column;
+}
+
+.search-user-name{
+  font-weight:bold;
+  font-size:14px;
+}
+
+.search-user-id{
+  font-size:12px;
+  color:#aaa;
+}
+
+.badges img{
+  height:16px;
+  margin-left:2px;
+}
+
+.btn-follow{
+  background:#ffd700;
+  border:none;
+  padding:6px 12px;
+  border-radius:8px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.btn-follow.following{
+  background:#555;
+  color:#ccc;
+}
+
+/* EVENTOS ADMIN */
+.evento-admin{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#1a1a1a;
+  padding:12px;
+  border-radius:12px;
+  margin-bottom:10px;
+}
+
+/* SWITCH (VERSÃO CORRETA) */
+.switch{
+  position:relative;
+  width:46px;
+  height:24px;
+}
+
+.switch input{
+  display:none;
+}
+
+.slider{
+  position:absolute;
+  inset:0;
+  background:#555;
+  border-radius:24px;
+  transition:.3s;
+}
+
+.slider::before{
+  content:"";
+  position:absolute;
+  width:18px;
+  height:18px;
+  left:3px;
+  top:3px;
+  background:#fff;
+  border-radius:50%;
+  transition:.3s;
+}
+
+.switch input:checked + .slider{
+  background:#ffd700;
+}
+
+.switch input:checked + .slider::before{
+  transform:translateX(22px);
+}
+
+/* OFFLINE */
+.offline{
+  position:fixed;
+  inset:0;
+  background:#000;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+  color:#aaa;
+}
+
+.offline img{
+  width:140px;
+  margin-bottom:12px;
+}
+
+/* NOTIFICAÇÃO */
+.btn-notificacao{
+  position:relative;
+}
+
+.icone-notice{
+  width:28px;
+}
+
+.icone-remind{
+  position:absolute;
+  top:0;
+  right:0;
+  width:12px;
+  display:none;
+}
+
+/* SEGUINDO */
+.seguindo{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  width:100%;
+  justify-content:flex-start;
+}
+
+.seguindo img{
+  width:16px;
+  height:16px;
+}
+
+.seguindo p{
+  margin:0;
+  font-size:14px;
+}
+
+/* EVENTOS SCROLL */
+#eventosContainer{
+  max-height:300px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding-right:6px;
+}
+
+#eventosContainer::-webkit-scrollbar{
+  width:6px;
+}
+
+#eventosContainer::-webkit-scrollbar-thumb{
+  background:#ffd700;
+  border-radius:10px;
+}
+
+/* ADMIN SCROLL */
+#eventosAdmin{
+  max-height:300px;
+  overflow-y:auto;
+}
+</style>
+</head>
+<body>
+
+<div id="offline" class="offline">
+  <img src="ic_empty_default.png" alt="Sem conexão">
+  <p>Sem conexão com a internet</p>
+</div>
+
+<!-- ONLINE -->
+<div id="online" style="display:none;">
+  <!-- TODO O CONTEÚDO DA PÁGINA FICA AQUI -->
+</div>
+
+<div class="app tela main-screen">
+
+  <!-- TOPO -->
+  <div class="topbar">
+    <button id="btnEventos" onclick="abrirEventos()" style="display:none;">
+      <span style="color:#ffd700;font-weight:bold;font-size:13px;">
+        Eventos do CastChat2.0
+      </span>
+    </button>
+
+    <div class="topbar-right">
+    <button onclick="abrirPesquisa()">
+      <img src="ic_home_search.png" alt="pesquisa">
+    </button>
+    <button class="btn-notificacao" onclick="window.location.href='notificacao.html'">
+
+  <img class="icone-notice" src="ic_notice.png" alt="notificações">
+
+  <img id="iconeRemind" class="icone-remind" src="ic_remind.png">
+
+</button>
+    <button onclick="abrirCriarSala()">
+      <img src="ic_create_room.png" alt="criar sala">
+    </button>
+  </div>
+  </div>
+
+  <!-- CONTEÚDO -->
+<div class="content">
+    <img id="eventoBanner" class="evento-img">
+    <div id="eventosContainer"></div>
+  </div>
+
+<div class="seguindo">
+  <img src="ic_following.png">
+  <p>Refrigerar com os Amigos</p>
+</div>
+
+    <!-- DJ AC CLUB -->
+    <div class="dj-section" id="djClubSection">
+      <div class="dj-overlay">
+        <img src="ic_ac_club.png">
+        <span>DJ AC CLUB</span>
+      </div>
+
+      <img src="djacclub.png" alt="DJ AC CLUB" class="dj-banner">
+
+      <button id="btnCriarDJ" class="btn-criar" style="display:none;">
+        CRIAR
+      </button>
+    </div>
+
+    <!-- Seções -->
+    <div class="section-title">Partida Rápida</div>
+    <div class="section-text">Escolha um jogo e entre em sala com amigos.</div>
+
+    <div class="section-title">Em Tendência</div>
+    <div class="section-text">Salas populares e novidades.</div>
+
+  <!-- RODAPÉ -->
+  <div class="bottombar">
+    <a href="home.html"><img src="icon_home_selected.png" alt="home"></a>
+    <a href="animal.html"><img src="icon_pet_game_selected.png" alt="pets"></a>
+    <a href="missao.html"><img src="icon_friends_selected.png" alt="missões"></a>
+    <a href="mensagem.html"><img src="icon_dm_selected.png" alt="chat"></a>
+    <a href="perfil.html"><img src="icon_profile_selected.png" alt="perfil"></a>
+  </div>
+  </div>
+
+<!-- MODAL CRIAR CANAL -->
+
+<div id="modalEventos" class="modal hidden">
+
+  <div class="modal-card">
+
+    <h2>Eventos do CastChat2.0</h2>
+
+    <div id="eventosAdmin"></div>
+
+    <button onclick="fecharEventos()" style="
+      width:100%;
+      margin-top:10px;
+      background:#ffd700;
+      border:none;
+      padding:10px;
+      border-radius:10px;
+      font-weight:bold;
+    ">
+      Fechar
+    </button>
+
+  </div>
+
+</div>
+
+<div id="modalCriarCanal" class="modal hidden">
+  <div class="modal-header">
+    <span>Configure seu canal</span>
+    <button onclick="fecharCriarSala()">✕</button>
+  </div>
+
+  <div class="modal-body">
+
+ <!-- Canais de Jogos -->
+  <div class="modal-section">
+  <h3>Canais Sociais</h3>
+  <div class="grid">
+   <div class="card" data-link="social.html">Sala GTA</div>
+   <div class="card" data-link="godofwar.html">Sala God Of War</div>
+   <div class="card" data-link="kombat.html">Sala Mortal Kombat Xll</div>
+   <div class="card" data-link="need.html">Sala do Need For Speed Most Wanted</div>
+   <div class="card" data-link="needrivals.html">Sala do Need For Speed Rivals</div>
+   <div class="card" data-link="amongus20.html">Sala Among Us 2.0</div>
+  </div>
+</div>
+
+  <!-- Canais de Jogos -->
+  <div class="modal-section">
+  <h3>Canais de jogos</h3>
+  <div class="grid">
+    <div class="card" data-link="just.html">Just Chatting</div>
+    <div class="card" data-link="amongus.html">Among Us</div>
+    <div class="card" data-link="roblox.html">Roblox</div>
+    <div class="card" data-link="fortnite.html">Fortnite</div>
+    <div class="card" data-link="freefire.html">Free Fire</div>
+    <div class="card" data-link="minecraft.html">Minecraft</div>
+    <div class="card" data-link="rocket.html">Rocket League</div>
+    <div class="card" data-link="valorant.html">Valorant</div>
+    <div class="card" data-link="callduty.html">Call Of Duty</div>
+    <div class="card" data-link="pubg.html">PUBG Mobile</div>
+    <div class="card" data-link="brawl.html">Brawl Stars</div>
+    <div class="card" data-link="mobile.html">Mobile Legends</div>
+    <div class="card" data-link="clash.html">Clash Of Clans</div>
+    <div class="card" data-link="ball.html">8 Ball Pool</div>
+  </div>
+</div>
+
+  <!-- Canais de Aplicativos -->
+  <div class="modal-section">
+  <h3>Canais de aplicativos</h3>
+  <div class="grid">
+    <div class="card" data-link="discord.html">Discord</div>
+    <div class="card" data-link="instagram.html">Instagram</div>
+    <div class="card" data-link="whatsapp.html">WhatsApp</div>
+    <div class="card" data-link="kwai.html">Kwai</div>
+    <div class="card" data-link="face.html">Facebook</div>
+    <div class="card" data-link="tik.html">TikTok</div>
+    <div class="card" data-link="zangi.html">Zangi</div>
+    <div class="card" data-link="twiter.html">Twitter</div>
+    <div class="card" data-link="you.html">YouTube</div>
+    <div class="card" data-link="snap.html">SnapTube</div>
+    <div class="card" data-link="mesenger.html">Messenger</div>
+    <div class="card" data-link="duolingo.html">Duolingo</div>
+  </div>
+</div>
+
+    <!-- Salas -->
+  <div class="modal-section">
+  <h3>Salas especiais</h3>
+  <div class="grid">
+    <div class="card" data-link="masculino.html">Sala Masculina</div>
+    <div class="card" data-link="femininas.html">Sala Feminina</div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- MODAL DE PESQUISA -->
+<div id="searchModal" class="modal hidden">
+
+  <div class="modal-header">
+    <span>Pesquisar</span>
+    <button onclick="fecharPesquisa()">✕</button>
+  </div>
+
+  <div class="modal-body">
+
+    <input
+      id="searchInput"
+      placeholder="Apelido ou ID"
+      style="
+        width:100%;
+        padding:10px;
+        border-radius:8px;
+        border:none;
+        background:#1a1a1a;
+        color:#fff;
+        margin-bottom:14px;
+      "
+      oninput="buscarUsuario(this.value)"
+    >
+
+    <div id="searchResult"></div>
+
+  </div>
+</div>
+
+<!-- SCRIPT -->
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+// =========================
+// FIREBASE
+// =========================
+const firebaseConfig = {
+  apiKey: "AIzaSyBAOQC_mEjF-m5fdEO2no1-XfsQUjZc2mU",
+  authDomain: "amongchat-848f9.firebaseapp.com",
+  projectId: "amongchat-848f9",
+  storageBucket: "amongchat-848f9.firebasestorage.app",
+  messagingSenderId: "317096866187",
+  appId: "1:317096866187:web:fc4be8871cc5a9e7f43f8e",
+  measurementId: "G-ZFE9C5E595"
+};
+
+// =========================
+// INIT
+// =========================
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// =========================
+// USUÁRIO ATUAL
+// =========================
+window.usuarioAtual = {
+  id: null,
+  nome: "",
+  selo: ""
+};
+
+// =========================
+// CARREGAR USUÁRIO REAL
+// =========================
+async function carregarUsuarioAtual(){
+
+  const loginAtualDoc =
+  await db.collection("config")
+    .doc("loginAtual")
+    .get();
+
+if (!loginAtualDoc.exists) return;
+
+const loginAtual =
+  loginAtualDoc.data() || {};
+
+let perfilID = null;
+
+if (loginAtual.tipo === "discord") {
+  perfilID = loginAtual.uid;
+}
+
+if (loginAtual.tipo === "google") {
+  perfilID = loginAtual.perfilID;
+}
+
+if (!perfilID) return;
+
+  try{
+
+    const doc = await db.collection("usuarios")
+      .doc(String(perfilID))
+      .get();
+
+    // não existe
+    if(!doc.exists) return;
+
+    const data = doc.data();
+
+    usuarioAtual.id = String(perfilID);
+
+    usuarioAtual.nome =
+      data.nome || "Usuário";
+
+    usuarioAtual.selo =
+      data.selo || "";
+
+    console.log("Usuário atual:", usuarioAtual);
+
+// =========================
+// LIBERA EVENTOS APENAS
+// ID 10000 + DISCORD OFICIAL
+// =========================
+const btnEventos =
+  document.getElementById("btnEventos");
+
+const podeVerEventos =
+  String(data.uid) === "10000" &&
+  String(data.discordID) === "908775623135219734";
+
+if (btnEventos) {
+
+  btnEventos.style.display =
+    podeVerEventos
+      ? "inline-block"
+      : "none";
+
+}
+
+  }catch(err){
+
+    console.error(err);
+
+  }
+
+}
+
+// inicia
+carregarUsuarioAtual();
+
+// =========================
+// BUSCAR USUÁRIO FIRESTORE
+// =========================
+async function buscarUsuario(valor){
+
+  const container = document.getElementById("searchResult");
+
+  container.innerHTML = "";
+
+  if(!valor.trim()) return;
+
+  const termo = valor.trim();
+
+  // só aceita IDs numéricos
+  if(!/^\d+$/.test(termo)){
+
+    container.innerHTML =
+      "<p style='color:#aaa'>Digite um ID válido</p>";
+
+    return;
+  }
+
+  try{
+
+    const doc = await db.collection("usuarios")
+      .doc(String(termo))
+      .get();
+
+    // não encontrou
+    if(!doc.exists){
+
+      container.innerHTML =
+        "<p style='color:#aaa'>Usuário não encontrado</p>";
+
+      return;
+    }
+
+    const data = doc.data();
+
+    const userId = String(data.uid || termo);
+
+    const nome = data.nome || "Usuário";
+
+    const avatar =
+      data.avatar || "avatar_default.png";
+
+    const selo =
+      data.selo || "";
+
+    const meuId = String(usuarioAtual.id || "");
+
+    const mostrarBotao =
+      userId !== meuId;
+
+    container.innerHTML = `
+
+      <div
+        class="search-user"
+        onclick="abrirPerfilPesquisa('${userId}')"
+        style="cursor:pointer;"
+      >
+
+        <div class="search-user-left">
+
+          <img src="${avatar}" class="avatar">
+
+          <div class="search-user-info">
+
+            <span class="search-user-name">
+
+              ${nome}
+
+              ${
+                selo
+                ? `<img src="${selo}"
+                    style="height:16px;margin-left:4px;">`
+                : ""
+              }
+
+            </span>
+
+            <span class="search-user-id">
+
+              <img
+                src="ic_uid.png"
+                style="height:14px;vertical-align:middle;"
+              >
+
+              ID ${userId}
+
+            </span>
+
+          </div>
+
+        </div>
+
+        ${
+          mostrarBotao
+          ? `
+            <button
+              class="btn-follow"
+              onclick="event.stopPropagation();seguirUsuario('${userId}')"
+            >
+              Seguir
+            </button>
+          `
+          : ""
+        }
+
+      </div>
+
+    `;
+
+  }catch(err){
+
+    console.error(err);
+
+    container.innerHTML =
+      "<p style='color:red'>Erro ao buscar usuário</p>";
+
+  }
+
+}
+
+// =========================
+// ABRIR PERFIL PESQUISADO
+// =========================
+function abrirPerfilPesquisa(uid){
+
+  // salva perfil aberto
+  sessionStorage.setItem("perfilVisitado", uid);
+
+  // abre perfil
+  window.location.href = "perfil.html";
+
+}
+
+/* =========================
+   SEGUIR USUÁRIO
+========================== */
+function seguirUsuario(userId){
+  const meuId = String(usuarioAtual.id);
+  if(userId === meuId) return;
+
+  const seguindoKey = `seguindo_${meuId}_${userId}`;
+  if(localStorage.getItem(seguindoKey) === "true") return;
+
+  localStorage.setItem(seguindoKey, "true");
+
+  // contador seguindo
+  const countKey = `seguindo_count_${meuId}`;
+  const atual = parseInt(localStorage.getItem(countKey) || "0", 10);
+  localStorage.setItem(countKey, atual + 1);
+
+  // notificação para o usuário seguido
+  const notifKey = `notificacoes_${userId}`;
+  const notificacoes =
+    JSON.parse(localStorage.getItem(notifKey) || "[]");
+
+  notificacoes.unshift({
+    tipo: "seguidor",
+    deId: meuId,
+    nome: usuarioAtual.nome,
+    avatar:
+      localStorage.getItem("avatar_" + meuId) || "avatar_default.png",
+    data: Date.now()
+  });
+
+  localStorage.setItem(notifKey, JSON.stringify(notificacoes));
+
+  buscarUsuario(userId);
+}
+
+/* =========================
+   DOM READY
+========================== */
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btnEventos =
+    document.getElementById("btnEventos");
+
+  if (btnEventos) {
+    btnEventos.style.display = "none";
+  }
+
+  /* TOPO */
+  window.abrirPesquisa = function(){
+    const modal = document.getElementById("searchModal");
+    if(modal) modal.classList.remove("hidden");
+  }
+
+  window.fecharPesquisa = function(){
+    const modal = document.getElementById("searchModal");
+    if(modal) modal.classList.add("hidden");
+
+    const input = document.getElementById("searchInput");
+    const result = document.getElementById("searchResult");
+    if(input) input.value = "";
+    if(result) result.innerHTML = "";
+  }
+
+  window.abrirCriarSala = function(){
+    const modal = document.getElementById("modalCriarCanal");
+    if(modal) modal.classList.remove("hidden");
+  }
+
+  window.fecharCriarSala = function(){
+    const modal = document.getElementById("modalCriarCanal");
+    if(modal) modal.classList.add("hidden");
+  }
+
+  /* EVENTO BOAS VINDAS */
+  const eventoCard = document.getElementById("eventoCard");
+  const btnCriarDJ = document.getElementById("btnCriarDJ");
+
+  function atualizarEvento(){
+    const ativo = localStorage.getItem("evento_boas_vindas") === "true";
+
+    if(eventoCard){
+      eventoCard.style.display = ativo ? "block" : "none";
+    }
+
+    if(btnCriarDJ){
+      btnCriarDJ.style.display =
+        (usuarioAtual.id === "10000" && usuarioAtual.selo === "ic_official.png")
+        ? "inline-block"
+        : "none";
+    }
+  }
+
+  atualizarEvento();
+  setInterval(atualizarEvento, 1000);
+
+  if(btnCriarDJ){
+    btnCriarDJ.addEventListener("click", () => {
+      window.location.href = "DJACCLUB.html";
+    });
+  }
+
+  /* CLIQUE NAS CARDS */
+  document.querySelectorAll(".card").forEach(card => {
+    card.addEventListener("click", () => {
+      const link = card.getAttribute("data-link");
+      if(link) window.location.href = link;
+    });
+  });
+
+});
+
+/* EVENTOS */
+const eventos = [
+  { key:"evento_boas_vindas", img:"boasvindas.png", link:"evento_de_boas_vindas.html" },
+  { key:"evento_seguidores", img:"seguir.png", link:"seguidores.html" },
+  { key:"evento_namorados", img:"diadosnamorados.png", link:"namorados.html" },
+  { key:"evento_laboratorio", img:"laboratorio.png", link:"laboratorio.html" },
+  { key:"evento_caca_baus", img:"cacabaus.png", link:"cacasbau.html" },
+  { key:"evento_olimpiadas", img:"olimpiada2026.png", link:"olimpiada.html" },
+  { key:"evento_copa_do_mundo", img:"copadomundo.png", link:"https://discord.gg/Q62ZTgw9d" },
+  { key:"evento_primavera", img:"primavera01.png", link:"primavera.html" },
+  { key:"evento_desconto", img:"desconto.png", link:"compras.html" },
+  { key:"evento_fim_de_ano", img:"anonovo.png", link:"compras.html" },
+  { key:"evento_natal", img:"natal.png", link:"natal.html" },
+  { key:"evento_pascoa", img:"pascoa.png", link:"pascoa.html" },
+  { key:"evento_aniversário", img:"aniversario.png", link:"festa.html" },
+  { key:"evento_castChat2.0_Gachapon_Events", img:"castchateventsgachaónn.png", link:"festa.html" },
+];
+
+let bannerIndex = 0;
+
+/* BANNER LOOP */
+function atualizarBanner(){
+  const banner = document.getElementById("eventoBanner");
+  const ativos = eventos.filter(e => localStorage.getItem(e.key)==="true");
+
+  if(ativos.length === 0){
+    banner.style.display="none";
+    return;
+  }
+
+  const evento = ativos[bannerIndex % ativos.length];
+  banner.src = evento.img;
+  banner.onclick = ()=>window.location.href = evento.link;
+  banner.style.display="block";
+
+  bannerIndex++;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  atualizarBanner();
+  setInterval(atualizarBanner, 10000);
+});
+
+/* SWITCHES */
+document.querySelectorAll(".switch").forEach(sw=>{
+  const key = sw.dataset.key;
+  if(localStorage.getItem(key)==="true") sw.classList.add("on");
+
+  sw.onclick=()=>{
+    const ativo = sw.classList.toggle("on");
+    localStorage.setItem(key, ativo);
+    atualizarBanner();
+  };
+});
+
+/* PLACEHOLDERS */
+function abrirPesquisa(){}
+function abrirCriarSala(){}
+
+
+/* =========================
+   EVENTOS ADMIN
+========================== */
+
+function abrirEventos(){
+  document.getElementById("modalEventos").classList.remove("hidden");
+  renderEventosAdmin();
+}
+
+function fecharEventos(){
+  document.getElementById("modalEventos").classList.add("hidden");
+}
+
+function renderEventosAdmin(){
+  const box = document.getElementById("eventosAdmin");
+  if(!box) return;
+
+  box.innerHTML = "";
+
+  eventos.forEach(ev => {
+    const ativo = localStorage.getItem(ev.key) === "true";
+
+    const row = document.createElement("div");
+    row.className = "evento-admin";
+
+    row.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="${ev.img}" style="width:42px;border-radius:8px">
+        <span>${ev.key
+          .replace("evento_","")
+          .replace("_"," ")
+          .toUpperCase()}</span>
+      </div>
+
+      <label class="switch">
+        <input type="checkbox" ${ativo ? "checked":""}>
+        <span class="slider"></span>
+      </label>
+    `;
+
+    row.querySelector("input").onchange = e => {
+      localStorage.setItem(ev.key, e.target.checked);
+      atualizarBanner();
+    };
+
+    box.appendChild(row);
+  });
+}
+
+function atualizarEstadoInternet(){
+  const online = document.getElementById("online");
+  const offline = document.getElementById("offline");
+
+  if(navigator.onLine){
+    offline.style.display = "none";
+    online.style.display = "block";
+  }else{
+    offline.style.display = "flex";
+    online.style.display = "none";
+  }
+}
+
+window.addEventListener("online", atualizarEstadoInternet);
+window.addEventListener("offline", atualizarEstadoInternet);
+
+atualizarEstadoInternet();
+
+function verificarNotificacoes(){
+
+  const remind = document.getElementById("iconeRemind");
+
+  db.collection("notificacoes")
+    .orderBy("data","desc")
+    .limit(20)
+    .onSnapshot(snapshot=>{
+
+      let temNotif = false;
+
+      snapshot.forEach(doc=>{
+
+        const n = doc.data();
+
+        const destino = String(n.idConta);
+        const meuID = String(usuarioAtual.id);
+
+        if(destino === "todos" || destino === meuID){
+          temNotif = true;
+        }
+
+      });
+
+      if(temNotif){
+        remind.style.display = "block";
+      }else{
+        remind.style.display = "none";
+      }
+
+    });
+
+}
+verificarNotificacoes();
+</script>
+
+</body>
+</html>
