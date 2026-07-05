@@ -1,1 +1,603 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CastChat - Configurações</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  body { background:#000; color:#fff; margin:0; font-family:sans-serif; }
+  .app{display:flex;flex-direction:column;align-items:center;min-height:100vh;}
 
+  .topbar{display:flex;align-items:center;justify-content:space-between;
+          width:100%;max-width:420px;padding:12px;background:#111;border-bottom:1px solid #222;}
+  .topbar h2{margin:0;font-size:16px;color:#fff;flex:1;text-align:center;}
+  .topbar button{background:none;border:none;cursor:pointer;}
+  .topbar img{width:22px;height:22px;}
+
+  .config-list{width:100%;max-width:420px;flex:1;padding:10px;}
+  .config-item{display:flex;align-items:center;justify-content:space-between;
+               padding:14px 10px;border-bottom:1px solid #222;cursor:pointer;}
+  .config-item span{display:flex;align-items:center;gap:10px;font-size:14px;color:#fff;}
+  .config-item img{width:22px;height:22px;}
+  .config-item .arrow{width:14px;height:14px;opacity:0.6;}
+
+  .switch{width:40px;height:20px;background:#555;border-radius:20px;position:relative;cursor:pointer;}
+  .switch::after{content:"";position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;
+                 top:2px;left:2px;transition:0.2s;}
+  .switch.active{background:#ffd700;}
+  .switch.active::after{left:22px;}
+
+  /* estilo dos botões AC CLUB */
+  .special-btn{
+    display:none;
+    justify-content:space-between;
+    padding:14px 10px;
+    border-bottom:1px solid #222;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:bold;
+  }
+  .special-btn span{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .special-btn img{
+    width:22px;
+    height:22px;
+  }
+
+  #eventosLista{
+    display:none;
+    width:100%;
+    max-width:420px;
+    background:#111;
+    border:1px solid #333;
+    border-radius:12px;
+    padding:10px;
+    margin-top:10px;
+  }
+
+  .evento-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 0;
+    border-bottom:1px solid #222;
+  }
+  .evento-item:last-child{
+    border-bottom:none;
+  }
+
+  .footer{margin:20px 0;text-align:center;font-size:12px;color:#777;}
+  .footer a{color:#ffd700;text-decoration:none;margin:0 4px;}
+
+  .idioma {
+  padding:10px;
+  border-bottom:1px solid #222;
+  display:flex;
+  justify-content:space-between;
+  cursor:pointer;
+}
+
+.idioma:last-child {
+  border-bottom:none;
+}
+
+.idioma span {
+  color:#ffd700;
+}
+
+#logoutBtn{
+  width:100%;
+  height:52px;
+
+  border:none;
+  border-radius:999px;
+
+  background:linear-gradient(
+    90deg,
+    #252525,
+    #2c2c2c,
+    #252525
+  );
+
+  color:#ffffff;
+  font-size:18px;
+  font-weight:700;
+
+  cursor:pointer;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  transition:.2s;
+}
+
+#logoutBtn:hover{
+  background:linear-gradient(
+    90deg,
+    #303030,
+    #383838,
+    #303030
+  );
+}
+
+#logoutBtn:active{
+  transform:scale(.98);
+}
+</style>
+</head>
+<body>
+
+<div class="app tela configuracao-screen">
+
+  <div class="topbar">
+    <button onclick="window.location.href='perfil.html'">
+      <img src="ic_back.png" alt="voltar">
+    </button>
+    <h2>Configurações</h2>
+    <div style="width:22px;"></div>
+  </div>
+
+  
+
+  <div class="config-list">
+
+  <div class="config-item" onclick="abrirIdiomas()">
+    <span><img src="ic_language.png" alt="">
+      <span data-i18n="idioma">Idioma do bate-papo</span>
+    </span>
+    <img class="arrow" src="ic_arrow.png" alt="">
+  </div>
+
+  <div class="config-item">
+    <span><img src="ic_block_list.png" alt="">
+      <span data-i18n="bloqueio">Lista de bloqueio</span>
+    </span>
+    <img class="arrow" src="ic_arrow.png" alt="">
+  </div>
+
+  <div class="config-item" onclick="abrirPoliticas()">
+  <span>
+    <img src="ic_community_guide.png">
+    Diretrizes da comunidade
+  </span>
+  <img class="arrow" src="ic_arrow.png">
+</div>
+
+  <div class="config-item">
+    <span><img src="ic_phone.png" alt="">
+      <span data-i18n="sobrepor">Sobrepor a outros aplicativos</span>
+    </span>
+    <img class="arrow" src="ic_arrow.png" alt="">
+  </div>
+
+  <div class="config-item">
+    <span><img src="ic_rate.png" alt="">
+      <span data-i18n="avaliar">Nos avalie</span>
+    </span>
+    <img class="arrow" src="ic_arrow.png" alt="">
+  </div>
+
+  <div class="config-item">
+    <span><img src="ic_setting_ad.png" alt="">
+      <span data-i18n="anuncios">Anúncios</span>
+    </span>
+    <div class="switch" id="adsSwitch"></div>
+  </div>
+
+  <div class="config-item">
+    <span><img src="ic_delete_account.png" alt="">
+      <span data-i18n="excluir">Excluir conta</span>
+    </span>
+    <img class="arrow" src="ic_arrow.png" alt="">
+  </div>
+
+  <div class="config-item">
+    <span><img src="ic_restore.png" alt="">
+      <span data-i18n="restaurar">Restaurar compras</span>
+    </span>
+    <img class="arrow" src="ic_arrow.png" alt="">
+  </div>
+
+  <div class="config-item">
+    <span><img src="ic_verify.png" alt="">
+      <span data-i18n="verificar">Ser verificado</span>
+    </span>
+    <img class="arrow" src="ic_arrow.png" alt="">
+  </div>
+
+  <div class="config-item">
+    <span><img src="ic_settings_clear_cache.png" alt="">
+      <span data-i18n="cache">Limpar cache</span>
+    </span>
+    <span style="color:#aaa;font-size:12px;">0.02 M</span>
+  </div>
+
+  <div class="config-item">
+    <span><img src="ic_contact_us.png" alt="">
+      <span data-i18n="contato">Contate-nos</span>
+    </span>
+    <img class="arrow" src="ic_arrow.png" alt="">
+  </div>
+
+  <div id="verMissoes" class="special-btn">
+    <span><img src="ic_missoes.png" alt="">
+      <span data-i18n="missoes">Ver Missões Concluídas</span>
+    </span>
+    <img class="arrow" src="ic_arrow.png" alt="">
+  </div>
+
+  <div id="abrirModeracao" class="special-btn">
+    <span><img src="ic_moderacao.png" alt="">
+      <span data-i18n="moderacao">Moderação do Aplicativo</span>
+    </span>
+    <img class="arrow" src="ic_arrow.png" alt="">
+  </div>
+
+</div>
+
+<button id="logoutBtn">Sair da conta</button>
+
+<div class="footer">
+  Cast<span style="color:red;">Chat</span> <span style="color:#fff;">2.0</span><br>
+  <span data-i18n="versao">Versão</span>: 2.33.0-25085244<br>
+  <span data-i18n="termos">Política de Privacidade & Termos de serviço</span>
+</div>
+
+</div>
+
+<!-- MODAL DE IDIOMAS -->
+<div id="modalIdiomas" style="
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.7);
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+">
+  <div style="
+    background:#111;
+    padding:20px;
+    border-radius:12px;
+    width:90%;
+    max-width:350px;
+  ">
+    <h3 style="margin-top:0;">Selecionar idioma</h3>
+
+    <div class="idioma" onclick="selecionarIdioma('pt')">Português <span></span></div>
+    <div class="idioma" onclick="selecionarIdioma('en')">English <span></span></div>
+    <div class="idioma" onclick="selecionarIdioma('es')">Español <span></span></div>
+    <div class="idioma" onclick="selecionarIdioma('fr')">Français <span></span></div>
+
+    <button onclick="fecharIdiomas()" style="
+      margin-top:10px;
+      width:100%;
+      padding:10px;
+      background:#222;
+      color:#fff;
+      border:none;
+      border-radius:8px;
+    ">Fechar</button>
+
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBAOQC_mEjF-m5fdEO2no1-XfsQUjZc2mU",
+  authDomain: "amongchat-848f9.firebaseapp.com",
+  projectId: "amongchat-848f9",
+  storageBucket: "amongchat-848f9.firebasestorage.app",
+  messagingSenderId: "317096866187",
+  appId: "1:317096866187:web:fc4be8871cc5a9e7f43f8e"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+function abrirPoliticas(){
+  window.location.href = "politicas.html";
+}
+
+/* =======================
+   UTIL
+======================= */
+function $id(id){ 
+  return document.getElementById(id); 
+}
+
+/* =======================
+   SWITCH DE ANÚNCIOS
+======================= */
+const adsSwitch = $id("adsSwitch");
+if(adsSwitch){
+  const toggleAds = ()=>{
+    adsSwitch.classList.toggle("active");
+    const pressed = adsSwitch.classList.contains("active");
+    adsSwitch.setAttribute("aria-pressed", pressed);
+  };
+  adsSwitch.onclick = toggleAds;
+  adsSwitch.onkeydown = (e)=>{
+    if(e.key === "Enter" || e.key === " "){
+      e.preventDefault();
+      toggleAds();
+    }
+  };
+}
+
+/* =======================
+   USUÁRIO LOGADO
+======================= */
+const usuarioAtual = {
+  id: 10000,
+  nome: "AC CLUB"
+};
+
+/* =======================
+   PERMISSÕES
+======================= */
+function isAdmin(){
+  return usuarioAtual && usuarioAtual.id === 10000;
+}
+
+function isOfficial(){
+  return localStorage.getItem(
+    `castchat_badge_official_${usuarioAtual.id}`
+  ) === "true";
+}
+
+/* =======================
+   BOTÕES ESPECIAIS
+======================= */
+const specialButtons = ["verMissoes", "abrirModeracao"];
+
+specialButtons.forEach(id=>{
+  const el = $id(id);
+  if(!el) return;
+
+  if (isAdmin() || isOfficial()) {
+    el.style.display = "flex";
+  } else {
+    el.style.display = "none";
+  }
+});
+
+/* =======================
+   AÇÕES DOS BOTÕES
+======================= */
+const verMissoesBtn = $id("verMissoes");
+if(verMissoesBtn){
+  verMissoesBtn.onclick = ()=> {
+    window.location.href = "missao_admin.html";
+  };
+}
+
+const abrirModeracaoBtn = $id("abrirModeracao");
+if(abrirModeracaoBtn){
+  abrirModeracaoBtn.onclick = ()=> {
+    window.location.href = "moderacao.html";
+  };
+}
+
+/* =======================
+   MODAL IDIOMAS
+======================= */
+function abrirIdiomas(){
+  $id("modalIdiomas").style.display = "flex";
+}
+
+function fecharIdiomas(){
+  $id("modalIdiomas").style.display = "none";
+}
+
+function selecionarIdioma(lang){
+  localStorage.setItem("lang", lang);
+  aplicarIdioma(lang);
+  fecharIdiomas();
+}
+
+/* =======================
+   TRADUÇÕES
+======================= */
+const translations = {
+  pt: {
+    configuracoes: "Configurações",
+    idioma: "Idioma do bate-papo",
+    bloqueio: "Lista de bloqueio",
+    diretrizes: "Diretrizes da comunidade",
+    sobrepor: "Sobrepor a outros aplicativos",
+    avaliar: "Nos avalie",
+    anuncios: "Anúncios",
+    excluir: "Excluir conta",
+    restaurar: "Restaurar compras",
+    verificar: "Ser verificado",
+    cache: "Limpar cache",
+    contato: "Contate-nos",
+    missoes: "Ver Missões Concluídas",
+    moderacao: "Moderação do Aplicativo",
+    versao: "Versão",
+    termos: "Política de Privacidade & Termos de serviço"
+  },
+
+  en: {
+    configuracoes: "Settings",
+    idioma: "Chat language",
+    bloqueio: "Block list",
+    diretrizes: "Community guidelines",
+    sobrepor: "Overlay other apps",
+    avaliar: "Rate us",
+    anuncios: "Ads",
+    excluir: "Delete account",
+    restaurar: "Restore purchases",
+    verificar: "Get verified",
+    cache: "Clear cache",
+    contato: "Contact us",
+    missoes: "View completed missions",
+    moderacao: "App moderation",
+    versao: "Version",
+    termos: "Privacy Policy & Terms of Service"
+  },
+
+  fr: {
+    configuracoes: "Paramètres",
+    idioma: "Langue du chat",
+    bloqueio: "Liste de blocage",
+    diretrizes: "Règles de la communauté",
+    sobrepor: "Superposer aux autres applications",
+    avaliar: "Évaluez-nous",
+    anuncios: "Annonces",
+    excluir: "Supprimer le compte",
+    restaurar: "Restaurer les achats",
+    verificar: "Être vérifié",
+    cache: "Vider le cache",
+    contato: "Contactez-nous",
+    missoes: "Voir les missions terminées",
+    moderacao: "Modération de l'application",
+    versao: "Version",
+    termos: "Politique de confidentialité & Conditions d'utilisation"
+  },
+
+  es: {
+    configuracoes: "Configuración",
+    idioma: "Idioma del chat",
+    bloqueio: "Lista de bloqueo",
+    diretrizes: "Normas de la comunidad",
+    sobrepor: "Superponer otras apps",
+    avaliar: "Califícanos",
+    anuncios: "Anuncios",
+    excluir: "Eliminar cuenta",
+    restaurar: "Restaurar compras",
+    verificar: "Ser verificado",
+    cache: "Limpiar caché",
+    contato: "Contáctanos",
+    missoes: "Ver misiones completadas",
+    moderacao: "Moderación de la app",
+    versao: "Versión",
+    termos: "Política de privacidad & Términos de servicio"
+  }
+};
+
+/* =======================
+   APLICAR IDIOMA
+======================= */
+function aplicarIdioma(lang){
+  const titulo = document.querySelector(".topbar h2");
+  if(titulo && translations[lang]){
+    titulo.textContent = translations[lang].configuracoes;
+  }
+}
+
+/* =======================
+   CARREGAR IDIOMA SALVO
+======================= */
+document.addEventListener("DOMContentLoaded", ()=>{
+  const lang = localStorage.getItem("lang") || "pt";
+  aplicarIdioma(lang);
+});
+
+/* =======================
+   MOSTRAR / OCULTAR SAIR
+======================= */
+document.addEventListener("DOMContentLoaded", () => {
+
+  const logoutBtn =
+    document.getElementById("logoutBtn");
+
+  if (!logoutBtn) return;
+
+  auth.onAuthStateChanged((user) => {
+
+    const temLoginDiscord =
+      localStorage.getItem("castchat_token");
+
+    const temLogin =
+      temLoginDiscord || user;
+
+    logoutBtn.style.display =
+      temLogin ? "block" : "none";
+
+  });
+
+});
+
+/*=======================
+BOTÃO SAIR
+=========================*/
+document.getElementById("logoutBtn")
+.addEventListener("click", async () => {
+
+  try {
+
+    let perfilID = null;
+
+    // tenta descobrir o perfil atual pelo Firestore
+    const loginAtualDoc =
+      await db.collection("config")
+        .doc("loginAtual")
+        .get();
+
+    if (loginAtualDoc.exists) {
+
+      const loginAtual =
+        loginAtualDoc.data() || {};
+
+      if (loginAtual.tipo === "google") {
+        perfilID = loginAtual.perfilID;
+      }
+
+      if (loginAtual.tipo === "discord") {
+        perfilID = loginAtual.uid;
+      }
+
+    }
+
+    // marca logout apenas no documento do usuário
+    if (perfilID) {
+      await db.collection("usuarios")
+        .doc(String(perfilID))
+        .set({
+          online: false,
+          ultimoLogout: Date.now()
+        }, { merge:true });
+    }
+
+    // sai do Google/Firebase
+  if (auth.currentUser) {
+  await auth.signOut();
+}
+
+    // limpa somente este navegador
+    localStorage.removeItem("castchat_token");
+    localStorage.removeItem("profileData");
+    localStorage.removeItem("perfilID");
+
+    sessionStorage.clear();
+
+    window.location.href = "index.html";
+
+  } catch (err) {
+
+    console.error("Erro ao sair:", err);
+    alert("Erro ao sair da conta.");
+
+  }
+
+});
+</script>
+
+</body>
+</html>
