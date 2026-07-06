@@ -1,1 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CastChat - PRO</title>
+<link rel="stylesheet" href="style.css">
+<style>
+:root { --yellow: #ffd700; }
 
+/* FUNDO DO SITE */
+body{
+  margin:0;
+  background:#000;
+  font-family:sans-serif;
+  color:#fff;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+
+/* CELULAR */
+.pro-container{
+
+  width:380px;
+  max-width:95%;
+ padding:20px;
+
+  border-radius:35px;
+
+  /* IMAGEM AGORA É O FUNDO DO CELULAR */
+  background:url("bg_premium.png") no-repeat center center;
+  background-size:cover;
+
+  box-shadow:
+  0 0 0 8px #111,
+  0 0 60px rgba(0,0,0,0.9);
+
+  min-height:90vh;
+
+  overflow-y:auto;
+}
+
+/* Título */
+h1{
+  font-size:20px;
+  margin:16px 0;
+}
+/* Avatar */
+.avatar{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  border:2px solid var(--yellow);
+
+  display:block;
+  margin:10px auto;
+}
+
+/* PLANOS */
+
+.planos{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin:20px 0;
+}
+
+.plano{
+  flex:1;
+  background:#141414;
+  padding:16px;
+  border-radius:12px;
+  cursor:pointer;
+  border:2px solid transparent;
+  transition:0.2s;
+}
+
+.plano:hover{
+  transform:scale(1.03);
+}
+
+.plano.selecionado{
+  border:2px solid var(--yellow);
+}
+
+.plano img{
+  width:32px;
+  height:32px;
+  margin-bottom:8px;
+}
+
+.plano h3{
+  margin:0 0 6px;
+  font-size:14px;
+}
+
+.plano p{
+  margin:0;
+  color:#bbb;
+  font-size:12px;
+}
+
+/* BOTÃO */
+
+.btn-continuar{
+  background:var(--yellow);
+  border:none;
+  padding:14px;
+  border-radius:28px;
+  font-weight:bold;
+  width:100%;
+  cursor:pointer;
+  margin:16px 0;
+  font-size:15px;
+}.btn-continuar:disabled{
+  opacity:0.4;
+  cursor:not-allowed;
+}
+
+/* TERMOS */
+
+.termos{
+  font-size:11px;
+  color:#aaa;
+  line-height:1.4;
+  text-align:left;
+  margin:10px 0 30px;
+}
+
+/* PRIVILÉGIOS */
+
+.privilegios{
+  margin-top:20px;
+  text-align:left;
+}
+
+.privilegios h2{
+  font-size:16px;
+  text-align:center;
+  margin-bottom:16px;
+}
+
+.priv-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:10px 0;
+}
+
+.priv-item img{
+  width:32px;
+  height:32px;
+}
+
+.priv-item div h3{
+  margin:0;
+  font-size:14px;
+}
+
+.priv-item div p{
+  margin:2px 0 0;
+  font-size:12px;
+  color:#bbb;
+}
+
+.username{
+  font-weight:bold;
+  margin:6px 0;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+
+.coroa{
+  width:18px;
+  height:18px;
+}
+</style>
+</head>
+<body>
+  <div class="pro-container">
+
+    <h1>Desbloquear PRO</h1>
+    <img src="castchat2.0.png" class="avatar" alt="avatar">
+    <div class="username">
+      CastChatOfficial2.0
+      <img src="ic_avatar_pro.png" class="coroa">
+    </div>
+
+    <!-- Planos -->
+    <div class="planos">
+      <div class="plano" id="planoSemanal" onclick="selecionarPlano('semanal')">
+        <img src="ic_premium_not_activated.png" alt="coroa prata">
+        <h3>Por Mês</h3>
+        <p>R$ 5,00</p>
+      </div>
+      <div class="plano selecionado" id="planoGratis" onclick="selecionarPlano('gratis')">
+        <img src="PRO Bronze.png" alt="coroa bronze">
+        <h3>3 dias de Teste Grátis</h3>
+      </div>
+      <div class="plano" id="planoMensal" onclick="selecionarPlano('mensal')">
+        <img src="ic_avatar_pro.png" alt="coroa ouro">
+        <h3>Por Ano</h3>
+        <p>R$ 11,00</p>
+      </div>
+    </div>
+
+    <button class="btn-continuar" onclick="window.location.href='perfil.html'">
+        CONTINUAR
+    </button>
+
+    <!-- Termos -->
+    <div class="termos">
+      Termos da Assinatura: Após o período de avaliação gratuita, a assinatura do CastChat Pro Anual é R$ 54,99, e é renovada automaticamente, a menos que seja desativada nas Configurações da Conta pelo menos 24h antes do término do período atual. O pagamento é cobrado na sua conta Google, podendo ser cancelado a qualquer momento. O aplicativo ainda é acessível sem a necessidade de assinatura.<br><br>
+      Ao continuar, você concorda em aceitar nossa Política de Privacidade & Termos de serviço.
+    </div>
+
+    <!-- Privilégios -->
+    <div class="privilegios">
+      <h2>Privilégios PRO</h2>
+      <div class="priv-item">
+        <img src="premium_icon_no_ads.png" alt="no ads">
+        <div><h3>Sem anúncios</h3><p>Aproveite a versão sem anúncios</p></div>
+      </div>
+      <div class="priv-item">
+        <img src="premium_icon_unlimited_space_card.png" alt="space card">
+        <div><h3>Cartões SPACE ilimitado</h3><p>Sinta-se à vontade para criar canais</p></div>
+      </div>
+      <div class="priv-item">
+        <img src="premium_icon_vip.png" alt="vip">
+        <div><h3>Emblema PRO exclusivo</h3><p>Destaque-se entre os amigos</p></div>
+      </div>
+      <div class="priv-item">
+        <img src="premium_icon_match.png" alt="match">
+        <div><h3>Prioridade máxima para combinar</h3><p>Mais rápido para encontrar amigos & formar uma equipe</p></div>
+      </div>
+      <div class="priv-item">
+        <img src="premium_icon_special_avatar.png" alt="avatar especial">
+        <div><h3>Avatares especiais</h3><p>Você é o jogador mais legal</p></div>
+      </div>
+      <div class="priv-item">
+        <img src="premium_icon_upload_avatar.png" alt="upload avatar">
+        <div><h3>Carregue seu próprio avatar</h3><p>Seu avatar pode ser diferente</p></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+
+const profile = JSON.parse(localStorage.getItem("profileData")) || {};
+const uid = profile.uid || 10000;
+
+let planoSelecionado = "gratis";
+
+const agora = Date.now();
+
+const btnContinuar = document.getElementById("btnContinuar");
+
+/* =========================
+   UID MASTER (ADMIN)
+========================= */
+
+if(uid === 10000){
+  btnContinuar.disabled = false;
+}
+
+/* =========================
+   SELECIONAR PLANO
+========================= */
+
+function selecionarPlano(plano){
+
+  document.querySelectorAll(".plano").forEach(p => p.classList.remove("selecionado"));
+
+  if(plano === "semanal"){
+    document.getElementById("planoSemanal").classList.add("selecionado");
+  }
+
+  if(plano === "gratis"){
+    document.getElementById("planoGratis").classList.add("selecionado");
+  }
+
+  if(plano === "mensal"){
+    document.getElementById("planoMensal").classList.add("selecionado");
+  }
+
+  planoSelecionado = plano;
+
+}
+
+
+/* =========================
+   CARD PIX
+========================= */
+
+function mostrarPagamento(valor){
+
+  const card = document.createElement("div");
+
+  card.style.position="fixed";
+  card.style.top="0";
+  card.style.left="0";
+  card.style.width="100%";
+  card.style.height="100%";
+  card.style.background="rgba(0,0,0,0.9)";
+  card.style.display="flex";
+  card.style.flexDirection="column";
+  card.style.justifyContent="center";
+  card.style.alignItems="center";
+  card.style.zIndex="9999";
+
+  card.innerHTML=`
+
+  <div style="background:#111;padding:20px;border-radius:12px;text-align:center;width:300px">
+
+    <h3>Pagar com PIX</h3>
+    <p>Valor: R$ ${valor}</p>
+
+    <img src="qrcode_pix.png" style="width:200px;margin:15px 0">
+
+    <button id="btnPago" style="padding:10px;border:none;background:#ffd700;border-radius:20px;margin-top:10px">
+    Já paguei
+    </button>
+
+    <button onclick="this.parentElement.parentElement.remove()" style="padding:8px;border:none;background:#444;border-radius:20px;margin-top:10px">
+    Cancelar
+    </button>
+
+  </div>
+
+  `;
+
+  document.body.appendChild(card);
+
+  document.getElementById("btnPago").onclick = () => {
+
+    document.getElementById("btnContinuar").disabled = false;
+
+    card.remove();
+
+    alert("Pagamento confirmado. Agora você pode continuar.");
+
+  }
+
+}
+
+
+/* =========================
+   CONFIRMAR PLANO
+========================= */
+
+function confirmarPlano(){
+
+  let proData = JSON.parse(localStorage.getItem("castchat_pro")) || {};
+
+  if(planoSelecionado === "gratis"){
+
+    const fim = agora + (3 * 24 * 60 * 60 * 1000);
+
+    proData.bronze = fim;
+
+    localStorage.setItem("castchat_pro", JSON.stringify(proData));
+
+    alert("PRO Bronze ativado por 3 dias!");
+
+    window.location.href="perfil.html";
+
+  }
+
+  if(planoSelecionado === "semanal"){
+
+    mostrarPagamento("5,00");
+
+  }
+
+  if(planoSelecionado === "mensal"){
+
+    mostrarPagamento("11,00");
+
+  }
+
+}
+
+
+/* =========================
+   UID MASTER BENEFÍCIOS
+========================= */
+
+if(uid == 10000){
+
+  let proData = JSON.parse(localStorage.getItem("castchat_pro")) || {};
+
+  if(!proData.prata){
+
+    proData.prata = agora + (7 * 24 * 60 * 60 * 1000);
+
+  }
+
+  if(!proData.avatar){
+
+    proData.avatar = agora + (365 * 24 * 60 * 60 * 1000);
+
+  }
+
+  localStorage.setItem("castchat_pro", JSON.stringify(proData));
+
+}
+
+
+/* =========================
+   ATUALIZAR BOTÃO
+========================= */
+
+function atualizarStatus(){
+
+  const proData = JSON.parse(localStorage.getItem("castchat_pro")) || {};
+
+  const btn = document.querySelector(".btn-continuar");
+
+  let texto = "CONTINUAR";
+
+  if(proData.bronze && proData.bronze > agora){
+
+    const dias = Math.ceil((proData.bronze - agora) / 86400000);
+
+    texto = "PRO Bronze ativo ("+dias+" dias)";
+
+  }
+
+  if(proData.prata && proData.prata > agora){
+
+    const dias = Math.ceil((proData.prata - agora) / 86400000);
+
+    texto = "PRO Prata ativo ("+dias+" dias)";
+
+  }
+
+  if(proData.avatar && proData.avatar > agora){
+
+    const dias = Math.ceil((proData.avatar - agora) / 86400000);
+
+    texto += " | Avatar PRO ("+dias+" dias)";
+
+  }
+
+  btn.innerText = texto;
+
+}
+
+atualizarStatus();
+
+document.getElementById("btnContinuar").onclick = () => {
+
+  let proData = JSON.parse(localStorage.getItem("castchat_pro")) || {};
+  const agora = Date.now();
+
+  if(planoSelecionado === "semanal"){
+
+    proData.prata = agora + (30 * 24 * 60 * 60 * 1000);
+
+  }
+
+  if(planoSelecionado === "mensal"){
+
+    proData.avatar = agora + (365 * 24 * 60 * 60 * 1000);
+
+  }
+
+  localStorage.setItem("castchat_pro", JSON.stringify(proData));
+
+  window.location.href = "perfil.html";
+
+};
+</script>
+</body>
+</html>
