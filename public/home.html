@@ -548,8 +548,7 @@ body{
   <div class="bottombar">
     <a href="home.html"><img src="icon_home_selected.png" alt="home"></a>
     <a href="animal.html"><img src="icon_pet_game_selected.png" alt="pets"></a>
-    <a href="missao.html"><img src="icon_friends_selected.png" alt="missões"></a>
-    <a href="mensagem.html"><img src="icon_dm_selected.png" alt="chat"></a>
+    <a href="#" id="btnMissoes"><img src="icon_friends_selected.png"></a>    <a href="mensagem.html"><img src="icon_dm_selected.png" alt="chat"></a>
     <a href="perfil.html"><img src="icon_profile_selected.png" alt="perfil"></a>
   </div>
   </div>
@@ -1108,7 +1107,42 @@ document.querySelectorAll(".switch").forEach(sw=>{
 function abrirPesquisa(){}
 function abrirCriarSala(){}
 
+/* =========================
+   AVISO DE LOGIN
+========================== */
 
+function mostrarLoginAviso(){
+
+  let aviso =
+    document.getElementById("avisoLogin");
+
+  if(aviso) aviso.remove();
+
+  aviso = document.createElement("div");
+
+  aviso.id = "avisoLogin";
+
+  aviso.innerText = "Faça Login";
+
+  aviso.style.position = "fixed";
+  aviso.style.bottom = "100px";
+  aviso.style.left = "50%";
+  aviso.style.transform = "translateX(-50%)";
+  aviso.style.background = "#ffd700";
+  aviso.style.color = "#000";
+  aviso.style.padding = "10px 20px";
+  aviso.style.borderRadius = "10px";
+  aviso.style.fontWeight = "bold";
+  aviso.style.zIndex = "99999";
+
+  document.body.appendChild(aviso);
+
+  setTimeout(()=>{
+    aviso.remove();
+  },5000);
+
+}
+  
 /* =========================
    EVENTOS ADMIN
 ========================== */
