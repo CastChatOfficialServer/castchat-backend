@@ -28,8 +28,6 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-const db = admin.firestore();
-
 // ===============================
 // EXPRESS
 // ===============================
