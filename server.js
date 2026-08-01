@@ -576,7 +576,7 @@ app.get(
 // MASTER
 // ===============================
 if (
-  profile.id === AC_CLUB_DISCORD_ID
+  profile.id === AC_Official_001_DISCORD_ID
 ) {
 
   uid = "10000";
