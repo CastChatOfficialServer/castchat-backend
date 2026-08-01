@@ -128,6 +128,14 @@
 #logoutBtn:active{
   transform:scale(.98);
 }
+
+.config-item{
+  text-decoration:none;
+  color:inherit;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 </style>
 </head>
 <body>
@@ -150,14 +158,14 @@
     <span><img src="ic_language.png" alt="">
       <span data-i18n="idioma">Idioma do bate-papo</span>
     </span>
-    <img class="arrow" src="ic_arrow.png" alt="">
+    <img class="arrow" src="ic_arrow_right.png" alt="">
   </div>
 
   <div class="config-item">
     <span><img src="ic_block_list.png" alt="">
       <span data-i18n="bloqueio">Lista de bloqueio</span>
     </span>
-    <img class="arrow" src="ic_arrow.png" alt="">
+    <img class="arrow" src="ic_arrow_right.png" alt="">
   </div>
 
   <div class="config-item" onclick="abrirPoliticas()">
@@ -165,21 +173,21 @@
     <img src="ic_community_guide.png">
     Diretrizes da comunidade
   </span>
-  <img class="arrow" src="ic_arrow.png">
+  <img class="arrow" src="ic_arrow_right.png">
 </div>
 
   <div class="config-item">
     <span><img src="ic_phone.png" alt="">
       <span data-i18n="sobrepor">Sobrepor a outros aplicativos</span>
     </span>
-    <img class="arrow" src="ic_arrow.png" alt="">
+    <img class="arrow" src="ic_arrow_right.png" alt="">
   </div>
 
   <div class="config-item">
     <span><img src="ic_rate.png" alt="">
       <span data-i18n="avaliar">Nos avalie</span>
     </span>
-    <img class="arrow" src="ic_arrow.png" alt="">
+    <img class="arrow" src="ic_arrow_right.png" alt="">
   </div>
 
   <div class="config-item">
@@ -193,22 +201,24 @@
     <span><img src="ic_delete_account.png" alt="">
       <span data-i18n="excluir">Excluir conta</span>
     </span>
-    <img class="arrow" src="ic_arrow.png" alt="">
+    <img class="arrow" src="ic_arrow_right.png" alt="">
   </div>
 
   <div class="config-item">
     <span><img src="ic_restore.png" alt="">
       <span data-i18n="restaurar">Restaurar compras</span>
     </span>
-    <img class="arrow" src="ic_arrow.png" alt="">
+    <img class="arrow" src="ic_arrow_right.png" alt="">
   </div>
 
-  <div class="config-item">
-    <span><img src="ic_verify.png" alt="">
-      <span data-i18n="verificar">Ser verificado</span>
-    </span>
-    <img class="arrow" src="ic_arrow.png" alt="">
-  </div>
+ <a href="verificacao.html" class="config-item">
+  <span>
+    <img src="ic_verify.png" alt="">
+    <span data-i18n="verificar">Ser verificado</span>
+  </span>
+
+  <img class="arrow" src="ic_arrow_right.png" alt="">
+</a>
 
   <div class="config-item">
     <span><img src="ic_settings_clear_cache.png" alt="">
@@ -221,21 +231,21 @@
     <span><img src="ic_contact_us.png" alt="">
       <span data-i18n="contato">Contate-nos</span>
     </span>
-    <img class="arrow" src="ic_arrow.png" alt="">
+    <img class="arrow" src="ic_arrow_right.png" alt="">
   </div>
 
   <div id="verMissoes" class="special-btn">
     <span><img src="ic_missoes.png" alt="">
       <span data-i18n="missoes">Ver Missões Concluídas</span>
     </span>
-    <img class="arrow" src="ic_arrow.png" alt="">
+    <img class="arrow" src="ic_arrow_right.png" alt="">
   </div>
 
   <div id="abrirModeracao" class="special-btn">
     <span><img src="ic_moderacao.png" alt="">
       <span data-i18n="moderacao">Moderação do Aplicativo</span>
     </span>
-    <img class="arrow" src="ic_arrow.png" alt="">
+    <img class="arrow" src="ic_arrow_right.png" alt="">
   </div>
 
 </div>
