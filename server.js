@@ -516,14 +516,18 @@ app.get(
 
         });
 
-      document.getElementById("discordBtn")
-.addEventListener("click", () => {
-  window.open(
-    "https://castchat-backend.onrender.com/auth/discord",
-    "discordLogin",
-    "width=500,height=700"
+   const tokenResp =
+  await fetch(
+    'https://discord.com/api/oauth2/token',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type':
+          'application/x-www-form-urlencoded'
+      },
+      body: params
+    }
   );
-});
 
       const tokenJson =
         await tokenResp.json();
@@ -540,7 +544,7 @@ app.get(
 
       const userResp =
         await fetch(
-          'https://castchat-backend.onrender.com/me',
+          'https://discord.com/api/users/@me',
           {
             headers: {
               Authorization:
