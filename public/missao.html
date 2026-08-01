@@ -177,12 +177,58 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const storage = firebase.storage();
 
-const profile = JSON.parse(localStorage.getItem("profileData"));
-const userId = profile ? profile.uid : null;
+let userId = null;
 
-if(!userId || userId < 10000){
-  alert("UID inválido.");
+async function carregarUsuarioAtual(){
+
+  try{
+
+    const loginDoc =
+      await db.collection("config")
+              .doc("loginAtual")
+              .get();
+
+    if(!loginDoc.exists){
+
+      alert("Nenhum usuário logado.");
+      return;
+
+    }
+
+    const dados = loginDoc.data();
+
+    userId =
+      String(
+        dados.perfilID ||
+        dados.uid ||
+        ""
+      );
+
+    if(!userId){
+
+      alert("UID inválido.");
+      return;
+
+    }
+
+    console.log(
+      "UID carregado:",
+      userId
+    );
+
+  }catch(err){
+
+    console.error(err);
+
+    alert(
+      "Erro ao carregar usuário."
+    );
+
+  }
+
 }
+
+carregarUsuarioAtual();
 
 const missoes = [
   { id:1, descricao:"Procure a Bandeira do CastChat 2.0" },
