@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Criar Grupo - CastChat 2.0</title>
+
+<style>
+
+:root{
+  --yellow:#FFD700;
+  --red:#FF3030;
+  --black:#000000;
+  --card:#111111;
+  --text:#CCCCCC;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#000;
+  color:#fff;
+  font-family:Arial, sans-serif;
+  max-width:420px;
+  margin:auto;
+  min-height:100vh;
+}
+
+.top-banner{
+
+  position:relative;
+
+  width:100%;
+}
+
+.back-btn{
+
+  position:absolute;
+
+  top:15px;
+
+  left:15px;
+
+  z-index:10;
+
+  display:flex;
+}
+
+.back-btn img{
+
+  width:42px;
+
+  height:42px;
+
+  object-fit:contain;
+
+  cursor:pointer;
+}
+
+.top-image{
+
+  width:100%;
+
+  display:block;
+}
+
+.container{
+  padding:15px;
+}
+
+.card{
+  background:#111;
+  border-radius:20px;
+  padding:15px;
+  margin-bottom:20px;
+}
+
+.photo-box{
+
+  width:130px;
+  height:130px;
+
+  margin:0 0 15px 0;
+
+  border-radius:20px;
+
+  border:2px dashed #FFD700;
+
+  background:#0a0a0a;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  cursor:pointer;
+
+  overflow:hidden;
+}
+
+.photo-box img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.plus{
+  font-size:50px;
+  color:#FFD700;
+  font-weight:bold;
+}
+
+label{
+  display:block;
+  margin-top:15px;
+  margin-bottom:5px;
+  color:#FFD700;
+  font-size:14px;
+}
+
+input,
+textarea,
+select{
+
+  width:100%;
+
+  background:#1a1a1a;
+
+  border:none;
+
+  border-radius:12px;
+
+  padding:12px;
+
+  color:white;
+
+  outline:none;
+}
+
+textarea{
+  resize:none;
+  height:120px;
+}
+
+.counter{
+  text-align:right;
+  color:#888;
+  font-size:12px;
+  margin-top:4px;
+}
+
+.confirm-btn{
+
+  width:100%;
+
+  margin-top:20px;
+
+  padding:14px;
+
+  border:none;
+
+  border-radius:30px;
+
+  font-weight:bold;
+
+  background:#555;
+
+  color:#999;
+
+  cursor:not-allowed;
+}
+
+.confirm-btn.active{
+
+  background:#FFD700;
+
+  color:#000;
+
+  cursor:pointer;
+}
+
+.groups-title{
+  color:#FFD700;
+  margin-bottom:10px;
+}
+
+.empty-groups{
+
+  background:#111;
+
+  border-radius:15px;
+
+  padding:20px;
+
+  text-align:center;
+
+  color:#777;
+}
+
+.group-card{
+
+  background:#111;
+
+  border-radius:15px;
+
+  padding:12px;
+
+  display:flex;
+
+  align-items:center;
+
+  gap:10px;
+
+  margin-bottom:10px;
+}
+
+.group-card img{
+
+  width:60px;
+  height:60px;
+
+  border-radius:12px;
+
+  object-fit:cover;
+}
+
+.group-info{
+  flex:1;
+}
+
+.group-info h3{
+  font-size:15px;
+  color:white;
+}
+
+.group-info p{
+  font-size:12px;
+  color:#999;
+  margin-top:3px;
+}
+
+.enter-btn{
+
+  background:#FFD700;
+
+  color:#000;
+
+  border:none;
+
+  padding:8px 14px;
+
+  border-radius:20px;
+
+  font-weight:bold;
+
+  cursor:pointer;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="top-banner">
+
+  <img
+    src="img_guide_group.png"
+    class="top-image"
+  >
+
+  <a href="perfil.html" class="back-btn">
+
+    <img
+      src="ic_back_gray_bg.png"
+      alt="Voltar"
+    >
+
+  </a>
+
+</div>
+
+<div class="container">
+
+  <div class="card">
+
+```
+<div class="photo-box" id="photoBox">
+
+  <span class="plus" id="plusIcon">+</span>
+
+  <img id="preview" style="display:none;">
+
+  <input
+    type="file"
+    id="groupPhoto"
+    accept="image/*"
+    hidden
+  >
+
+</div>
+
+<label>Nome do Grupo</label>
+
+<input
+  type="text"
+  id="groupName"
+  maxlength="20"
+  placeholder="Máximo 20 caracteres"
+>
+
+<div class="counter">
+  <span id="nameCount">0</span>/20
+</div>
+
+<label>Descrição</label>
+
+<textarea
+  id="groupDescription"
+  maxlength="200"
+  placeholder="Máximo 200 caracteres"
+></textarea>
+
+<div class="counter">
+  <span id="descCount">0</span>/200
+</div>
+
+<label>Tema do Grupo</label>
+
+<select id="groupTheme">
+
+  <option value="">
+    Selecione um jogo
+  </option>
+
+  <option>GTA V</option>
+  <option>Go Of War</option>
+  <option>Mortal Kombat XII</option>
+  <option>Need For Speed Most Wanted</option>
+  <option>Need For Speed Rivals</option>
+  <option>Among Us 2.0</option>
+  <option>Just Chatting</option>
+  <option>Among Us</option>
+  <option>Roblox</option>
+  <option>FortNite</option>
+  <option>Free Fire</option>
+  <option>Minecraft</option>
+  <option>Rocket League</option>
+  <option>Valorant</option>
+  <option>Call Of Duty</option>
+  <option>PUBG Mobile</option>
+  <option>Brawl Stars</option>
+  <option>Mobile Legends</option>
+  <option>Clash Of Clans</option>
+  <option>8 Ball Pool</option>
+
+</select>
+
+<button
+  id="confirmBtn"
+  class="confirm-btn"
+  disabled
+>
+  Confirmar
+</button>
+```
+
+  </div>
+
+  <h2 class="groups-title">
+    Meus Grupos
+  </h2>
+
+  <div id="groupsArea">
+
+```
+<div class="empty-groups">
+  Nenhum grupo criado ainda.
+</div>
+```
+
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBAOQC_mEjF-m5fdEO2no1-XfsQUjZc2mU",
+  authDomain: "amongchat-848f9.firebaseapp.com",
+  projectId: "amongchat-848f9",
+  storageBucket: "amongchat-848f9.firebasestorage.app",
+  messagingSenderId: "317096866187",
+  appId: "1:317096866187:web:fc4be8871cc5a9e7f43f8e",
+  measurementId: "G-ZFE9C5E595"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const db = firebase.firestore();
+
+const photoBox =
+document.getElementById("photoBox");
+
+const photoInput =
+document.getElementById("groupPhoto");
+
+const preview =
+document.getElementById("preview");
+
+const plusIcon =
+document.getElementById("plusIcon");
+
+const groupName =
+document.getElementById("groupName");
+
+const groupDescription =
+document.getElementById("groupDescription");
+
+const groupTheme =
+document.getElementById("groupTheme");
+
+const confirmBtn =
+document.getElementById("confirmBtn");
+
+photoBox.addEventListener("click",()=>{
+
+  photoInput.click();
+
+});
+
+photoInput.addEventListener("change",(e)=>{
+
+  const file = e.target.files[0];
+
+  if(!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(event){
+
+    preview.src = event.target.result;
+
+    preview.dataset.url =
+      event.target.result;
+
+    preview.style.display =
+      "block";
+
+    plusIcon.style.display =
+      "none";
+
+    validarFormulario();
+
+  };
+
+  reader.readAsDataURL(file);
+
+});
+
+groupName.addEventListener("input",()=>{
+
+  document.getElementById("nameCount")
+  .innerText =
+  groupName.value.length;
+
+  validarFormulario();
+
+});
+
+groupDescription.addEventListener("input",()=>{
+
+  document.getElementById("descCount")
+  .innerText =
+  groupDescription.value.length;
+
+  validarFormulario();
+
+});
+
+groupTheme.addEventListener("change",()=>{
+
+  validarFormulario();
+
+});
+
+function validarFormulario(){
+
+  const foto =
+  photoInput.files.length > 0;
+
+  const nome =
+  groupName.value.trim();
+
+  const descricao =
+  groupDescription.value.trim();
+
+  const tema =
+  groupTheme.value;
+
+  const valido =
+    foto &&
+    nome &&
+    descricao &&
+    tema;
+
+  confirmBtn.disabled =
+  !valido;
+
+  if(valido){
+
+    confirmBtn.classList.add("active");
+
+  }else{
+
+    confirmBtn.classList.remove("active");
+
+  }
+
+}
+
+confirmBtn.addEventListener("click", async()=>{
+
+  try{
+
+    const grupo = {
+
+      dono:
+        localStorage.getItem("perfilID"),
+
+      nome:
+        groupName.value.trim(),
+
+      descricao:
+        groupDescription.value.trim(),
+
+      tema:
+        groupTheme.value,
+
+      foto:
+        preview.dataset.url,
+
+      criadoEm:
+        firebase.firestore.FieldValue.serverTimestamp()
+
+    };
+
+    await db.collection("grupos")
+      .add(grupo);
+
+    alert(
+      "Grupo criado com sucesso!"
+    );
+
+    /* RESET */
+
+    photoInput.value = "";
+
+    preview.src = "";
+
+    preview.dataset.url = "";
+
+    preview.style.display =
+      "none";
+
+    plusIcon.style.display =
+      "block";
+
+    groupName.value = "";
+
+    groupDescription.value = "";
+
+    groupTheme.selectedIndex = 0;
+
+    document.getElementById("nameCount")
+      .innerText = "0";
+
+    document.getElementById("descCount")
+      .innerText = "0";
+
+    validarFormulario();
+
+    carregarMeusGrupos();
+
+  }catch(err){
+
+    console.error(err);
+
+    alert(
+      "Erro ao criar grupo."
+    );
+
+  }
+
+});
+
+async function carregarMeusGrupos(){
+
+  const groupsArea =
+    document.getElementById("groupsArea");
+
+  if(!groupsArea) return;
+
+  const meuUID =
+    localStorage.getItem("perfilID");
+
+  if(!meuUID) return;
+
+  const snap =
+    await db.collection("grupos")
+      .where("dono","==",meuUID)
+      .get();
+
+  groupsArea.innerHTML = "";
+
+  if(snap.empty){
+
+    groupsArea.innerHTML = `
+
+      <div class="empty-groups">
+
+        Nenhum grupo criado ainda.
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+  snap.forEach(doc=>{
+
+    const grupo = doc.data();
+
+    groupsArea.innerHTML += `
+
+      <div class="group-card">
+
+        <img src="${grupo.foto}">
+
+        <div class="group-info">
+
+          <h3>${grupo.nome}</h3>
+
+          <p>${grupo.descricao}</p>
+
+        </div>
+
+        <button
+          class="enter-btn"
+        >
+          Entrar
+        </button>
+
+      </div>
+
+    `;
+
+  });
+
+}
+
+carregarMeusGrupos().catch(console.error);
+</script>
+
+</body>
+</html>
