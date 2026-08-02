@@ -676,9 +676,26 @@ const token =
     isACClub: isACClub
   });
 
-      res.send(
-        generateSuccessPage(token)
-      );
+// SALVA LOGIN ATUAL
+await db.collection("config")
+  .doc("loginAtual")
+  .set({
+
+    tipo: "discord",
+
+    perfilID: String(uid),
+
+    uid: String(uid),
+
+    discordID: profile.id,
+
+    atualizadoEm: Date.now()
+
+  });
+
+res.send(
+  generateSuccessPage(token)
+);
 
     } catch (err) {
 
