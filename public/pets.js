@@ -342,9 +342,9 @@ const todosAnimais = [
     { id:21, nome:"Stickgirl", desc:"", img:"stickgirl.png", raridade:"Comum" },
     { id:22, nome:"Gosma Verde", desc:"", img:"gosmaverde.png", raridade:"Comum" },
      
-    { id:-1, nome:"Mascote dos AC CLUBS.", desc:"", img:"Mascotedosacclubs.png", raridade:"Supremo Lendário" },
-    { id:0, nome:"Medalha da Missão.", desc:"", img:"Medalha.png", raridade:"Supremo Lendário" },
-    { id:1, nome:"Bandeira CastChat20.", desc:"", img:"bandeiracastchat2.0.png", raridade:"Supremo Lendário" },
+    { id:-1, nome:"Mascote dos AC CLUBS.", desc:"", img:"mascotedosacclubs.png", raridade:"Supremo Lendário" },
+    { id:0, nome:"Medalha da Missão.", desc:"", img:"medalhadeouro.png", raridade:"Supremo Lendário" },
+    { id:1, nome:"Bandeira CastChat20.", desc:"", img:"bandeiracastchat20.png", raridade:"Supremo Lendário" },
     { id:2, nome:"Cachorro com Osso", desc:"", img:"cachorrocomosso.png", raridade:"Incomum" },
     { id:3, nome:"Among Vermelho", desc:"", img:"among.png", raridade:"Super Legendário" },
     { id:4, nome:"Among Verde", desc:"", img:"among verde.png", raridade:"Legendário" },
