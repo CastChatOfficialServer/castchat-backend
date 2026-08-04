@@ -982,6 +982,17 @@ setTimeout(() => {
 }
 
 // ===============================
+// CASTCHAT STORE
+// ===============================
+
+app.use(
+  '/castchatstore',
+  express.static(
+    path.join(__dirname, 'castchatstore')
+  )
+);
+
+// ===============================
 // START
 // ===============================
 
