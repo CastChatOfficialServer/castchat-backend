@@ -68,7 +68,7 @@ const JWT_SECRET =
 // MASTER DISCORD
 // ===============================
 
-const AC_CLUB_DISCORD_ID =
+const AC_Official_001_DISCORD_ID =
   '908775623135219734';
 
 // ===============================
@@ -676,23 +676,6 @@ const token =
     isACClub: isACClub
   });
 
-// SALVA LOGIN ATUAL
-await db.collection("config")
-  .doc("loginAtual")
-  .set({
-
-    tipo: "discord",
-
-    perfilID: String(uid),
-
-    uid: String(uid),
-
-    discordID: profile.id,
-
-    atualizadoEm: Date.now()
-
-  });
-
 res.send(
   generateSuccessPage(token)
 );
@@ -999,7 +982,7 @@ app.use(
 app.listen(PORT, () => {
 
   console.log('======================');
-  console.log('CastChat2.0 ONLINE');
+  console.log('CastChat2.0 Online');
   console.log('======================');
 
   console.log(
