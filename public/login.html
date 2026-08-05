@@ -308,15 +308,6 @@ auth.onAuthStateChanged(async (firebaseUser) => {
 
     }
 
- await db.collection("config")
-      .doc("loginAtual")
-      .set({
-        tipo: "google",
-        firebaseUID: firebaseUser.uid,
-        perfilID: String(perfilID),
-        atualizadoEm: Date.now()
-      }, { merge:true });
-
     window.location.href =
       "perfil.html";
 
@@ -442,14 +433,6 @@ window.addEventListener("message", async (event) => {
 
     const uidString =
       String(uid);
-
-await db.collection("config")
-  .doc("loginAtual")
-  .set({
-    tipo: "discord",
-    uid: uidString,
-    atualizadoEm: Date.now()
-  }, { merge:true });
 
     const isAdmin =
       uidString === "10000";
