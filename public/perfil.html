@@ -2234,6 +2234,9 @@ const MASTER_ID = "10000";
 // ===============================
 // PERSISTÊNCIA + AUTH
 // ===============================
+  const castToken =
+  localStorage.getItem("castchat_token");
+  
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
   .then(() => {
 
@@ -2247,23 +2250,9 @@ auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
 const visitado =
   sessionStorage.getItem("perfilVisitado");
 
-// ===============================
-// LOGIN ATIVO PELO FIRESTORE
-// ===============================
-const loginAtualDoc =
-  await db.collection("config")
-    .doc("loginAtual")
-    .get();
-
-const loginAtual =
-  loginAtualDoc.exists
-    ? loginAtualDoc.data()
-    : null;
-
-console.log("LOGIN ATIVO:", loginAtual);
-
-if (loginAtual) {
-
+const perfilDiscord =
+  localStorage.getItem("perfilID");
+      
   // ===============================
   // LOGIN GOOGLE
   // ===============================
@@ -2325,7 +2314,7 @@ initApp();
 // ===============================
 // VISITANTE
 // ===============================
-if (!user && !castToken) {
+if (!user && !castToken && !perfilDiscord) {
 
   console.log("Visitante");
 
