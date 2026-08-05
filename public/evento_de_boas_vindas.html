@@ -451,8 +451,8 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 
-/* ================= 
-USER 
+/* =================
+USER
 ================= */
 
 let currentUser = {
@@ -465,34 +465,15 @@ let currentUser = {
 
 async function carregarUsuarioAtualEvento(){
 
-  const loginAtualDoc =
-    await db.collection("config")
-      .doc("loginAtual")
-      .get();
+  const perfilID =
+    localStorage.getItem("perfilID");
 
-  if (!loginAtualDoc.exists) {
+  if (!perfilID) {
+
     alert("Faça login para participar do evento.");
     window.location.href = "login.html";
     return;
-  }
 
-  const loginAtual =
-    loginAtualDoc.data() || {};
-
-  let perfilID = null;
-
-  if (loginAtual.tipo === "google") {
-    perfilID = loginAtual.perfilID;
-  }
-
-  if (loginAtual.tipo === "discord") {
-    perfilID = loginAtual.uid;
-  }
-
-  if (!perfilID) {
-    alert("Perfil não encontrado.");
-    window.location.href = "login.html";
-    return;
   }
 
   const userDoc =
@@ -501,8 +482,10 @@ async function carregarUsuarioAtualEvento(){
       .get();
 
   if (!userDoc.exists) {
+
     alert("Perfil não encontrado no Firestore.");
     return;
+
   }
 
   const data =
@@ -519,6 +502,7 @@ async function carregarUsuarioAtualEvento(){
   };
 
   console.log("Usuário do evento:", currentUser);
+
 }
 
 /* ================= 
