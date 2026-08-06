@@ -227,6 +227,19 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btnCriar =
+    document.querySelector(
+      'button[onclick="abrirCriador()"]'
+    );
+
+  if (btnCriar) {
+    btnCriar.style.display = "none";
+  }
+
+});
+  
 /* =========================
    PEGAR USUÁRIO REAL PELO FIRESTORE
 ========================== */
@@ -237,30 +250,13 @@ let usuarioAtual = {
 
 async function carregarUsuarioAtual(){
 
-  const loginAtualDoc =
-    await db.collection("config")
-      .doc("loginAtual")
-      .get();
+  const perfilID =
+    localStorage.getItem("perfilID");
 
-  if (!loginAtualDoc.exists) {
-    console.log("Nenhum login ativo.");
+  if (!perfilID) {
+    console.log("Nenhum perfil encontrado.");
     return;
   }
-
-  const loginAtual =
-    loginAtualDoc.data() || {};
-
-  let perfilID = null;
-
-  if (loginAtual.tipo === "google") {
-    perfilID = loginAtual.perfilID;
-  }
-
-  if (loginAtual.tipo === "discord") {
-    perfilID = loginAtual.uid;
-  }
-
-  if (!perfilID) return;
 
   const userDoc =
     await db.collection("usuarios")
@@ -272,19 +268,19 @@ async function carregarUsuarioAtual(){
   const data =
     userDoc.data() || {};
 
-    const btnCriar =
-  document.querySelector(
-    'button[onclick="abrirCriador()"]'
-  );
+  const btnCriar =
+    document.querySelector(
+      'button[onclick="abrirCriador()"]'
+    );
 
-const podeCriar =
-  String(perfilID) === "10000" &&
-  String(data.discordID) === "908775623135219734";
+  const podeCriar =
+    String(perfilID) === "10000" &&
+    String(data.discordID) === "908775623135219734";
 
-if (btnCriar) {
-  btnCriar.style.display =
-    podeCriar ? "block" : "none";
-}
+  if (btnCriar) {
+    btnCriar.style.display =
+      podeCriar ? "block" : "none";
+  }
 
   usuarioAtual = {
     id: String(perfilID),
@@ -294,7 +290,10 @@ if (btnCriar) {
       `Usuário ${perfilID}`
   };
 
-  console.log("Usuário notificações:", usuarioAtual);
+  console.log(
+    "Usuário notificações:",
+    usuarioAtual
+  );
 
 }
 
