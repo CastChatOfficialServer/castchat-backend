@@ -185,23 +185,26 @@ let petsAdquiridos = [];
 
 async function carregarPerfilAnimal(){
 
-  const loginAtualDoc =
-    await db.collection("config")
-      .doc("loginAtual")
-      .get();
+  const perfilID =
+    localStorage.getItem("perfilID");
 
-  if (!loginAtualDoc.exists) return;
+  if (!perfilID) {
 
-  const loginAtual =
-    loginAtualDoc.data() || {};
+    alert("Faça login primeiro.");
 
-  if (loginAtual.tipo === "google") {
-    meuPerfilID = String(loginAtual.perfilID);
+    window.location.href =
+      "login.html";
+
+    return;
   }
 
-  if (loginAtual.tipo === "discord") {
-    meuPerfilID = String(loginAtual.uid);
-  }
+  meuPerfilID =
+    String(perfilID);
+
+  console.log(
+    "Perfil Animal:",
+    meuPerfilID
+  );
 
 }
 
