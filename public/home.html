@@ -725,27 +725,10 @@ window.usuarioAtual = {
 // =========================
 async function carregarUsuarioAtual(){
 
-  const loginAtualDoc =
-  await db.collection("config")
-    .doc("loginAtual")
-    .get();
+  const perfilID =
+    localStorage.getItem("perfilID");
 
-if (!loginAtualDoc.exists) return;
-
-const loginAtual =
-  loginAtualDoc.data() || {};
-
-let perfilID = null;
-
-if (loginAtual.tipo === "discord") {
-  perfilID = loginAtual.uid;
-}
-
-if (loginAtual.tipo === "google") {
-  perfilID = loginAtual.perfilID;
-}
-
-if (!perfilID) return;
+  if (!perfilID) return;
 
   try{
 
@@ -776,7 +759,7 @@ const btnEventos =
   document.getElementById("btnEventos");
 
 const podeVerEventos =
-  String(data.uid) === "10000" &&
+  String(usuarioAtual.id) === "10000" &&
   String(data.discordID) === "908775623135219734";
 
 if (btnEventos) {
