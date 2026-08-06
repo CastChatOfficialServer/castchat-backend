@@ -2253,62 +2253,27 @@ const visitado =
 const perfilDiscord =
   localStorage.getItem("perfilID");
       
-  // ===============================
-  // LOGIN GOOGLE
-  // ===============================
-  if (
-    loginAtual.tipo === "google" &&
-    loginAtual.perfilID
-  ) {
+// ===============================
+// LOGIN DISCORD
+// ===============================
+if (perfilDiscord) {
 
-    const perfilID =
-      String(loginAtual.perfilID);
+  meuPerfilID = String(perfilDiscord);
 
-    currentUser = loginAtual;
-    currentUID = String(loginAtual.firebaseUID || "");
+  perfilUID =
+    visitado
+      ? String(visitado)
+      : meuPerfilID;
 
-    meuPerfilID = perfilID;
-    perfilUID = visitado ? String(visitado) : perfilID;
+  await criarPerfilPadrao(meuPerfilID);
 
-    await criarPerfilPadrao(meuPerfilID);
-
-    console.log("Perfil Google:", perfilUID);
+  console.log("Perfil Discord:", perfilUID);
 
   startUserListener();
-iniciarCarteiraPerfil();
-initApp();
+  iniciarCarteiraPerfil();
+  initApp();
 
-    return;
-  }
-
-  // ===============================
-  // LOGIN DISCORD
-  // ===============================
-  if (
-    loginAtual.tipo === "discord" &&
-    loginAtual.uid
-  ) {
-
-    const perfilID =
-  String(loginAtual.perfilID || loginAtual.uid);
-
-    currentUser = loginAtual;
-    currentUID = perfilID;
-
-    meuPerfilID = perfilID;
-    perfilUID = visitado ? String(visitado) : perfilID;
-
-    await criarPerfilPadrao(meuPerfilID);
-
-    console.log("Perfil Discord:", perfilUID);
-
-startUserListener();
-iniciarCarteiraPerfil();
-initApp();
-
-    return;
-  }
-
+  return;
 }
 
 // ===============================
