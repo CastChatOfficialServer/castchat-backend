@@ -169,33 +169,26 @@ let adminLiberado = false;
 ============================== */
 async function verificarAdmin(){
 
-  const loginAtualDoc =
-    await db.collection("config")
-      .doc("loginAtual")
-      .get();
+  const perfilID =
+    localStorage.getItem("perfilID");
 
-  if (!loginAtualDoc.exists) {
-    alert("Acesso negado.");
-    window.location.href = "home.html";
+  if (!perfilID) {
+
+    alert("Faça login.");
+
+    window.location.href =
+      "login.html";
+
     return false;
   }
 
-  const loginAtual =
-    loginAtualDoc.data() || {};
-
-  let perfilID = null;
-
-  if (loginAtual.tipo === "google") {
-    perfilID = loginAtual.perfilID;
-  }
-
-  if (loginAtual.tipo === "discord") {
-    perfilID = loginAtual.uid;
-  }
-
   if (String(perfilID) !== UID_MASTER) {
+
     alert("Acesso negado.");
-    window.location.href = "home.html";
+
+    window.location.href =
+      "home.html";
+
     return false;
   }
 
@@ -205,21 +198,32 @@ async function verificarAdmin(){
       .get();
 
   if (!userDoc.exists) {
+
     alert("Perfil admin não encontrado.");
-    window.location.href = "home.html";
+
+    window.location.href =
+      "home.html";
+
     return false;
   }
 
   const user =
     userDoc.data() || {};
 
-  if (String(user.discordID) !== DISCORD_MASTER) {
+  if (
+    String(user.discordID) !== DISCORD_MASTER
+  ) {
+
     alert("Acesso negado.");
-    window.location.href = "home.html";
+
+    window.location.href =
+      "home.html";
+
     return false;
   }
 
   adminLiberado = true;
+
   return true;
 }
 
