@@ -172,37 +172,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   const COUNTRY_DEFAULT = "Brasil";
 
   // =========================
-// PEGA ID DO PERFIL PELO FIRESTORE
+// PEGA ID DO PERFIL PELO LOCALSTORAGE
 // =========================
-const loginAtualDoc =
-  await db.collection("config")
-    .doc("loginAtual")
-    .get();
-
-if (!loginAtualDoc.exists) {
-  alert("Perfil não encontrado");
-  return;
-}
-
-const loginAtual =
-  loginAtualDoc.data() || {};
-
-let meuPerfilID = null;
-
-if (loginAtual.tipo === "google") {
-  meuPerfilID = loginAtual.perfilID;
-}
-
-if (loginAtual.tipo === "discord") {
-  meuPerfilID = loginAtual.uid;
-}
+let meuPerfilID =
+  localStorage.getItem("perfilID");
 
 if (!meuPerfilID) {
-  alert("Perfil não encontrado");
+
+  alert("Faça login primeiro.");
+
+  window.location.href =
+    "login.html";
+
   return;
 }
 
-meuPerfilID = String(meuPerfilID);
+meuPerfilID =
+  String(meuPerfilID);
 
   // =========================
   // CARREGAR DADOS FIREBASE
