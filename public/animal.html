@@ -190,21 +190,15 @@ async function carregarPerfilAnimal(){
 
   if (!perfilID) {
 
-    alert("Faça login primeiro.");
+    meuPerfilID = "visitante";
 
-    window.location.href =
-      "login.html";
+    console.log("Modo visitante");
 
     return;
   }
 
   meuPerfilID =
     String(perfilID);
-
-  console.log(
-    "Perfil Animal:",
-    meuPerfilID
-  );
 
 }
 
@@ -295,7 +289,7 @@ async function carregarPerfilAnimal(){
     { id:273, nome:"Fada da Floresta", desc:"", img:"fadadafloresta.png", raridade:"Legendário"},
     { id:272, nome:"Dispertador de Almoço", desc:"", img:"dispertador.png", raridade:"Raro"},
     { id:271, nome:"Fofoqueiro", desc:"", img:"fofoqueiro.png", raridade:"Comum"},
-    { id:270, nome:"Filhote de Polvo", desc:"", img:"filhotedepolvo.png", raridade:"Icomum"},
+    { id:270, nome:"Filhote de Polvo", desc:"", img:"filhotedepolvo.png", raridade:"Incomum"},
     { id:269, nome:"Bule de Xá", desc:"", img:"buledexa.png", raridade:"Legendário"},
     { id:268, nome:"Panela Fervendo", desc:"", img:"panelafervente.png", raridade:"Raro"},
     { id:267, nome:"Flor do Calice", desc:"", img:"flordecalice.png", raridade:"Comum"},
@@ -311,7 +305,7 @@ async function carregarPerfilAnimal(){
     { id:257, nome:"Pinóquio", desc:"", img:"pinoquio.png", raridade:"Comum"},
     { id:256, nome:"Filhote", desc:"", img:"filhote.png", raridade:"Incomum"},
     { id:255, nome:"Arroz Doce", desc:"", img:"arrozdoce.png", raridade:"Legendário"},
-    { id:254, nome:"Torradeira", desc:"", img:"torradeira.png", raridade:"Raroo"},
+    { id:254, nome:"Torradeira", desc:"", img:"torradeira.png", raridade:"Raro"},
     { id:253, nome:"Abacate", desc:"", img:"abacate.png", raridade:"Comum"},
     { id:252, nome:"Origami", desc:"", img:"origami.png", raridade:"Legendário"},
     { id:251, nome:"Espuma", desc:"", img:"espoma.png", raridade:"Raro"},
@@ -796,7 +790,12 @@ function atualizarEstadoInternet(){
 ================================ */
 function iniciarCarteira(){
 
-  if (!meuPerfilID) return;
+  if (
+    !meuPerfilID ||
+    meuPerfilID === "visitante"
+  ){
+    return;
+  }
 
   db.collection("usuarios")
     .doc(String(meuPerfilID))
@@ -861,7 +860,12 @@ function getPetsIniciaisPorID(){
 
 async function garantirPetsFirestore(){
 
-  if (!meuPerfilID) return;
+  if (
+    !meuPerfilID ||
+    meuPerfilID === "visitante"
+  ){
+    return;
+  }
 
   const ref = db.collection("usuarios").doc(String(meuPerfilID));
   const doc = await ref.get();
@@ -947,6 +951,8 @@ window.addEventListener("offline", atualizarEstadoInternet);
   iniciarCarteira();
   await garantirPetsFirestore();
 
+ if (meuPerfilID !== "visitante") {
+
   db.collection("usuarios")
     .doc(String(meuPerfilID))
     .onSnapshot(doc => {
@@ -959,6 +965,15 @@ window.addEventListener("offline", atualizarEstadoInternet);
       renderPets();
 
     });
+
+} else {
+
+  petsAdquiridos =
+    getPetsIniciaisPorID();
+
+  renderPets();
+
+}
 
   atualizarEstadoInternet();
 })();
