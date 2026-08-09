@@ -2167,6 +2167,11 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ===============================
+// ID REAL DO USUÁRIO
+// ===============================
+let meuPerfilID = null;
+  
+// ===============================
 // PERFIL ABERTO
 // ===============================
 let perfilUID = null;
@@ -2174,28 +2179,17 @@ let perfilUID = null;
 let perfilVisitadoID = null;
 let visualizandoOutroPerfil = false;
 
-//================================
-  PESQUISADO
-//================================
-const params =
-  new URLSearchParams(location.search);
+const params = new URLSearchParams(location.search);
 
-perfilVisitadoID =
-  params.get("id");
+perfilVisitadoID = params.get("id");
 
-if(
-  perfilVisitadoID &&
-  perfilVisitadoID !== String(meuPerfilID)
-){
-
-  visualizandoOutroPerfil = true;
+visualizandoOutroPerfil = !!perfilVisitadoID;
 
 }
   
-// ===============================
-// ID REAL DO USUÁRIO
-// ===============================
-let meuPerfilID = null;
+/*=====================
+
+=======================*/
 
 let carteiraPerfilIniciada = false;
 
