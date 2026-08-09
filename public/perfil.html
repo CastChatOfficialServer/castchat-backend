@@ -1796,6 +1796,17 @@ BOTÃO PRO/VIP
       </div>
     </div>
 
+<div id="perfilBackBtn" style="display:none;">
+  <img
+    src="ic_back_circle.png"
+    onclick="window.location.href='home.html'"
+    style="
+      width:40px;
+      cursor:pointer;
+      margin-bottom:10px;
+    ">
+</div>
+  
   <div class="perfil-header">
 
     <div class="avatar-wrap">
@@ -2160,6 +2171,27 @@ const db = firebase.firestore();
 // ===============================
 let perfilUID = null;
 
+let perfilVisitadoID = null;
+let visualizandoOutroPerfil = false;
+
+//================================
+  PESQUISADO
+//================================
+const params =
+  new URLSearchParams(location.search);
+
+perfilVisitadoID =
+  params.get("id");
+
+if(
+  perfilVisitadoID &&
+  perfilVisitadoID !== String(meuPerfilID)
+){
+
+  visualizandoOutroPerfil = true;
+
+}
+  
 // ===============================
 // ID REAL DO USUÁRIO
 // ===============================
@@ -3012,9 +3044,14 @@ async function iniciarPets() {
 
   const MAX_PETS = 4;
 
-  const doc = await db.collection("usuarios")
-    .doc(String(meuPerfilID))
-    .get();
+ const uidPerfil =
+  visualizandoOutroPerfil
+    ? String(perfilVisitadoID)
+    : String(meuPerfilID);
+
+const doc = await db.collection("usuarios")
+  .doc(uidPerfil)
+  .get();
 
   let petsEquipados =
     doc.data()?.petsEquipados || [];
@@ -3102,13 +3139,17 @@ async function iniciarPets() {
           ${pet.nome}
         </div>
 
-        <button class="pet-equip-btn">
-          ${
-            isEquipped
-              ? "Desequipar"
-              : "Equipar"
-          }
-        </button>
+      <button class="pet-equip-btn">
+  ${
+    visualizandoOutroPerfil
+      ? "Trocar"
+      : (
+          isEquipped
+            ? "Desequipar"
+            : "Equipar"
+        )
+  }
+</button>
       `;
 
       petsGrid.appendChild(card);
@@ -3736,6 +3777,7 @@ function updateUI() {
 
   if (typeof iniciarPets === "function") iniciarPets();
 
+  atualizarModoPerfilVisitado(); // ADICIONE ESTA LINHA
 }
 </script>
 </body>
