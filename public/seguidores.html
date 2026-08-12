@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evento de Seguidores</title>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui,Arial;
+  background:#000;
+  display:flex;
+  justify-content:center;
+}
+
+/* FORMATO CELULAR */
+.app{
+  position:relative;
+  width:390px;
+  min-height:100vh;
+  background:#041368;
+  padding:16px;
+}
+
+/* TOP 3 */
+.top3{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  margin-top:20px;
+}
+.top-card{
+  width:30%;
+  text-align:center;
+}
+.top-card .name{
+  font-weight:bold;
+  margin-bottom:6px;
+}
+
+/* MOLDURA + AVATAR */
+.avatar-frame{
+  position:relative;
+  width:86px;
+  height:86px;
+  margin:0 auto 6px;
+}
+.avatar-frame img.frame{
+  width:100%;
+  height:100%;
+}
+.avatar-frame img.avatar{
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  background:#ccc;
+}
+
+/* LISTA */
+.list{
+  margin-top:24px;
+}
+.user-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:#041368;
+  border-radius:12px;
+  padding:10px;
+  margin-bottom:10px;
+}
+.user-info{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.user-info img{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:#ccc;
+}
+.follow-btn{
+  background:#ffd400;
+  border:none;
+  border-radius:8px;
+  padding:6px 14px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.following{
+  color:#000;
+  font-weight:bold;
+}
+
+/* RECOMPENSAS */
+.rewards{
+  margin-top:32px;
+}
+.rewards h2{
+  text-align:center;
+  margin-bottom:18px;
+}
+
+.reward-row{
+  display:flex;
+  align-items:center;
+  margin-bottom:14px;
+}
+
+.reward-text{
+  color:#000;
+  font-weight:bold;
+}
+
+.reward-img{
+  width:50px;
+  height:50px;
+  object-fit:contain;
+}
+
+.back-btn{
+  position:absolute;
+  top:12px;
+  left:12px;
+  z-index:999;
+}
+
+.back-btn img{
+  width:42px;
+  height:42px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <!-- BOTÃO VOLTAR -->
+  <a href="home.html" class="back-btn">
+    <img src="ic_back_gray_bg.png" alt="Voltar">
+  </a>
+
+  <!-- TOP 3 -->
+  <div class="top3">
+
+    <!-- TOP 2 -->
+    <div class="top-card" id="top2">
+
+      <div class="name" id="top2Nome">
+        Carregando...
+      </div>
+
+      <div class="avatar-frame">
+
+        <img class="frame"
+             src="ic_avatar_frame_reward_2.png">
+
+        <img class="avatar"
+             id="top2Avatar"
+             src="avatar_default.png">
+
+        <img class="rank-img"
+             src="ic_rank_reward_02.png">
+
+      </div>
+
+      <div id="top2Selos"></div>
+
+      <div id="top2Curtidas">
+        ❤️ 0
+      </div>
+
+    </div>
+
+    <!-- TOP 1 -->
+    <div class="top-card" id="top1">
+
+      <div class="name" id="top1Nome">
+        Carregando...
+      </div>
+
+      <div class="avatar-frame">
+
+        <img class="frame"
+             src="ic_avatar_frame_reward_1.png">
+
+        <img class="avatar"
+             id="top1Avatar"
+             src="avatar_default.png">
+
+        <img class="rank-img"
+             src="ic_rank_reward_01.png">
+
+      </div>
+
+      <div id="top1Selos"></div>
+
+      <div id="top1Curtidas">
+        ❤️ 0
+      </div>
+
+    </div>
+
+    <!-- TOP 3 -->
+    <div class="top-card" id="top3">
+
+      <div class="name" id="top3Nome">
+        Carregando...
+      </div>
+
+      <div class="avatar-frame">
+
+        <img class="frame"
+             src="ic_avatar_frame_reward_3.png">
+
+        <img class="avatar"
+             id="top3Avatar"
+             src="avatar_default.png">
+
+        <img class="rank-img"
+             src="ic_rank_reward_03.png">
+
+      </div>
+
+      <div id="top3Selos"></div>
+
+      <div id="top3Curtidas">
+        ❤️ 0
+      </div>
+
+    </div>
+
+  </div>
+
+<!-- LISTA 4–100 -->
+<div class="list" id="list"></div>
+
+<!-- RECOMPENSAS -->
+<div class="rewards">
+  <h2>Recompensas do evento</h2>
+
+  <div class="reward-row">
+    <img src="premioouro.png" class="reward-img">
+    <div class="reward-text">30 pets legendary</div>
+  </div>
+
+  <div class="reward-row">
+    <img src="premioprata.png" class="reward-img">
+    <div class="reward-text">20 pets legendary</div>
+  </div>
+
+  <div class="reward-row">
+    <img src="premiobronze.png" class="reward-img">
+    <div class="reward-text">10 pets legendary</div>
+  </div>
+
+  <div class="reward-row">
+    <img src="premio4_10.png" class="reward-img">
+    <div class="reward-text">5 pets legendary</div>
+  </div>
+
+  <div class="reward-row">
+    <img src="premio11_20.png" class="reward-img">
+    <div class="reward-text">30 days of PRO card</div>
+  </div>
+</div>
+
+<script>
+const list = document.getElementById("list");
+
+/* =========================
+   CRIAR LINHA
+========================== */
+
+function criarLinhaRanking(
+  posicao,
+  nome,
+  avatar,
+  curtidas,
+  selos = []
+){
+
+  const row = document.createElement("div");
+  row.className = "user-row";
+
+  row.innerHTML = `
+    <div class="user-info">
+
+      <img src="${avatar || 'avatar_default.png'}">
+
+      <div>
+
+        <strong>${posicao}º ${nome}</strong>
+
+        <div class="selos"></div>
+
+        <div>❤️ ${curtidas}</div>
+
+      </div>
+
+    </div>
+
+    <button class="follow-btn">
+      Seguir
+    </button>
+  `;
+
+  const btn = row.querySelector("button");
+
+  btn.onclick = () => {
+
+    btn.outerHTML =
+    '<span class="following">Seguindo</span>';
+
+  };
+
+  const icones = {
+    official:"ic_official.png",
+    verifyPadrao:"ic_settings_verify.png",
+    verifyAmarelo:"ic_settings_verify_amarelo.png",
+    verifyVermelho:"ic_settings_verify_vermelho.png"
+  };
+
+  const seloBox =
+    row.querySelector(".selos");
+
+  selos.forEach(s => {
+
+    if(!icones[s]) return;
+
+    const img =
+      document.createElement("img");
+
+    img.src = icones[s];
+    img.style.width = "18px";
+    img.style.marginRight = "4px";
+
+    seloBox.appendChild(img);
+
+  });
+
+  list.appendChild(row);
+
+}
+
+/* =========================
+   CARREGAR RANKING
+========================== */
+async function carregarRanking(){
+
+  list.innerHTML = "";
+
+  const snap = await db
+    .collection("ranking_social")
+    .orderBy("curtidas","desc")
+    .limit(100)
+    .get();
+
+  let posicao = 1;
+
+  for(const doc of snap.docs){
+
+    const rankData = doc.data();
+
+    const perfilDoc = await db
+      .collection("usuarios")
+      .doc(doc.id)
+      .get();
+
+    let nome = "Usuário";
+    let avatar = "avatar_default.png";
+    let selos = [];
+
+    if(perfilDoc.exists){
+
+      const perfil = perfilDoc.data();
+
+      nome =
+        perfil.nickname ||
+        perfil.nome ||
+        `Usuário ${doc.id}`;
+
+      if(perfil.avatarUpload){
+
+        avatar = perfil.avatarUpload;
+
+      }
+      else if(
+        perfil.avatarEquipado &&
+        perfil.avatarEquipado.valor
+      ){
+
+        avatar = perfil.avatarEquipado.valor;
+
+      }
+      else if(perfil.avatar){
+
+        avatar = perfil.avatar;
+
+      }
+
+      selos =
+        perfil.selos || [];
+
+    }
+
+    /* =====================
+       TOP 1, 2 e 3
+    ====================== */
+
+    if(posicao <= 3){
+
+      document.getElementById(
+        `top${posicao}Nome`
+      ).textContent = nome;
+
+      document.getElementById(
+        `top${posicao}Avatar`
+      ).src = avatar;
+
+      document.getElementById(
+        `top${posicao}Curtidas`
+      ).textContent =
+      `❤️ ${rankData.curtidas || 0}`;
+
+      const box =
+        document.getElementById(
+          `top${posicao}Selos`
+        );
+
+      box.innerHTML = "";
+
+      const icones = {
+        official:"ic_official.png",
+        verifyPadrao:"ic_settings_verify.png",
+        verifyAmarelo:"ic_settings_verify_amarelo.png",
+        verifyVermelho:"ic_settings_verify_vermelho.png"
+      };
+
+      selos.forEach(selo => {
+
+        if(!icones[selo]) return;
+
+        const img =
+          document.createElement("img");
+
+        img.src = icones[selo];
+        img.style.width = "18px";
+        img.style.marginRight = "4px";
+
+        box.appendChild(img);
+
+      });
+
+    }
+
+    /* =====================
+       TOP 4-100
+    ====================== */
+
+    else{
+
+      criarLinhaRanking(
+        posicao,
+        nome,
+        avatar,
+        rankData.curtidas || 0,
+        selos
+      );
+
+    }
+
+    posicao++;
+
+  }
+
+}
+
+carregarRanking();
+</script>
+
+</body>
+</html>
