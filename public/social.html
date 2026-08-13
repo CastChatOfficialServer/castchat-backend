@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sala GTA</title>
+
+<style>
+:root{--text:#fff;}
+body{
+  margin:0;background:#000;
+  display:flex;justify-content:center;align-items:center;
+  height:100vh;font-family:system-ui,Arial;
+}
+.app{
+  width:390px;height:100vh;max-height:780px;
+  background:#000;color:var(--text);
+  position:relative;overflow:hidden;
+}
+
+/* VOICE */
+.voice{
+  position:absolute;inset:0;
+  background:url('gta5.png') center/cover no-repeat;
+}
+
+/* TOPO */
+.voice-top{
+  display:flex;justify-content:flex-end;
+  padding:12px;
+}
+.voice-top img{width:26px;cursor:pointer}
+
+/* AVATAR (ESPAÇO VAZIO) */
+.avatar{
+  position:absolute;
+  top:45%;left:50%;
+  transform:translate(-50%,-50%);
+  width:80px;height:80px;
+}
+
+/* ===== SEMÁFORO DE RANK ===== */
+.rank-traffic{
+  position:absolute;
+  top:90px;
+  right:16px; /* 🔧 canto direito */
+  width:64px;
+  height:160px;
+  border:3px solid #0a1e3f;
+  border-radius:20px;
+  background:#0a1e3f;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 0;
+}
+
+.rank-timer{
+  color:#fff;
+  font-size:14px;
+  height:18px;
+}
+
+.rank-value{
+  color:#fff;
+  font-size:22px;
+  font-weight:bold;
+}
+
+.rank-heart{
+  width:36px;
+  cursor:pointer;
+}
+.rank-heart.disabled{
+  opacity:.4;
+  pointer-events:none;
+}
+
+/* EMOJI GRANDE */
+.avatar .emoji{
+  position:absolute;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:64px;
+  opacity:0;
+  transition:opacity .3s;
+}
+
+/* JOYSTICK */
+.joystick{
+  position:absolute;
+  bottom:120px;right:24px;
+  width:90px;height:90px;
+  border-radius:50%;
+  background:rgba(255,255,255,.15);
+}
+.joystick-ball{
+  position:absolute;
+  width:36px;height:36px;
+  border-radius:50%;
+  background:#fff;
+  top:27px;left:27px;
+}
+
+.voice-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 14px;
+  z-index: 60;
+}
+
+.voice-left,
+.voice-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.voice-bottom img {
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+/* ===== CHAT ===== */
+.chat {
+  position: absolute;
+  bottom: 64px; /* exatamente acima da barra */
+  left: 0;
+  width: 100%;
+  height: 40%;
+  background: #111;
+  display: none;
+  flex-direction: column;
+  z-index: 100;
+}
+
+.chat.active {
+  display: flex;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.chat-input {
+  padding: 10px;
+  border-top: 1px solid #222;
+}
+
+.chat-input input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+/* ===== EMOJI ===== */
+.emoji-card {
+  position: absolute;
+  bottom: 64px; /* acima da barra */
+  left: 10px;
+  right: 10px;
+  background: #222;
+  border-radius: 14px;
+  padding: 10px;
+  display: none;
+  z-index: 100;
+}
+
+.emoji-card.active {
+  display: block;
+}
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+
+.emoji-grid span {
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* ===== GARANTE CLIQUE ===== */
+img {
+  pointer-events: auto;
+}
+
+.likes-count{
+  color:#ff4d6d;
+  font-size:13px;
+  font-weight:bold;
+}
+
+.rank-timer{
+  color:#fff;
+  font-size:12px;
+  min-height:14px;
+}
+
+.rank-heart.disabled{
+  opacity:.35;
+  pointer-events:none;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+<div class="voice">
+
+<div class="voice-top">
+  <img src="ic_group_leave.png" onclick="sair()">
+</div>
+
+<!-- SEMÁFORO -->
+<div class="rank-traffic">
+
+  <div id="likesCount" class="likes-count">
+    ❤️ 0
+  </div>
+
+  <div id="rankValue" class="rank-value">
+    N
+  </div>
+
+  <div id="rankTimer" class="rank-timer">
+  </div>
+
+  <img
+    id="rankHeart"
+    class="rank-heart"
+    src="ic_love_selected.png">
+
+</div>
+
+<div id="avatar" class="avatar">
+  <div id="emoji" class="emoji"></div>
+</div>
+
+<div class="joystick" id="joystick">
+  <div class="joystick-ball" id="ball"></div>
+</div>
+
+<div class="voice-bottom">
+  <div class="voice-left">
+    <img id="chatBtn" src="icon_msg.png">
+    <img id="emojiBtn" src="ic_emoji.png">
+    <img src="ic_room_share.png">
+  </div>
+  <div class="voice-right">
+    <img id="muteBtn" src="ic_mute_on_1.png">
+  </div>
+</div>
+
+<!-- CHAT -->
+<div id="chat" class="chat">
+  <div id="chatMessages" class="chat-messages"></div>
+  <div class="chat-input">
+    <input id="chatInput" placeholder="Digite...">
+  </div>
+</div>
+
+<!-- EMOJI -->
+<div id="emojiCard" class="emoji-card">
+  <div class="emoji-grid">
+    <span>😀</span><span>😎</span><span>🔥</span><span>👑</span><span>💀</span>
+    <span>❤️</span><span>😂</span><span>😈</span><span>🤖</span><span>🎮</span>
+  </div>
+</div>
+</div>
+</div>
+
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBAOQC_mEjF-m5fdEO2no1-XfsQUjZc2mU",
+  authDomain: "amongchat-848f9.firebaseapp.com",
+  projectId: "amongchat-848f9",
+  storageBucket: "amongchat-848f9.firebasestorage.app",
+  messagingSenderId: "317096866187",
+  appId: "1:317096866187:web:fc4be8871cc5a9e7f43f8e",
+  measurementId: "G-ZFE9C5E595"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const db = firebase.firestore();
+
+iniciarCurtidas();
+
+/* =========================
+   ELEMENTOS
+========================== */
+const chat        = document.getElementById('chat');
+const chatBtn     = document.getElementById('chatBtn');
+const chatMessages= document.getElementById('chatMessages');
+const chatInput   = document.getElementById('chatInput');
+
+const muteBtn     = document.getElementById('muteBtn');
+const emojiBtn    = document.getElementById('emojiBtn');
+const emojiCard   = document.getElementById('emojiCard');
+const emojiDisplay= document.getElementById('emoji');
+
+const avatar      = document.getElementById('avatar');
+const voice       = document.querySelector('.voice');
+
+const joystick    = document.getElementById('joystick');
+const ball        = document.getElementById('ball');
+
+/* =========================
+   VARIÁVEIS
+========================== */
+let muted = false;
+let dragging = false;
+let posX = 0;
+let posY = 0;
+const user = "Usuário";
+
+/* =========================
+   CHAT
+========================== */
+function addMsg(u, t){
+  const d = document.createElement('div');
+  d.className = 'msg';
+  d.innerHTML = `<span>${u}</span> ${t}`;
+  chatMessages.appendChild(d);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+addMsg(user, "ingressou");
+
+chatBtn.onclick = () => {
+  chat.classList.toggle("active");
+  emojiCard.classList.remove("active");
+  chatInput.focus();
+};
+
+chatInput.onkeydown = e => {
+  if(e.key === 'Enter' && chatInput.value.trim()){
+    addMsg(user, chatInput.value);
+    chatInput.value = '';
+  }
+};
+
+/* =========================
+   EMOJIS
+========================== */
+emojiBtn.onclick = () => {
+  emojiCard.classList.toggle("active");
+  chat.classList.remove("active");
+};
+
+emojiCard.onclick = e => {
+  if(e.target.tagName === 'SPAN'){
+    emojiDisplay.textContent = e.target.textContent;
+    emojiDisplay.style.opacity = 1;
+    emojiCard.classList.remove("active");
+
+    setTimeout(()=>{
+      emojiDisplay.style.opacity = 0;
+      emojiDisplay.textContent = '';
+    },5000);
+  }
+};
+
+/* CHAT */
+chatBtn.onclick = () => {
+  chat.classList.toggle("active");
+  emojiCard.classList.remove("active");
+};
+
+/* EMOJI */
+emojiBtn.onclick = () => {
+  emojiCard.classList.toggle("active");
+  chat.classList.remove("active");
+};
+
+/* CONVIDAR AMIGOS */
+document.querySelector('img[src="ic_room_share.png"]').onclick = () => {
+  alert("🔗 Convite do canal copiado!");
+};
+
+/* =========================
+   MUTE
+========================== */
+muteBtn.onclick = () => {
+  muted = !muted;
+  muteBtn.src = muted ? 'ic_mute_off_1.png' : 'ic_mute_on_1.png';
+};
+
+/* =========================
+   JOYSTICK
+========================== */
+joystick.onmousedown = () => dragging = true;
+
+document.onmouseup = () => {
+  dragging = false;
+  ball.style.left = '27px';
+  ball.style.top  = '27px';
+};
+
+document.onmousemove = e => {
+  if(!dragging) return;
+
+  const joyRect   = joystick.getBoundingClientRect();
+  const voiceRect = voice.getBoundingClientRect();
+  const avatarRect= avatar.getBoundingClientRect();
+
+  let x = e.clientX - joyRect.left - 18;
+  let y = e.clientY - joyRect.top  - 18;
+
+  x = Math.max(0, Math.min(54, x));
+  y = Math.max(0, Math.min(54, y));
+
+  ball.style.left = x + 'px';
+  ball.style.top  = y + 'px';
+
+  const forceX = (x - 27) / 27;
+  const forceY = (y - 27) / 27;
+  const speed  = 4;
+
+  posX += forceX * speed;
+  posY += forceY * speed;
+
+  posX = Math.max(0, Math.min(voiceRect.width  - avatarRect.width,  posX));
+  posY = Math.max(0, Math.min(voiceRect.height - avatarRect.height, posY));
+
+  avatar.style.left = posX + 'px';
+  avatar.style.top  = posY + 'px';
+};
+
+/* =========================
+   SAIR
+========================== */
+function sair(){
+  window.location.href = "home.html";
+}
+
+/*========================
+PERFIL ATUAL
+==========================*/
+
+const perfilUID =
+String(
+  localStorage.getItem("perfilID") || "0"
+);
+
+console.log("Perfil UID:", perfilUID);
+
+/*========================
+CURTIDAS
+==========================*/
+
+async function adicionarCurtida(uidPerfil){
+
+  const ref = db.collection("ranking_social")
+                .doc(uidPerfil);
+
+  await db.runTransaction(async (transaction)=>{
+
+    const doc = await transaction.get(ref);
+
+    if(!doc.exists){
+
+      transaction.set(ref,{
+        curtidas: 1,
+        nome: window.usuarioAtual?.nome || "",
+        avatar: window.usuarioAtual?.avatarUpload || "",
+        ultimaAtualizacao:
+          firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+    }else{
+
+      transaction.update(ref,{
+        curtidas:
+          firebase.firestore.FieldValue.increment(1),
+
+        ultimaAtualizacao:
+          firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+    }
+
+  });
+
+}
+
+
+/*========================
+POSIÇÃO NO RANKING
+==========================*/
+
+async function atualizarPosicao(uid){
+
+  const snap = await db
+    .collection("ranking_social")
+    .orderBy("curtidas","desc")
+    .get();
+
+  let pos = 1;
+
+  snap.forEach(doc=>{
+
+    if(doc.id === uid){
+      rankValue.textContent = pos;
+    }
+
+    pos++;
+
+  });
+
+}
+
+
+/*========================
+ELEMENTOS
+==========================*/
+
+const rankHeart =
+document.getElementById("rankHeart");
+
+const rankTimer =
+document.getElementById("rankTimer");
+
+const likesCount =
+document.getElementById("likesCount");
+
+const rankValue =
+document.getElementById("rankValue");
+
+
+/*========================
+CONFIGURAÇÕES
+==========================*/
+
+const meuID = String(
+  localStorage.getItem("perfilID") || "0"
+);
+
+const infinito =
+meuID === "10000";
+
+const LIMITE = 10;
+const TEMPO = 56;
+
+let curtidasHoje = 0;
+let tempoRestante = 0;
+let intervalo = null;
+
+
+/*========================
+CLIQUE CURTIR
+==========================*/
+
+rankHeart.onclick = async () => {
+
+  if (!infinito) {
+
+    if (curtidasHoje >= LIMITE)
+      return;
+
+    curtidasHoje++;
+
+    if (curtidasHoje >= LIMITE) {
+      bloquearCurtidas();
+    }
+
+  }
+
+  await adicionarCurtida(perfilUID);
+
+  await atualizarPosicao(perfilUID);
+
+};
+
+
+/*========================
+BLOQUEIO
+==========================*/
+
+function bloquearCurtidas(){
+
+  rankHeart.classList.add("disabled");
+
+  tempoRestante = TEMPO;
+
+  atualizarTempo();
+
+  intervalo = setInterval(() => {
+
+    tempoRestante--;
+
+    atualizarTempo();
+
+    if (tempoRestante <= 0){
+      liberarCurtidas();
+    }
+
+  },1000);
+
+}
+
+function atualizarTempo(){
+
+  rankTimer.textContent =
+  `${tempoRestante}s`;
+
+}
+
+function liberarCurtidas(){
+
+  clearInterval(intervalo);
+
+  curtidasHoje = 0;
+
+  rankHeart.classList.remove("disabled");
+
+  rankTimer.textContent = "";
+
+}
+
+
+/*========================
+LISTENER FIRESTORE
+==========================*/
+
+function iniciarCurtidas(){
+
+  if(!perfilUID) return;
+
+  db.collection("ranking_social")
+    .doc(perfilUID)
+    .onSnapshot(async (doc)=>{
+
+      if(!doc.exists){
+
+        likesCount.textContent =
+        "❤️ 0";
+
+        rankValue.textContent =
+        "N";
+
+        return;
+      }
+
+      const data = doc.data();
+
+      likesCount.textContent =
+      `❤️ ${data.curtidas || 0}`;
+
+      await atualizarPosicao(perfilUID);
+
+    });
+
+}
+
+
+</script>
+</body>
+</html>
