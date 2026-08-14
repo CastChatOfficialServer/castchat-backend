@@ -262,41 +262,59 @@ auth.onAuthStateChanged(async (firebaseUser) => {
     const doc =
       await ref.get();
 
-    if (!doc.exists) {
+   if (!doc.exists) {
 
-      await ref.set({
+  await ref.set({
 
-        uid: String(perfilID),
+    uid: String(perfilID),
 
-        nickname:
-          firebaseUser.displayName ||
-          `Usuário ${perfilID}`,
+    nickname:
+      firebaseUser.displayName ||
+      `Usuário ${perfilID}`,
 
-        email:
-          firebaseUser.email || "",
+    email:
+      firebaseUser.email || "",
 
-        avatar:
-          firebaseUser.photoURL || "",
+    avatar:
+      firebaseUser.photoURL || "",
 
-        moldura: "",
+    moldura: "",
 
-        selos: [],
+    selos: [],
 
-        coins: 0,
+    coins: 0,
 
-        diamonds: 0,
+    diamonds: 0,
 
-        seguidores: 0,
+    seguidores: 0,
 
-        seguindo: 0,
+    seguindo: 0,
 
-        role: "user",
+    role: "user",
 
-        isACClub: false,
+    isACClub: false,
 
-        criadoEm: Date.now()
+    criadoEm: Date.now()
 
-      });
+  });
+
+  /* =========================
+     CRIAR RANKING SOCIAL
+  ========================= */
+
+  await db
+    .collection("ranking_social")
+    .doc(String(perfilID))
+    .set({
+
+      curtidas: 0,
+
+      ultimaAtualizacao:
+        firebase.firestore.FieldValue.serverTimestamp()
+
+    });
+
+}
 
     } else {
 
@@ -308,6 +326,11 @@ auth.onAuthStateChanged(async (firebaseUser) => {
 
     }
 
+localStorage.setItem(
+  "perfilID",
+  String(perfilID)
+);
+ 
     window.location.href =
       "perfil.html";
 
