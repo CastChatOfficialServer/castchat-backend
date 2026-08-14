@@ -43,17 +43,19 @@ body{
 .rank-traffic{
   position:absolute;
   top:90px;
-  right:16px; /* 🔧 canto direito */
-  width:64px;
-  height:160px;
+  right:16px;
+
+  width:72px;
+  height:190px;
+
   border:3px solid #0a1e3f;
   border-radius:20px;
   background:#0a1e3f;
+
   display:flex;
   flex-direction:column;
   align-items:center;
-  justify-content:space-between;
-  padding:10px 0;
+  justify-content:space-around;
 }
 
 .rank-timer{
@@ -62,16 +64,22 @@ body{
   height:18px;
 }
 
+.likes-count{
+  color:#ff4d6d;
+  font-size:14px;
+  font-weight:bold;
+}
+
 .rank-value{
   color:#fff;
-  font-size:22px;
+  font-size:34px;
   font-weight:bold;
 }
 
 .rank-heart{
-  width:36px;
-  cursor:pointer;
+  width:40px;
 }
+
 .rank-heart.disabled{
   opacity:.4;
   pointer-events:none;
@@ -204,22 +212,6 @@ img {
   pointer-events: auto;
 }
 
-.likes-count{
-  color:#ff4d6d;
-  font-size:13px;
-  font-weight:bold;
-}
-
-.rank-timer{
-  color:#fff;
-  font-size:12px;
-  min-height:14px;
-}
-
-.rank-heart.disabled{
-  opacity:.35;
-  pointer-events:none;
-}
 </style>
 </head>
 
@@ -234,9 +226,9 @@ img {
 <!-- SEMÁFORO -->
 <div class="rank-traffic">
 
-  <div id="likesCount" class="likes-count">
-    ❤️ 0
-  </div>
+<div id="likesCount" class="likes-count">
+  ❤️ 0
+</div>
 
   <div id="rankValue" class="rank-value">
     N
@@ -309,8 +301,6 @@ if (!firebase.apps.length) {
 }
 
 const db = firebase.firestore();
-
-iniciarCurtidas();
 
 /* =========================
    ELEMENTOS
@@ -477,37 +467,33 @@ CURTIDAS
 
 async function adicionarCurtida(uidPerfil){
 
-  const ref = db.collection("ranking_social")
-                .doc(uidPerfil);
+  const ref = db
+    .collection("ranking_social")
+    .doc(String(uidPerfil));
 
-  await db.runTransaction(async (transaction)=>{
+  const doc = await ref.get();
 
-    const doc = await transaction.get(ref);
+  if(!doc.exists){
 
-    if(!doc.exists){
+    await ref.set({
+      curtidas: 1,
+      ultimaAtualizacao:
+        firebase.firestore.FieldValue.serverTimestamp()
+    });
 
-      transaction.set(ref,{
-        curtidas: 1,
-        nome: window.usuarioAtual?.nome || "",
-        avatar: window.usuarioAtual?.avatarUpload || "",
-        ultimaAtualizacao:
-          firebase.firestore.FieldValue.serverTimestamp()
-      });
+  }else{
 
-    }else{
+    await ref.update({
+      curtidas:
+        firebase.firestore.FieldValue.increment(1),
 
-      transaction.update(ref,{
-        curtidas:
-          firebase.firestore.FieldValue.increment(1),
+      ultimaAtualizacao:
+        firebase.firestore.FieldValue.serverTimestamp()
+    });
 
-        ultimaAtualizacao:
-          firebase.firestore.FieldValue.serverTimestamp()
-      });
+  }
 
-    }
-
-  });
-
+  console.log("CURTIDA SALVA");
 }
 
 
@@ -679,6 +665,9 @@ function iniciarCurtidas(){
 
 }
 
+window.addEventListener("load", () => {
+  iniciarCurtidas();
+});
 
 </script>
 </body>
