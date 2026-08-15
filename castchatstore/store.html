@@ -184,6 +184,15 @@ header{
   gap:12px;
   margin-bottom:30px;
 }
+
+#logoutBtn{
+  background:#ff3030;
+  color:white;
+  border:none;
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+}
   
 </style>
 
@@ -206,15 +215,19 @@ Faça Login
 
 <div id="perfil">
 
-<img id="perfilFoto" src="">
+  <img id="perfilFoto" src="">
 
-<div id="perfilInfo">
+  <div id="perfilInfo">
 
-<div id="perfilNome"></div>
+    <div id="perfilNome"></div>
 
-<div id="perfilEmail"></div>
+    <div id="perfilEmail"></div>
 
-</div>
+  </div>
+
+  <button id="logoutBtn">
+    Sair
+  </button>
 
 </div>
 
@@ -272,6 +285,22 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+document.addEventListener("click", async (e)=>{
+
+  if(e.target.id !== "logoutBtn") return;
+
+  try{
+
+    await auth.signOut();
+
+  }catch(err){
+
+    console.error(err);
+
+  }
+
+});
+  
 // EMAIL ADMIN
 
 const EMAIL_ADMIN =
