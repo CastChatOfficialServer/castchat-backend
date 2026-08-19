@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Seguidores</title>
+
+<style>
+
+body{
+  margin:0;
+  background:#000;
+  color:#fff;
+  font-family:Segoe UI,Arial,sans-serif;
+}
+
+.container{
+  max-width:500px;
+  margin:auto;
+  padding:20px;
+}
+
+h1{
+  text-align:center;
+  margin-bottom:30px;
+}
+
+.empty{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  margin-top:80px;
+}
+
+.empty img{
+  width:140px;
+  opacity:.9;
+}
+
+.empty p{
+  margin-top:15px;
+  color:#999;
+  font-size:15px;
+}
+
+.usuario{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px;
+  background:#111;
+  border-radius:12px;
+  margin-bottom:10px;
+}
+
+.usuario img{
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  object-fit:cover;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>Seguidores</h1>
+
+<div id="listaSeguidores"></div>
+
+<div id="emptyState" class="empty">
+
+<img src="ic_empty_roaming_log.png">
+
+<p>Ninguém te seguiu ainda.</p>
+
+</div>
+
+</div>
+
+</body>
+</html>
