@@ -529,18 +529,15 @@ app.get(
     }
   );
 
-      const tokenJson =
-        await tokenResp.json();
+// DEBUG
+const tokenText =
+  await tokenResp.text();
 
-      if (!tokenJson.access_token) {
+console.log("====== DISCORD TOKEN RESPONSE ======");
+console.log(tokenText);
+console.log("===================================");
 
-        console.error(tokenJson);
-
-        return res.sendFile(
-          path.join(__dirname, 'auth_error.html')
-        );
-
-      }
+return res.send(tokenText);
 
       const userResp =
         await fetch(
