@@ -1764,6 +1764,15 @@ BOTÃO PRO/VIP
   font-weight:bold;
   cursor:pointer;
 }
+
+.stat-link{
+  text-decoration:none;
+  color:inherit;
+}
+
+.stat-link:hover{
+  opacity:.85;
+}
 </style>
 </head>
 <body>
@@ -1931,17 +1940,22 @@ BOTÃO PRO/VIP
 
 </div>
 
-    <!-- STATS -->
-<div class="perfil-stats">
-  <div class="stat">
-    <span id="followingCount">0</span>
-    <small>Seguindo</small>
-  </div>
+ <div class="perfil-stats">
 
-  <div class="stat">
-    <span id="followersCount">0</span>
-    <small>Seguidores</small>
-  </div>
+  <a href="seguindo.html" class="stat-link">
+    <div class="stat">
+      <span id="followingCount">0</span>
+      <small>Seguindo</small>
+    </div>
+  </a>
+
+  <a href="seguidor.html" class="stat-link">
+    <div class="stat">
+      <span id="followersCount">0</span>
+      <small>Seguidores</small>
+    </div>
+  </a>
+
 </div>
 
 <!-- BOTÕES -->
