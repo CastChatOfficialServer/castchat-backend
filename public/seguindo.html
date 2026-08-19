@@ -8,22 +8,57 @@
 
 <style>
 
-body{
+*{
   margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
   background:#000;
-  color:#fff;
   font-family:Segoe UI,Arial,sans-serif;
+  color:#fff;
+
+  display:flex;
+  justify-content:center;
+
+  min-height:100vh;
+}
+
+.app{
+  width:100%;
+  max-width:420px;
+  min-height:100vh;
+
+  background:#000;
+  position:relative;
 }
 
 .container{
-  max-width:500px;
-  margin:auto;
   padding:20px;
+  padding-top:80px;
 }
 
 h1{
   text-align:center;
   margin-bottom:30px;
+  color:#FFD700;
+  font-size:24px;
+}
+
+.back-btn{
+  position:fixed;
+  top:15px;
+  left:50%;
+  transform:translateX(-210px);
+  z-index:999;
+}
+
+.back-btn img{
+  width:50px;
+  height:50px;
+  object-fit:contain;
+  cursor:pointer;
 }
 
 .empty{
@@ -31,7 +66,9 @@ h1{
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  margin-top:80px;
+
+  margin-top:100px;
+  text-align:center;
 }
 
 .empty img{
@@ -49,9 +86,12 @@ h1{
   display:flex;
   align-items:center;
   gap:12px;
+
   padding:12px;
+
   background:#111;
   border-radius:12px;
+
   margin-bottom:10px;
 }
 
@@ -62,25 +102,19 @@ h1{
   object-fit:cover;
 }
 
-.back-btn{
-  position:fixed;
-  top:20px;
-  left:20px;
-  z-index:999;
+.usuario .nome{
+  font-size:15px;
+  font-weight:600;
 }
 
-.back-btn img{
-  width:50px;
-  height:50px;
-  object-fit:contain;
-  cursor:pointer;
-}
 </style>
 </head>
 <body>
 
+<div class="app">
+
 <a href="perfil.html" class="back-btn">
-  <img src="ic_back_circle.png" alt="Voltar">
+  <img src="ic_back_circle.png">
 </a>
 
 <div class="container">
@@ -96,6 +130,8 @@ h1{
     <p>Você ainda não segue ninguém.</p>
 
   </div>
+
+</div>
 
 </div>
 
