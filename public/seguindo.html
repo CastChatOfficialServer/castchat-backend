@@ -62,23 +62,40 @@ h1{
   object-fit:cover;
 }
 
+.back-btn{
+  position:fixed;
+  top:20px;
+  left:20px;
+  z-index:999;
+}
+
+.back-btn img{
+  width:50px;
+  height:50px;
+  object-fit:contain;
+  cursor:pointer;
+}
 </style>
 </head>
 <body>
 
+<a href="perfil.html" class="back-btn">
+  <img src="ic_back_circle.png" alt="Voltar">
+</a>
+
 <div class="container">
 
-<h1>Seguindo</h1>
+  <h1>Seguindo</h1>
 
-<div id="listaSeguindo"></div>
+  <div id="listaSeguindo"></div>
 
-<div id="emptyState" class="empty">
+  <div id="emptyState" class="empty">
 
-<img src="ic_empty_roaming_log.png">
+    <img src="ic_empty_roaming_log.png">
 
-<p>Você ainda não segue ninguém.</p>
+    <p>Você ainda não segue ninguém.</p>
 
-</div>
+  </div>
 
 </div>
 
