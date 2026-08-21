@@ -2527,6 +2527,27 @@ function abrirPerfil(uid) {
 }
 
 // ===============================
+// CONTADORES
+// ===============================
+function iniciarContadoresPerfil(uidPerfil){
+
+  db.collection("usuarios")
+    .doc(String(uidPerfil))
+    .onSnapshot((doc)=>{
+
+      const data = doc.data() || {};
+
+      document.getElementById("followingCount")
+        .textContent = data.followingCount || 0;
+
+      document.getElementById("followersCount")
+        .textContent = data.followersCount || 0;
+
+    });
+
+}
+  
+// ===============================
 // PERFIL
 // ===============================
 function iniciarPerfil() {
@@ -2969,6 +2990,9 @@ async function criarPerfilPadrao(uid) {
         diamonds: data.diamonds ?? 0,
         discordOrbs: data.discordOrbs ?? 0,
 
+        followersCount: 0,
+        followingCount: 0,
+
         selos: data.selos || [],
         petsAdquiridos: data.petsAdquiridos || ["2"],
         petsEquipados: data.petsEquipados || []
@@ -3031,6 +3055,14 @@ async function criarPerfilPadrao(uid) {
     update.infinito = true;
   }
 
+if (data.followersCount === undefined) {
+  update.followersCount = 0;
+}
+
+if (data.followingCount === undefined) {
+  update.followingCount = 0;
+}
+  
   await ref.set(update, { merge:true });
 
   console.log("Perfil verificado:", uid);
