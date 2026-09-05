@@ -2139,13 +2139,53 @@ BOTÃO PRO/VIP
 </div>
    
  <!-- BARRA INFERIOR -->
-  <div class="bottombar">
-    <a href="home.html"><img src="icon_home_selected.png" alt="home"></a>
-    <a href="animal.html"><img src="icon_pet_game_selected.png" alt="pets"></a>
-    <a href="missao.html"><img src="icon_friends_selected.png" alt="missões"></a>
-    <a href="mensagem.html"><img src="icon_dm_selected.png" alt="chat"></a>
-    <a href="perfil.html"><img src="icon_profile_selected.png" alt="perfil"></a>
-  </div>
+  <div id="bottomBarNormal" class="bottombar">
+
+  <a href="home.html">
+    <img src="icon_home_selected.png" alt="home">
+  </a>
+
+  <a href="animal.html">
+    <img src="icon_pet_game_selected.png" alt="pets">
+  </a>
+
+  <a href="live.html">
+    <img src="icon_video_selected.png" alt="lives">
+  </a>
+
+  <a href="missao.html">
+    <img src="icon_friends_selected.png" alt="missões">
+  </a>
+
+  <a href="mensagem.html">
+    <img src="icon_dm_selected.png" alt="chat">
+  </a>
+
+  <a href="perfil.html">
+    <img src="icon_profile_selected.png" alt="perfil">
+  </a>
+</div>
+
+<div id="perfilVisitadoBar" class="perfil-visitado-bar" style="display:none;">
+
+  <button
+    class="btn-conversar"
+    onclick="abrirConversaPerfil()">
+
+    Conversar
+
+  </button>
+
+  <button
+    id="btnSeguirPerfil"
+    class="btn-seguir"
+    onclick="seguirPerfilVisitado()">
+
+    Seguir
+
+  </button>
+
+</div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -2526,6 +2566,46 @@ function abrirPerfil(uid) {
 
 }
 
+//*===============================
+// PERFIL VISITADO
+//================================
+function verificarModoPerfilVisitado(){
+
+  const perfilVisitado =
+    sessionStorage.getItem(
+      "perfilVisitado"
+    );
+
+  const meuID =
+    String(meuPerfilID);
+
+  if(
+    perfilVisitado &&
+    perfilVisitado !== meuID
+  ){
+
+    document.getElementById(
+      "bottomBarNormal"
+    ).style.display = "none";
+
+    document.getElementById(
+      "perfilVisitadoBar"
+    ).style.display = "flex";
+
+  }else{
+
+    document.getElementById(
+      "bottomBarNormal"
+    ).style.display = "flex";
+
+    document.getElementById(
+      "perfilVisitadoBar"
+    ).style.display = "none";
+
+  }
+
+}
+  
 // ===============================
 // CONTADORES
 // ===============================
@@ -3790,6 +3870,74 @@ function atualizarModoPerfilVisitado() {
   console.log("Modo perfil visitado atualizado");
 
 }
+
+//================
+//SEGUIR
+//===============
+async function seguirPerfilVisitado(){
+
+  if(!perfilVisitadoID) return;
+
+  const meuId = String(meuPerfilID);
+
+  const alvoId = String(perfilVisitadoID);
+
+  if(meuId === alvoId) return;
+
+  const refMeu =
+    db.collection("usuarios")
+      .doc(meuId);
+
+  const refAlvo =
+    db.collection("usuarios")
+      .doc(alvoId);
+
+  await db.runTransaction(async(tx)=>{
+
+    const meuDoc =
+      await tx.get(refMeu);
+
+    const alvoDoc =
+      await tx.get(refAlvo);
+
+    const seguindo =
+      meuDoc.data()?.followingCount || 0;
+
+    const seguidores =
+      alvoDoc.data()?.followersCount || 0;
+
+    tx.update(refMeu,{
+      followingCount: seguindo + 1
+    });
+
+    tx.update(refAlvo,{
+      followersCount: seguidores + 1
+    });
+
+  });
+
+  document.getElementById(
+    "btnSeguirPerfil"
+  ).innerText = "Seguindo";
+
+}
+
+//======================
+//CONVERSAR
+//======================
+function abrirConversaPerfil(){
+
+  if(!perfilVisitadoID) return;
+
+  sessionStorage.setItem(
+    "chatCom",
+    perfilVisitadoID
+  );
+
+  window.location.href =
+    "mensagem.html";
+
+}
   
 /*==================================
 INICIALIZAÇÃO
@@ -3807,6 +3955,11 @@ function initApp() {
   if (typeof atualizarEstadoLogin === "function")
   atualizarEstadoLogin();
 
+  verificarModoPerfilVisitado();
+
+    iniciarContadoresPerfil(
+    perfilVisitadoID || meuPerfilID
+  );
 }
 
 /*====================
