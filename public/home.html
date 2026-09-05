@@ -833,10 +833,8 @@ async function buscarUsuario(valor){
     const selo =
       data.selo || "";
 
-    const meuId = String(usuarioAtual.id || "");
-
-    const mostrarBotao =
-      userId !== meuId;
+   const meuId =
+  String(usuarioAtual.id || "");
 
     container.innerHTML = `
 
@@ -880,19 +878,6 @@ async function buscarUsuario(valor){
 
         </div>
 
-        ${
-          mostrarBotao
-          ? `
-            <button
-              class="btn-follow"
-              onclick="event.stopPropagation();seguirUsuario('${userId}')"
-            >
-              Seguir
-            </button>
-          `
-          : ""
-        }
-
       </div>
 
     `;
@@ -905,13 +890,6 @@ async function buscarUsuario(valor){
       "<p style='color:red'>Erro ao buscar usuário</p>";
 
   }
-
-}
-
-function abrirPerfilPesquisa(uid){
-
-  window.location.href =
-    "perfil.html?id=" + uid;
 
 }
 
