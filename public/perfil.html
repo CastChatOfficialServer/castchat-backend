@@ -1773,6 +1773,83 @@ BOTÃO PRO/VIP
 .stat-link:hover{
   opacity:.85;
 }
+
+.perfil-visitado-bar{
+
+  position:fixed;
+
+  bottom:0;
+  left:0;
+
+  width:100%;
+
+  display:flex;
+
+  gap:12px;
+
+  padding:12px;
+
+  background:#000;
+
+  border-top:1px solid #222;
+
+  z-index:9999;
+
+  box-sizing:border-box;
+
+}
+
+.btn-conversar{
+
+  flex:1;
+
+  height:52px;
+
+  border:none;
+
+  border-radius:14px;
+
+  background:#1b1b1b;
+
+  color:#fff;
+
+  font-size:16px;
+
+  font-weight:700;
+
+  cursor:pointer;
+
+}
+
+.btn-seguir{
+
+  flex:1;
+
+  height:52px;
+
+  border:none;
+
+  border-radius:14px;
+
+  background:#FFD700;
+
+  color:#000;
+
+  font-size:16px;
+
+  font-weight:700;
+
+  cursor:pointer;
+
+}
+
+.btn-conversar:hover{
+  opacity:.9;
+}
+
+.btn-seguir:hover{
+  opacity:.9;
+}
 </style>
 </head>
 <body>
@@ -2166,7 +2243,9 @@ BOTÃO PRO/VIP
   </a>
 </div>
 
-<div id="perfilVisitadoBar" class="perfil-visitado-bar" style="display:none;">
+<div id="perfilVisitadoBar"
+     class="perfil-visitado-bar"
+     style="display:none;">
 
   <button
     class="btn-conversar"
