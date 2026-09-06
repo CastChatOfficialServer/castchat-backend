@@ -3955,10 +3955,52 @@ function atualizarModoPerfilVisitado() {
 //===============
 async function seguirPerfilVisitado(){
 
-  alert("clicou");
+  console.log("CLICOU");
 
-  console.log("perfilVisitadoID", perfilVisitadoID);
-  console.log("meuPerfilID", meuPerfilID);
+  console.log("MEU ID:", meuPerfilID);
+  console.log("ALVO ID:", perfilVisitadoID);
+
+  try{
+
+    const meuRef =
+      db.collection("usuarios")
+      .doc(String(meuPerfilID));
+
+    const alvoRef =
+      db.collection("usuarios")
+      .doc(String(perfilVisitadoID));
+
+    const meuDoc =
+      await meuRef.get();
+
+    const alvoDoc =
+      await alvoRef.get();
+
+    console.log(
+      "Meu perfil existe?",
+      meuDoc.exists
+    );
+
+    console.log(
+      "Perfil alvo existe?",
+      alvoDoc.exists
+    );
+
+    console.log(
+      "MEU DATA:",
+      meuDoc.data()
+    );
+
+    console.log(
+      "ALVO DATA:",
+      alvoDoc.data()
+    );
+
+  }catch(err){
+
+    console.error(err);
+
+  }
 
 }
 
