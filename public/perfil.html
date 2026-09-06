@@ -3958,26 +3958,55 @@ async function seguirPerfilVisitado(){
   if(!perfilVisitadoID) return;
 
   const meuId = String(meuPerfilID);
-
   const alvoId = String(perfilVisitadoID);
 
   if(meuId === alvoId) return;
 
-  const refMeu =
+  const seguindoRef =
     db.collection("usuarios")
+      .doc(meuId)
+      .collection("seguindo")
+      .doc(alvoId);
+
+  const seguidorRef =
+    db.collection("usuarios")
+      .doc(alvoId)
+      .collection("seguidores")
       .doc(meuId);
 
-  const refAlvo =
-    db.collection("usuarios")
-      .doc(alvoId);
+  const jaSegue =
+    await seguindoRef.get();
+
+  if(jaSegue.exists){
+
+    alert("Você já segue esse usuário");
+
+    return;
+  }
+
+  await seguindoRef.set({
+    uid: alvoId,
+    criadoEm: Date.now()
+  });
+
+  await seguidorRef.set({
+    uid: meuId,
+    criadoEm: Date.now()
+  });
 
   await db.runTransaction(async(tx)=>{
 
     const meuDoc =
-      await tx.get(refMeu);
+      await tx.get(
+        db.collection("usuarios")
+          .doc(meuId)
+      );
 
     const alvoDoc =
-      await tx.get(refAlvo);
+      await tx.get(
+        db.collection("usuarios")
+          .doc(alvoId)
+      );
 
     const seguindo =
       meuDoc.data()?.followingCount || 0;
@@ -3985,13 +4014,19 @@ async function seguirPerfilVisitado(){
     const seguidores =
       alvoDoc.data()?.followersCount || 0;
 
-    tx.update(refMeu,{
-      followingCount: seguindo + 1
-    });
+    tx.update(
+      db.collection("usuarios").doc(meuId),
+      {
+        followingCount: seguindo + 1
+      }
+    );
 
-    tx.update(refAlvo,{
-      followersCount: seguidores + 1
-    });
+    tx.update(
+      db.collection("usuarios").doc(alvoId),
+      {
+        followersCount: seguidores + 1
+      }
+    );
 
   });
 
@@ -4017,7 +4052,38 @@ function abrirConversaPerfil(){
     "mensagem.html";
 
 }
-  
+
+//======================
+// SEGUINDO
+//======================
+async function verificarSeguimento(){
+
+  if(!perfilVisitadoID) return;
+
+  const meuId = String(meuPerfilID);
+  const alvoId = String(perfilVisitadoID);
+
+  const doc =
+    await db.collection("usuarios")
+      .doc(meuId)
+      .collection("seguindo")
+      .doc(alvoId)
+      .get();
+
+  const btn =
+    document.getElementById("btnSeguirPerfil");
+
+  if(!btn) return;
+
+  if(doc.exists){
+
+    btn.innerText = "Seguindo";
+    btn.disabled = true;
+
+  }
+
+}
+
 /*==================================
 INICIALIZAÇÃO
 ====================================*/
@@ -4035,7 +4101,7 @@ function initApp() {
   atualizarEstadoLogin();
 
   verificarModoPerfilVisitado();
-
+  verificarSeguimento();
     iniciarContadoresPerfil(
     perfilVisitadoID || meuPerfilID
   );
