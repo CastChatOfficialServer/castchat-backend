@@ -3955,84 +3955,10 @@ function atualizarModoPerfilVisitado() {
 //===============
 async function seguirPerfilVisitado(){
 
-  if(!perfilVisitadoID) return;
+  alert("clicou");
 
-  const meuId = String(meuPerfilID);
-  const alvoId = String(perfilVisitadoID);
-
-  if(meuId === alvoId) return;
-
-  const seguindoRef =
-    db.collection("usuarios")
-      .doc(meuId)
-      .collection("seguindo")
-      .doc(alvoId);
-
-  const seguidorRef =
-    db.collection("usuarios")
-      .doc(alvoId)
-      .collection("seguidores")
-      .doc(meuId);
-
-  const jaSegue =
-    await seguindoRef.get();
-
-  if(jaSegue.exists){
-
-    alert("Você já segue esse usuário");
-
-    return;
-  }
-
-  await seguindoRef.set({
-    uid: alvoId,
-    criadoEm: Date.now()
-  });
-
-  await seguidorRef.set({
-    uid: meuId,
-    criadoEm: Date.now()
-  });
-
-  await db.runTransaction(async(tx)=>{
-
-    const meuDoc =
-      await tx.get(
-        db.collection("usuarios")
-          .doc(meuId)
-      );
-
-    const alvoDoc =
-      await tx.get(
-        db.collection("usuarios")
-          .doc(alvoId)
-      );
-
-    const seguindo =
-      meuDoc.data()?.followingCount || 0;
-
-    const seguidores =
-      alvoDoc.data()?.followersCount || 0;
-
-    tx.update(
-      db.collection("usuarios").doc(meuId),
-      {
-        followingCount: seguindo + 1
-      }
-    );
-
-    tx.update(
-      db.collection("usuarios").doc(alvoId),
-      {
-        followersCount: seguidores + 1
-      }
-    );
-
-  });
-
-  document.getElementById(
-    "btnSeguirPerfil"
-  ).innerText = "Seguindo";
+  console.log("perfilVisitadoID", perfilVisitadoID);
+  console.log("meuPerfilID", meuPerfilID);
 
 }
 
