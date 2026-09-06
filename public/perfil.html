@@ -2314,7 +2314,11 @@ let visualizandoOutroPerfil = false;
 
 const params = new URLSearchParams(location.search);
 
-perfilVisitadoID = params.get("id");
+const visitado =
+  sessionStorage.getItem("perfilVisitado");
+
+perfilVisitadoID =
+  params.get("id") || visitado;
 
 visualizandoOutroPerfil = !!perfilVisitadoID;
 
@@ -2406,6 +2410,9 @@ auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
 // ===============================
 const visitado =
   sessionStorage.getItem("perfilVisitado");
+
+console.log("SESSION VISITADO:", visitado);
+console.log("PARAM ID:", perfilVisitadoID);
 
 const perfilDiscord =
   localStorage.getItem("perfilID");
