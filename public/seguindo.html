@@ -134,6 +134,79 @@ h1{
 </div>
 
 </div>
+<script>
+  async function carregarSeguindo(){
 
+  const lista =
+    document.getElementById(
+      "listaSeguindo"
+    );
+
+  lista.innerHTML = "";
+
+  const snap =
+    await db
+    .collection("usuarios")
+    .doc(String(meuUID))
+    .collection("seguindo")
+    .get();
+
+  for(const doc of snap.docs){
+
+    const uidSeguido =
+      doc.id;
+
+    const perfil =
+      await db
+      .collection("usuarios")
+      .doc(uidSeguido)
+      .get();
+
+    if(!perfil.exists) continue;
+
+    const dados =
+      perfil.data();
+
+    lista.innerHTML += `
+      <div class="usuario">
+
+        <img
+          src="${
+            dados.avatar ||
+            dados.avatarEquipado ||
+            'img/default.png'
+          }"
+        >
+
+        <div>
+
+          <b>
+            ${dados.nome || dados.nickname}
+          </b>
+
+          <br>
+
+          ID:
+          ${uidSeguido}
+
+        </div>
+
+        <button
+          onclick="
+            abrirPerfil(
+              '${uidSeguido}'
+            )
+          "
+        >
+          Ver Perfil
+        </button>
+
+      </div>
+    `;
+
+  }
+
+}
+</script>
 </body>
 </html>
