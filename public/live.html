@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
+
+<title>Lives</title>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#000;
+  color:#fff;
+  font-family:Segoe UI,Arial,sans-serif;
+
+  display:flex;
+  justify-content:center;
+
+  min-height:100vh;
+}
+
+.app{
+
+  width:100%;
+  max-width:420px;
+  min-height:100vh;
+
+  background:#000;
+}
+
+.header{
+
+  padding:20px;
+
+  text-align:center;
+
+  border-bottom:
+  1px solid #222;
+}
+
+.header h1{
+
+  color:#FFD700;
+
+  font-size:24px;
+}
+
+.criar-live{
+
+  padding:15px;
+}
+
+#btnCriarLive{
+
+  width:100%;
+  height:50px;
+
+  border:none;
+
+  border-radius:12px;
+
+  background:#FFD700;
+
+  color:#000;
+
+  font-weight:bold;
+
+  cursor:pointer;
+}
+
+#btnCriarLive:disabled{
+
+  background:#444;
+  color:#999;
+}
+
+#listaLives{
+
+  padding:15px;
+}
+
+.live-card{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:12px;
+
+  background:#111;
+
+  padding:12px;
+
+  border-radius:12px;
+
+  margin-bottom:10px;
+}
+
+.live-card img{
+
+  width:50px;
+  height:50px;
+
+  border-radius:50%;
+
+  object-fit:cover;
+}
+
+.live-info{
+
+  flex:1;
+}
+
+.live-nome{
+
+  font-weight:bold;
+}
+
+.live-card button{
+
+  background:#FFD700;
+
+  color:#000;
+
+  border:none;
+
+  border-radius:10px;
+
+  padding:8px 12px;
+
+  font-weight:bold;
+
+  cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <div class="header">
+
+    <h1>Lives</h1>
+
+  </div>
+
+  <div class="criar-live">
+
+    <button id="btnCriarLive">
+
+      Criar Live
+
+    </button>
+
+  </div>
+
+  <div id="listaLives"></div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBAOQC_mEjF-m5fdEO2no1-XfsQUjZc2mU",
+  authDomain: "amongchat-848f9.firebaseapp.com",
+  projectId: "amongchat-848f9",
+  storageBucket: "amongchat-848f9.firebasestorage.app",
+  messagingSenderId: "317096866187",
+  appId: "1:317096866187:web:fc4be8871cc5a9e7f43f8e",
+  measurementId: "G-ZFE9C5E595"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const db = firebase.firestore();
+  
+//=========================
+//  CONFERIR SELO STREAMER
+//=========================
+  async function verificarPermissaoLive(){
+
+  const doc =
+    await db.collection("usuarios")
+    .doc(String(meuPerfilID))
+    .get();
+
+  const dados =
+    doc.data() || {};
+
+  const selos =
+    dados.selos || [];
+
+  const podeCriar =
+    selos.includes("streamer")
+    || String(meuPerfilID) === "10000";
+
+  document.getElementById(
+    "btnCriarLive"
+  ).disabled = !podeCriar;
+
+}
+
+//=======================
+// CRIAR LIVE
+//=======================
+  async function criarLive(){
+
+  const perfil =
+    await db.collection("usuarios")
+    .doc(String(meuPerfilID))
+    .get();
+
+  const dados =
+    perfil.data();
+
+  const liveId =
+    Date.now().toString();
+
+  await db.collection("lives")
+    .doc(liveId)
+    .set({
+
+      hostUid:
+        String(meuPerfilID),
+
+      hostNome:
+        dados.nome ||
+        dados.nickname,
+
+      hostAvatar:
+        dados.avatar ||
+        dados.avatarEquipado ||
+        "",
+
+      viewers:0,
+
+      ativa:true,
+
+      criadaEm:
+        Date.now()
+
+    });
+
+  window.location.href =
+    "live_room.html?id=" +
+    liveId;
+
+}
+
+//=====================
+// BOTÃO COMPARTILHAR
+//=====================
+document
+.getElementById(
+  "btnCriarLive"
+)
+.onclick =
+criarLive;
+
+//===================
+// CARREGAR LIVE
+//===================
+async function carregarLives(){
+
+  const lista =
+    document.getElementById(
+      "listaLives"
+    );
+
+  lista.innerHTML = "";
+
+  const snap =
+    await db.collection("lives")
+    .where(
+      "ativa",
+      "==",
+      true
+    )
+    .get();
+
+  snap.forEach(doc=>{
+
+    const live =
+      doc.data();
+
+    lista.innerHTML += `
+
+      <div class="live-card">
+
+        <img
+          src="${live.hostAvatar}"
+          width="50"
+        >
+
+        <b>
+          ${live.hostNome}
+        </b>
+
+        <button
+          onclick="
+            entrarLive(
+              '${doc.id}'
+            )
+          "
+        >
+          Entrar
+        </button>
+
+      </div>
+
+    `;
+
+  });
+
+}
+
+//====================
+// ENTRAR NA LIVE
+//=====================
+function entrarLive(id){
+
+  window.location.href =
+    "live_room.html?id=" +
+    id;
+
+}
+
+//================
+// INICIAR LIVE
+//================
+window.onload = async ()=>{
+
+  await verificarPermissaoLive();
+
+  await carregarLives();
+
+};
+</script>
+</body>
+</html>
