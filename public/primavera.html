@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Evento de Primavera - CastChat</title>
+
+<style>
+:root{
+  --site-bg:#000;
+  --event-bg:#3f2318;
+  --muted:#d3bfb0;
+  --accent:#ffcc00;
+  --radius:14px;
+  --mobile-w:380px;
+}
+
+*{box-sizing:border-box}
+html,body{
+  height:100%;
+  margin:0;
+  font-family:Segoe UI,Roboto,Arial;
+  background:linear-gradient(180deg,var(--site-bg),#060606);
+  color:#fff;
+}
+
+.phone{
+  width:100%;
+  max-width:var(--mobile-w);
+  margin:18px auto;
+  padding:8px;
+}
+
+.event-banner img{
+  width:100%;
+  border-radius:14px;
+  margin-bottom:12px;
+}
+
+.summary-card{
+  background:linear-gradient(180deg,#0b740b,#0f4920);
+  padding:14px;
+  border-radius:14px;
+  margin-bottom:12px;
+}
+
+.summary-title{
+  font-weight:800;
+  text-align:center;
+  margin-bottom:8px;
+}
+
+.controls-row{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  margin-top:12px;
+}
+
+.btn{
+  padding:10px 18px;
+  border-radius:12px;
+  border:none;
+  cursor:pointer;
+  font-weight:800;
+}
+
+.btn-yellow{background:var(--accent);color:#000}
+.btn-brown{background:#139219d2;color:#ffffff}
+
+/* MACHINE */
+
+.machine{
+  background:#284724;
+  border-radius:12px;
+  padding:12px;
+}
+
+.machine-top{
+  font-weight:900;
+  color:rgb(255, 255, 255);
+  text-align:center;
+  margin-bottom:8px;
+}
+
+.machine-screen{
+  background:#203d25;
+  border-radius:10px;
+  min-height:120px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.machine-controls{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+}
+
+.machine-btn{
+  flex:1;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.machine-btn.free{background:#eee;color:#222}
+.machine-btn.coins{background:rgb(46, 158, 31);color:#222}
+
+/* SPRITE */
+
+.styles-sprite{
+  width:300px;
+  height:300px;
+  background-image:url('9estilos.png');
+  background-size:300px 300px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(3,1fr);
+  gap:6px;
+  padding:6px;
+  margin:12px auto 0;
+}
+
+.style-tile{
+  width:88px;
+  height:88px;
+  background-image:url('9estilos.png');
+  background-size:300px 300px;
+  border-radius:10px;
+}
+
+/* RANK */
+
+.rank-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-top:14px;
+}
+
+.rank-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:#375728;
+  padding:12px;
+  border-radius:12px;
+}
+
+.avatar-wrapper{
+  position:relative;
+  width:60px;
+  height:60px;
+}
+
+.avatar{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  overflow:hidden;
+  border:3px solid #333;
+}
+
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.rank-number{
+  position:absolute;
+  top:-12px;
+  left:-10px;
+  font-size:22px;
+  font-weight:900;
+}
+
+.gold{color:#ffd700}
+.silver{color:#c0c0c0}
+.bronze{color:#cd7f32}
+
+.crown{
+  position:absolute;
+  top:-14px;
+  right:-6px;
+  width:28px;
+}
+
+.meta{flex:1;font-weight:700}
+
+.like-btn{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+}
+
+.heart{
+  width:26px;
+}
+
+.like-btn span{
+  font-weight:700;
+  font-size:16px;
+}
+
+.toast{
+  position:fixed;
+  bottom:16px;
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,0.8);
+  padding:8px 14px;
+  border-radius:8px;
+  display:none;
+}
+
+#petCardOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  display:none; /* começa fechado */
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+
+#petCard{
+  background:#111;
+  width:90%;
+  max-width:380px;
+  padding:20px;
+  border-radius:16px;
+  max-height:420px;
+  display:flex;
+  flex-direction:column;
+}
+
+.petHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.petClose{
+  cursor:pointer;
+  font-size:20px;
+  font-weight:bold;
+}
+
+#petLista{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:15px;
+  overflow-y:auto;
+  max-height:260px;
+  padding-right:4px;
+}
+
+.petItem{
+  width:100%;
+  max-width:70px;
+  cursor:pointer;
+  padding:6px;
+  border-radius:10px;
+  transition:0.2s;
+  border:2px solid transparent;
+  margin:auto;
+}
+
+.petItem:hover{
+  border:2px solid #ffd700;
+  transform:scale(1.05);
+}
+
+@keyframes fadeIn{
+  from{opacity:0; transform:scale(0.9);}
+  to{opacity:1; transform:scale(1);}
+}
+
+.rank-pets{
+  display:flex;
+  gap:4px;
+  margin-top:4px;
+}
+
+.rank-pets img{
+  width:22px;
+  height:22px;
+}
+
+.admin-edit{
+  width:55px;
+  height:24px;
+  font-size:14px;
+  padding:2px;
+}
+
+.rank-pos{
+  width:28px;
+  text-align:center;
+  font-weight:900;
+  font-size:18px;
+}
+
+.rank-pos.gold{
+  color:#ffd700;
+}
+
+.rank-pos.silver{
+  color:#c0c0c0;
+}
+
+.rank-pos.bronze{
+  color:#cd7f32;
+}
+
+.my-rank-box{
+  background:#2b5c38;
+  padding:12px;
+  border-radius:10px;
+  margin-top:16px;
+  text-align:center;
+}
+
+.rewards{
+  margin-top:20px;
+}
+
+.rewards h2{
+  text-align:center;
+  margin-bottom:12px;
+  color:#c8ff9e;
+}
+
+.reward-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+  background:#0f2f17;
+  padding:8px;
+  border-radius:10px;
+}
+
+.reward-img{
+  width:80px;
+  height:auto;
+  object-fit:contain;
+}
+
+.reward-text{
+  font-weight:700;
+  color:#fff;
+  font-size:14px;
+}
+
+.event-banner{
+    position:relative;
+}
+
+.banner-img{
+    width:100%;
+    display:block;
+}
+
+.back-btn{
+    position:absolute;
+    top:16px;
+    left:16px;
+    z-index:100;
+}
+
+.back-btn img{
+    width:42px;
+    height:42px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="phone">
+
+ <div class="event-banner">
+
+    <a href="home.html" class="back-btn">
+        <img src="ic_back_circle.png" alt="Voltar">
+    </a>
+
+    <img src="primavera02.png" class="banner-img">
+
+</div>
+    
+
+
+  <div class="summary-card">
+    <div class="summary-title">SUMMARY</div>
+    <div style="color:var(--muted);line-height:1.4">
+      Nove fundos temáticos de Ação de Graças, em edição limitada, podem ser combinados aleatoriamente com seus pets. Vista o pet mais original para o Dia de Ação de Graças e deixe que todos votem em você! As 10, 30 e 50 melhores duplas de pets receberão pets especiais de Ação de Graças. Uma chance gratuita de personalização por dia.<br><br>
+      ⚠️ Observação: A dupla personalizada só será exibida na lista da página do evento e não afetará sua personalização original. O fundo temático de edição limitada do evento desaparecerá automaticamente após o término do evento e só será exibido durante o evento.
+    </div>
+
+    <div class="controls-row">
+      <button id="btnDress" class="btn btn-yellow">DRESS UP</button>
+      <button id="btnRank" class="btn btn-brown">RANK</button>
+    </div>
+  </div>
+
+  <!-- MACHINE AREA -->
+  <div id="machineArea">
+    <div class="machine">
+
+      <div class="machine-top">Primavera Gacha</div>
+
+      <div class="machine-screen">
+        <img src="ic_pet_add.png"
+             style="width:56px;cursor:pointer"
+             onclick="abrirCardPets()">
+      </div>
+
+      <div class="machine-controls">
+        <button class="machine-btn free" onclick="girarMaquina()">FREE</button>
+        <button class="machine-btn coins" onclick="girarMaquina()">
+          <img src="coin_rotate_06.png" style="width:20px;vertical-align:middle">
+          20
+        </button>
+      </div>
+
+      <div class="styles-sprite" id="stylesSprite"></div>
+
+    </div>
+  
+
+      <!-- RECOMPENSAS -->
+<div class="rewards">
+  <h2>Recompensas do evento</h2>
+
+  <div class="reward-row">
+    <img src="premioouro.png" class="reward-img">
+    <div class="reward-text">20 pets legendary</div>
+  </div>
+
+  <div class="reward-row">
+    <img src="premioprata.png" class="reward-img">
+    <div class="reward-text">15 pets legendary</div>
+  </div>
+
+  <div class="reward-row">
+    <img src="premiobronze.png" class="reward-img">
+    <div class="reward-text">10 pets legendary</div>
+  </div>
+
+  <div class="reward-row">
+    <img src="premio4_10.png" class="reward-img">
+    <div class="reward-text">5 pets legendary</div>
+  </div>
+
+  <div class="reward-row">
+    <img src="premio11_30.png" class="reward-img">
+    <div class="reward-text">30 Days of PRO card</div>
+  </div>
+
+  <div class="reward-row">
+    <img src="premio31_50.png" class="reward-img">
+    <div class="reward-text"> 7 Days of PRO Card</div>
+  </div>
+
+<div class="reward-row">
+    <img src="premio51_70.png" class="reward-img">
+    <div class="reward-text"> 3 Days of PRO Card</div>
+  </div>
+</div>
+</div>
+  
+  <!-- RANK AREA -->
+  <div id="rankArea" style="display:none;">
+    <div class="rank-list" id="rankList"></div>
+  </div>
+
+</div>
+
+<!-- CARD PETS -->
+<div id="petCardOverlay" style="display:none;">
+  <div id="petCard">
+
+    <div class="petHeader">
+      <h2 id="petTitulo">Minha tripulação de estimação (0)</h2>
+      <span class="petClose" onclick="fecharCardPets()">✕</span>
+    </div>
+
+    <h3>Escolha 1 animal de estimação para enfeitar.</h3>
+
+    <div id="petLista"></div>
+
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+</body>
