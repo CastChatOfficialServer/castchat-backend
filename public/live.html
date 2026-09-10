@@ -140,6 +140,19 @@ body{
   cursor:pointer;
 }
 
+#videoLive{
+
+  width:100%;
+
+  height:70vh;
+
+  background:#000;
+
+  object-fit:contain;
+
+  display:block;
+
+}
 </style>
 </head>
 
@@ -217,6 +230,8 @@ if (!firebase.apps.length) {
 }
 
 const db = firebase.firestore();
+
+let souStreamer = false;
   
 //=========================
 //  CONFERIR SELO STREAMER
@@ -248,12 +263,14 @@ const db = firebase.firestore();
 // CRIAR LIVE
 //=======================
   async function criarLive(){
-
+    
+  souStreamer = true;
+    
   const perfil =
     await db.collection("usuarios")
     .doc(String(meuPerfilID))
     .get();
-
+    
   const dados =
     perfil.data();
 
@@ -261,31 +278,82 @@ const db = firebase.firestore();
     Date.now().toString();
 
   await db.collection("lives")
-    .doc(liveId)
-    .set({
+.doc(liveId)
+.set({
 
-      hostUid:
-        String(meuPerfilID),
+  hostUid: String(meuPerfilID),
 
-      hostNome:
-        dados.nome ||
-        dados.nickname,
+  hostNome:
+    dados.nome ||
+    dados.nickname,
 
-      hostAvatar:
-        dados.avatar ||
-        dados.avatarEquipado ||
-        "",
+  hostAvatar:
+    dados.avatar ||
+    dados.avatarEquipado ||
+    "",
 
-      viewers:0,
+  viewers: 0,
 
-      ativa:true,
+  ativa: true,
 
-      criadaEm:
-        Date.now()
+  criadaEm: Date.now(),
 
-    });
+  webrtc: true
+
+});
+
+await db.collection("lives")
+.doc(liveId)
+.collection("offers")
+.doc("main")
+.set({
+
+  createdAt: Date.now()
+
+});
 
 abrirLive(liveId);
+
+}
+
+//========================
+// COMPARTILHAR TELA
+//========================
+async function iniciarCompartilhamentoTela(){
+
+  try{
+
+    const stream =
+      await navigator.mediaDevices
+      .getDisplayMedia({
+
+        video:true,
+        audio:true
+
+      });
+
+    const video =
+      document.getElementById(
+        "videoLive"
+      );
+
+    video.srcObject =
+      stream;
+
+    await video.play();
+
+    console.log(
+      "Tela compartilhada"
+    );
+
+  }catch(err){
+
+    console.error(
+      "Erro ao compartilhar tela:",
+      err
+    );
+
+  }
 
 }
 
@@ -407,49 +475,15 @@ async function abrirLive(id){
     "Entrou na live:",
     id
   );
-await iniciarCompartilhamentoTela();
-}
 
-//========================
-// COMPARTILHAR TELA
-//========================
-async function iniciarCompartilhamentoTela(){
+  if(souStreamer){
 
-  try{
-
-    const stream =
-      await navigator.mediaDevices
-      .getDisplayMedia({
-
-        video:true,
-        audio:true
-
-      });
-
-    const video =
-      document.getElementById(
-        "videoLive"
-      );
-
-    video.srcObject =
-      stream;
-
-    await video.play();
-
-    console.log(
-      "Tela compartilhada"
-    );
-
-  }catch(err){
-
-    console.error(
-      "Erro ao compartilhar tela:",
-      err
-    );
+    await iniciarCompartilhamentoTela();
 
   }
 
 }
+
 </script>
 </body>
 </html>
