@@ -351,10 +351,10 @@ const todosAnimais = [
     { id:20, nome:"Disco Voador", desc:"", img:"discovoador.png", raridade:"Comum" },
     { id:21, nome:"Stickgirl", desc:"", img:"stickgirl.png", raridade:"Comum" },
     { id:22, nome:"Gosma Verde", desc:"", img:"gosmaverde.png", raridade:"Comum" },
-     
-    { id:-1, nome:"Mascote dos AC CLUBS.", desc:"", img:"mascotedosacclubs.png", raridade:"Supremo Lendário" },
-    { id:0, nome:"Medalha da Missão.", desc:"", img:"medalhadeouro.png", raridade:"Supremo Lendário" },
-    { id:1, nome:"Bandeira CastChat20.", desc:"", img:"bandeiracastchat20.png", raridade:"Supremo Lendário" },
+   
+    { id:-1, nome:"Medalha de Ouro", desc:"", img:"medalhadeouro.png", raridade:"Supremo Lendário" },
+    { id:0, nome:"Mascote dos AC CLUBS", desc:"", img:"mascotedosacclubs.png", raridade:"Supremo Lendário" },
+    { id:1, nome:"Bandeira do CastChat2.0", desc:"", img:"bandeiracastchat20.png", raridade:"Supremo Lendário" },
     { id:2, nome:"Cachorro com Osso", desc:"", img:"cachorrocomosso.png", raridade:"Incomum" },
     { id:3, nome:"Among Vermelho", desc:"", img:"among.png", raridade:"Super Legendário" },
     { id:4, nome:"Among Verde", desc:"", img:"among verde.png", raridade:"Legendário" },
@@ -368,5 +368,5 @@ const todosAnimais = [
     { id:12, nome:"Among Branco", desc:"", img:"among branco.png", raridade:"Incomum" },
     { id:13, nome:"Among Roxo", desc:"", img:"among roxo.png", raridade:"Raro" },
     { id:14, nome:"Among Cinza Escuro", desc:"", img:"among cinza escuro.png", raridade:"Incomum" },
-    { id:15, nome:"Among Magenta", desc:"", img:"among magenta.png", raridade:"Comum" },
-]
+    { id:15, nome:"Among Magenta", desc:"", img:"among magenta.png", raridade:"Comum" }
+  ];
