@@ -586,7 +586,7 @@ STORAGE
 async function getRank(){
 
   const snap =
-    await db.collection("eventos_boas_vindas_rank")
+    await db.collection("primavera_rank")
       .get();
 
   const rank = [];
@@ -603,7 +603,7 @@ async function getRank(){
 
 async function setRankItem(ownerId, data){
 
-  await db.collection("eventos_boas_vindas_rank")
+  await db.collection("primavera_rank")
     .doc(String(ownerId))
     .set(data, { merge:true });
 
@@ -644,7 +644,7 @@ async function isLiked(id){
   }
 
   const likeDoc =
-    await db.collection("eventos_boas_vindas_likes")
+    await db.collection("primavera_likes")
       .doc(`${currentUser.id}_${id}`)
       .get();
 
@@ -666,7 +666,7 @@ async function handleLike(id){
     String(id);
 
   const likeRef =
-    db.collection("eventos_boas_vindas_likes")
+    db.collection("primavera_likes")
       .doc(`${meuId}_${itemId}`);
 
   const likeDoc =
@@ -677,7 +677,7 @@ async function handleLike(id){
   }
 
   const rankRef =
-    db.collection("eventos_boas_vindas_rank")
+    db.collection("primavera_rank")
       .doc(itemId);
 
   await db.runTransaction(async (transaction) => {
@@ -721,7 +721,7 @@ async function editarLikes(id, value){
     likes = 0;
   }
 
-  await db.collection("eventos_boas_vindas_rank")
+  await db.collection("primavera_rank")
     .doc(String(id))
     .set({
       likes: likes
@@ -1009,7 +1009,7 @@ async function entrarNoRank(petId){
     String(currentUser.id);
 
   const ref =
-    db.collection("eventos_boas_vindas_rank")
+    db.collection("primavera_rank")
       .doc(ownerId);
 
   const doc =
