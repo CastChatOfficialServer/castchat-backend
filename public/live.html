@@ -312,7 +312,9 @@ await db.collection("lives")
 
 });
 
-abrirLive(liveId);
+await abrirLive(liveId);
+
+await criarOffer(liveId);
 
 }
 
@@ -331,6 +333,16 @@ async function iniciarCompartilhamentoTela(){
         audio:true
 
       });
+
+    // ENVIA A TELA PARA O WEBRTC
+    stream.getTracks().forEach(track => {
+
+      peerConnection.addTrack(
+        track,
+        stream
+      );
+
+    });
 
     const video =
       document.getElementById(
@@ -484,6 +496,61 @@ async function abrirLive(id){
 
 }
 
+//=====================
+// WEBRTC
+//=====================
+const peerConnection =
+new RTCPeerConnection({
+
+  iceServers:[
+
+    {
+      urls:
+      "stun:stun.l.google.com:19302"
+    }
+
+  ]
+
+});
+
+//=====================
+// OFFER WEBRTC
+//=====================
+async function criarOffer(liveId){
+
+  const offer =
+    await peerConnection
+    .createOffer();
+
+  await peerConnection
+    .setLocalDescription(
+      offer
+    );
+
+  await db
+    .collection("lives")
+    .doc(liveId)
+    .collection("offers")
+    .doc("main")
+    .set({
+
+      type:
+        offer.type,
+
+      sdp:
+        offer.sdp,
+
+      criadaEm:
+        Date.now()
+
+    });
+
+  console.log(
+    "Offer criada"
+  );
+
+}
+  
 </script>
 </body>
 </html>
