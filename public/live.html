@@ -156,14 +156,43 @@ body{
   <div class="criar-live">
 
     <button id="btnCriarLive">
-
       Criar Live
-
     </button>
 
   </div>
 
   <div id="listaLives"></div>
+
+  <!-- TELA DA LIVE -->
+  <div id="telaLive" style="display:none;">
+
+    <div class="live-topo">
+
+      <img
+        id="liveAvatar"
+        src="avatarpreto01.png"
+      >
+
+      <span id="liveNome">
+        Streamer
+      </span>
+
+      <button id="btnSeguirLive">
+        Seguir
+      </button>
+
+    </div>
+
+    <video
+      id="videoLive"
+      autoplay
+      playsinline
+      muted
+    ></video>
+
+    <div id="chatLive"></div>
+
+  </div>
 
 </div>
 
@@ -256,9 +285,7 @@ const db = firebase.firestore();
 
     });
 
-  window.location.href =
-    "live_room.html?id=" +
-    liveId;
+abrirLive(liveId);
 
 }
 
@@ -334,9 +361,7 @@ async function carregarLives(){
 //=====================
 function entrarLive(id){
 
-  window.location.href =
-    "live_room.html?id=" +
-    id;
+  abrirLive(id);
 
 }
 
@@ -350,6 +375,81 @@ window.onload = async ()=>{
   await carregarLives();
 
 };
+
+//================
+// LIVE ATUAL
+//================
+let liveAtual = null;
+
+//================
+// ABRIR LIVE
+//================
+async function abrirLive(id){
+
+  liveAtual = id;
+
+  // Esconde lista de lives
+  document.getElementById(
+    "listaLives"
+  ).style.display = "none";
+
+  // Esconde botão criar live
+  document.querySelector(
+    ".criar-live"
+  ).style.display = "none";
+
+  // Mostra tela da live
+  document.getElementById(
+    "telaLive"
+  ).style.display = "block";
+
+  console.log(
+    "Entrou na live:",
+    id
+  );
+await iniciarCompartilhamentoTela();
+}
+
+//========================
+// COMPARTILHAR TELA
+//========================
+async function iniciarCompartilhamentoTela(){
+
+  try{
+
+    const stream =
+      await navigator.mediaDevices
+      .getDisplayMedia({
+
+        video:true,
+        audio:true
+
+      });
+
+    const video =
+      document.getElementById(
+        "videoLive"
+      );
+
+    video.srcObject =
+      stream;
+
+    await video.play();
+
+    console.log(
+      "Tela compartilhada"
+    );
+
+  }catch(err){
+
+    console.error(
+      "Erro ao compartilhar tela:",
+      err
+    );
+
+  }
+
+}
 </script>
 </body>
 </html>
