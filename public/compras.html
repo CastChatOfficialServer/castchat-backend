@@ -774,22 +774,21 @@ let meuPerfilID = null;
 
 async function carregarPerfilCompras(){
 
-  const loginAtualDoc =
-    await db.collection("config")
-      .doc("loginAtual")
-      .get();
+  const uidLocal =
+    localStorage.getItem("perfilID");
 
-  if (!loginAtualDoc.exists) return;
+  if(!uidLocal){
 
-  const loginAtual = loginAtualDoc.data() || {};
+    console.error(
+      "Usuário não encontrado"
+    );
 
-  if (loginAtual.tipo === "google") {
-    meuPerfilID = String(loginAtual.perfilID);
+    return;
+
   }
 
-  if (loginAtual.tipo === "discord") {
-    meuPerfilID = String(loginAtual.uid);
-  }
+  meuPerfilID =
+    String(uidLocal);
 
 }
 
@@ -1729,6 +1728,5 @@ async function confirmarPagamentoPix() {
 })();
 
 </script>
-
 </body>
 </html>
