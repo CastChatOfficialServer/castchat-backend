@@ -95,19 +95,34 @@
   text-shadow:0 0 8px #ffd700;
 }
 
-.notif-img{
-  width:100%;
-  height:180px;
-  object-fit:cover;
-  border-radius:12px;
-  margin-bottom:10px;
-}
-
 .notif-icon{
   width:18px;
   height:18px;
   object-fit:contain;
 }
+
+/* Eventos */
+.notif-img{
+  width:100%;
+  border-radius:12px;
+  margin-bottom:10px;
+}
+
+/* Recompensas */
+.recompensa-img{
+  width:80px;
+  height:80px;
+  object-fit:contain;
+}
+
+.recompensa-img{
+  width:90px;
+  height:90px;
+  display:block;
+  margin:12px auto 0 auto;
+  object-fit:contain;
+}
+  
 </style>
 </head>
 
@@ -361,19 +376,26 @@ function criarCardSelo(tipo, seloID){
   /* =========================
      GANHOU SELO NORMAL
   ========================== */
-  if(tipo === "ganhou" && !selosFuncionarios.includes(seloID)){
-    return `
-      <div class="card">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <img src="${imagem}" style="width:70px;">
-          <div>
-            <h2>Uma nova recompensa acaba de ser enviada para você</h2>
-            <p>Surpresa🥳👻 Você acaba de receber um emblema exclusivo</p>
-          </div>
-        </div>
-      </div>
-    `;
-  }
+if(tipo === "ganhou" && !selosFuncionarios.includes(seloID)){
+  return `
+    <div class="card">
+
+      <h2>
+        Uma nova recompensa acaba de ser enviada para você
+      </h2>
+
+      <p>
+        Surpresa🥳👻 Você acaba de receber um emblema exclusivo
+      </p>
+
+      <img
+        src="${imagem}"
+        class="recompensa-img"
+      >
+
+    </div>
+  `;
+}
 
   /* =========================
      GANHOU FUNCIONÁRIO
