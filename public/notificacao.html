@@ -492,20 +492,62 @@ function carregarNotificacoes(){
         /* =========================
            CARD NORMAL
         ========================== */
+const ehRecompensa =
+  n.tipoNotificacao === "recompensa";
 
-        conteudo.innerHTML += `
-          <div class="card">
+if(ehRecompensa){
 
-            ${n.imagem ? `<img src="${n.imagem}" class="notif-img">` : ""}
+  conteudo.innerHTML += `
+    <div class="card">
 
-            <h3>${n.titulo || ""}</h3>
+      <h3>${n.titulo || ""}</h3>
 
-            <p>${n.mensagem || ""}</p>
+      <p>${n.mensagem || ""}</p>
 
-            ${n.link ? `<a href="${n.link}" class="link">Abrir ➜</a>` : ""}
-
+      ${
+        n.imagem
+        ? `
+          <div style="
+            text-align:center;
+            margin-top:12px;
+          ">
+            <img
+              src="${n.imagem}"
+              class="notif-img"
+            >
           </div>
-        `;
+        `
+        : ""
+      }
+
+    </div>
+  `;
+
+}else{
+
+  conteudo.innerHTML += `
+    <div class="card">
+
+      ${
+        n.imagem
+        ? `<img src="${n.imagem}" class="notif-img">`
+        : ""
+      }
+
+      <h3>${n.titulo || ""}</h3>
+
+      <p>${n.mensagem || ""}</p>
+
+      ${
+        n.link
+        ? `<a href="${n.link}" class="link">Abrir ➜</a>`
+        : ""
+      }
+
+    </div>
+  `;
+
+}
 
       });
 
@@ -656,6 +698,5 @@ async function enviarNotificacao(){
 })();
 
 </script>
-
 </body>
 </html>
