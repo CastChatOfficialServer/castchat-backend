@@ -231,6 +231,13 @@ if (!firebase.apps.length) {
 
 const db = firebase.firestore();
 
+const meuPerfilID =
+  localStorage.getItem("perfilID");
+
+if (!meuPerfilID) {
+  console.error("perfilID não encontrado");
+}
+  
 let souStreamer = false;
   
 //=========================
