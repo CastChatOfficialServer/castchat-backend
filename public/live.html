@@ -290,14 +290,16 @@ let souStreamer = false;
 
   hostUid: String(meuPerfilID),
 
-  hostNome:
-    dados.nome ||
-    dados.nickname,
+ hostNome:
+  dados.nickname ||
+  dados.nome ||
+  "Streamer",
 
-  hostAvatar:
-    dados.avatar ||
-    dados.avatarEquipado ||
-    "",
+ hostAvatar:
+  dados.avatarUpload ||
+  dados.avatar ||
+  dados.avatarEquipado ||
+  "icon_profile_selected.png",
 
   viewers: 0,
 
