@@ -134,6 +134,7 @@ hr{
   </a>
   </div>
 
+```html
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -149,9 +150,6 @@ const firebaseConfig = {
   measurementId: "G-ZFE9C5E595"
 };
 
-/* =========================
-   FIREBASE INIT
-========================= */
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
@@ -159,352 +157,385 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* =========================
-   🔐 PERSISTÊNCIA
-========================= */
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-.then(() => {
-  console.log("Persistência ativada");
-})
-.catch((err) => {
-  console.error(err);
-});
+const BACKEND_URL =
+  "https://castchat-backend.onrender.com";
 
-/* =========================
-   RETORNO DO GOOGLE REDIRECT
-========================= */
+let processandoLoginGoogle = false;
+let processandoLoginDiscord = false;
+
+/* ========================================
+   PERSISTÊNCIA
+======================================== */
+
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  .then(() => {
+    console.log("Persistência ativada.");
+  })
+  .catch(console.error);
+
+/* ========================================
+   CRIAÇÃO ATÔMICA DO PERFIL GOOGLE
+
+   Reserva o ID, cria authLinks, cria o
+   usuário e cria o ranking na mesma
+   transação do Firestore.
+======================================== */
+
+async function obterOuCriarPerfilGoogle(firebaseUser) {
+  const linkRef = db
+    .collection("authLinks")
+    .doc(String(firebaseUser.uid));
+
+  const contadorRef = db
+    .collection("config")
+    .doc("contadorIDs");
+
+  const perfilID = await db.runTransaction(
+    async (transaction) => {
+      // Primeiro, verificar se a conta já possui vínculo.
+      const linkDoc = await transaction.get(linkRef);
+
+      let id;
+      let novoVinculo = false;
+      let contadorDoc = null;
+      let userDoc = null;
+
+      if (linkDoc.exists) {
+        id = String(linkDoc.data().perfilID || "");
+
+        if (!id || id === "undefined" || id === "null") {
+          throw new Error(
+            "O vínculo authLinks existe, mas não possui perfilID válido."
+          );
+        }
+
+        const userRef = db.collection("usuarios").doc(id);
+        userDoc = await transaction.get(userRef);
+
+      } else {
+        novoVinculo = true;
+
+        contadorDoc = await transaction.get(contadorRef);
+
+        let ultimoID = 10000;
+
+        if (contadorDoc.exists) {
+          const valor = Number(
+            contadorDoc.data().ultimoID || 10000
+          );
+
+          if (!Number.isFinite(valor) || valor < 10000) {
+            throw new Error(
+              "O contadorIDs contém um ultimoID inválido."
+            );
+          }
+
+          ultimoID = Math.floor(valor);
+        }
+
+        // Procurar um documento de usuário livre.
+        // Todas as leituras acontecem antes das gravações.
+        let encontrado = false;
+
+        for (let tentativa = 0; tentativa < 1000; tentativa++) {
+          const candidato = String(ultimoID + 1);
+          const candidatoRef = db
+            .collection("usuarios")
+            .doc(candidato);
+
+          const candidatoDoc = await transaction.get(candidatoRef);
+
+          if (!candidatoDoc.exists) {
+            id = candidato;
+            userDoc = candidatoDoc;
+            encontrado = true;
+            break;
+          }
+
+          ultimoID++;
+        }
+
+        if (!encontrado) {
+          throw new Error(
+            "Não foi possível encontrar um ID livre. Tente novamente."
+          );
+        }
+      }
+
+      const userRef = db.collection("usuarios").doc(id);
+      const rankingRef = db.collection("ranking_social").doc(id);
+
+      // Ler o ranking antes de gravar qualquer documento.
+      const rankingDoc = await transaction.get(rankingRef);
+
+      const agora = Date.now();
+
+      if (novoVinculo) {
+        // O contador só avança quando o vínculo e o perfil
+        // também forem confirmados pela transação.
+        transaction.set(contadorRef, {
+          ultimoID: Number(id)
+        }, { merge: true });
+
+        transaction.set(linkRef, {
+          perfilID: id,
+          firebaseUID: firebaseUser.uid,
+          provider: "google",
+          email: firebaseUser.email || "",
+          criadoEm: agora
+        });
+      }
+
+      if (!userDoc.exists) {
+        // Perfil novo ou perfil ausente de um vínculo antigo.
+        transaction.set(userRef, {
+          uid: id,
+          nome: firebaseUser.displayName || `Usuário ${id}`,
+          nickname: firebaseUser.displayName || `Usuário ${id}`,
+          email: firebaseUser.email || "",
+          avatar: firebaseUser.photoURL || "",
+          bio: "",
+          moldura: "",
+          selos: [],
+          coins: 0,
+          diamonds: 0,
+          discordOrbs: 0,
+          seguidores: 0,
+          seguindo: 0,
+          followersCount: 0,
+          followingCount: 0,
+          petsAdquiridos: ["2"],
+          petsEquipados: [],
+          role: "user",
+          isACClub: false,
+          criadoEm: agora,
+          atualizadoEm: agora
+        });
+      } else {
+        // Atualizar apenas dados de autenticação.
+        // Não apagar moedas, pets, selos ou outros dados.
+        transaction.set(userRef, {
+          uid: id,
+          email: firebaseUser.email || "",
+          avatar: firebaseUser.photoURL || "",
+          atualizadoEm: agora
+        }, { merge: true });
+      }
+
+      if (!rankingDoc.exists) {
+        transaction.set(rankingRef, {
+          curtidas: 0,
+          ultimaAtualizacao:
+            firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+
+      return id;
+    }
+  );
+
+  return String(perfilID);
+}
+
+/* ========================================
+   FINALIZAR LOGIN GOOGLE
+======================================== */
+
+async function finalizarLoginGoogle(firebaseUser) {
+  if (!firebaseUser || processandoLoginGoogle) return;
+
+  processandoLoginGoogle = true;
+
+  try {
+    console.log(
+      "Finalizando login Google:",
+      firebaseUser.uid
+    );
+
+    const perfilID =
+      await obterOuCriarPerfilGoogle(firebaseUser);
+
+    localStorage.setItem("perfilID", perfilID);
+
+    window.location.href = "perfil.html";
+
+  } catch (err) {
+    console.error("Erro ao finalizar login Google:", err);
+
+    alert(
+      "Não foi possível concluir o login. " +
+      "Seus dados não devem ser recriados manualmente. " +
+      "Tente novamente e, se persistir, consulte o console."
+    );
+
+    processandoLoginGoogle = false;
+  }
+}
+
+/* ========================================
+   RETORNO DO REDIRECT
+======================================== */
+
 auth.getRedirectResult()
   .then((result) => {
-
     if (result.user) {
       console.log("Google redirect OK:", result.user.uid);
     }
-
   })
   .catch((err) => {
-
-    console.error("ERRO GOOGLE REDIRECT:");
-    console.error(err);
-    alert(err.message);
-
+    console.error("Erro Google redirect:", err);
   });
 
-/* =========================
-   🔄 AUTO LOGIN FIREBASE
-   GOOGLE / FIREBASE AUTH
-========================= */
-auth.onAuthStateChanged(async (firebaseUser) => {
+/* ========================================
+   OBSERVAR AUTENTICAÇÃO GOOGLE
+======================================== */
 
+auth.onAuthStateChanged((firebaseUser) => {
   if (!firebaseUser) return;
 
-  console.log("Usuário Firebase logado:", firebaseUser.uid);
+  finalizarLoginGoogle(firebaseUser);
+});
 
-  try {
+/* ========================================
+   LOGIN GOOGLE
+======================================== */
 
-    const linkRef =
-      db.collection("authLinks")
-        .doc(String(firebaseUser.uid));
+document.getElementById("googleBtn")
+  .addEventListener("click", async () => {
+    try {
+      await auth.signOut();
 
-    const linkDoc =
-      await linkRef.get();
+      const provider =
+        new firebase.auth.GoogleAuthProvider();
 
-    let perfilID = null;
+      provider.setCustomParameters({
+        prompt: "select_account"
+      });
 
-    if (linkDoc.exists) {
-      perfilID =
-        String(linkDoc.data().perfilID);
+      await auth.signInWithPopup(provider);
+
+    } catch (err) {
+      console.error("Erro Google login:", err);
+      alert(err.message);
     }
-
-    if (!perfilID || perfilID === "undefined") {
-
-      const contadorRef =
-        db.collection("config")
-          .doc("contadorIDs");
-
-      perfilID =
-        await db.runTransaction(async (transaction) => {
-
-          const contadorDoc =
-            await transaction.get(contadorRef);
-
-          let ultimoID = 10000;
-
-          if (contadorDoc.exists) {
-            ultimoID =
-              contadorDoc.data().ultimoID || 10000;
-          }
-
-          const novoID =
-            ultimoID + 1;
-
-          transaction.set(contadorRef, {
-            ultimoID: novoID
-          });
-
-          return String(novoID);
-
-        });
-
-      await linkRef.set({
-        perfilID: perfilID,
-        firebaseUID: firebaseUser.uid,
-        provider: "google",
-        email: firebaseUser.email || "",
-        criadoEm: Date.now()
-      }, { merge:true });
-
-    }
-
-    const ref =
-      db.collection("usuarios")
-        .doc(String(perfilID));
-
-    const doc =
-      await ref.get();
-
-   if (!doc.exists) {
-
-  await ref.set({
-
-    uid: String(perfilID),
-
-    nickname:
-      firebaseUser.displayName ||
-      `Usuário ${perfilID}`,
-
-    email:
-      firebaseUser.email || "",
-
-    avatar:
-      firebaseUser.photoURL || "",
-
-    moldura: "",
-
-    selos: [],
-
-    coins: 0,
-
-    diamonds: 0,
-
-    seguidores: 0,
-
-    seguindo: 0,
-
-    role: "user",
-
-    isACClub: false,
-
-    criadoEm: Date.now()
-
   });
 
-  /* =========================
-     CRIAR RANKING SOCIAL
-  ========================= */
+/* ========================================
+   LOGIN DISCORD
+======================================== */
 
-  await db
-    .collection("ranking_social")
-    .doc(String(perfilID))
-    .set({
+document.getElementById("discordBtn")
+  .addEventListener("click", () => {
+    window.open(
+      `${BACKEND_URL}/auth/discord`,
+      "discordLogin",
+      "width=500,height=700"
+    );
+  });
 
-      curtidas: 0,
+/* ========================================
+   RECEBER LOGIN DISCORD DO BACKEND
 
-      ultimaAtualizacao:
-        firebase.firestore.FieldValue.serverTimestamp()
+   IMPORTANTE:
+   O backend deve ser a fonte confiável
+   do UID do Discord. Este trecho não
+   reserva IDs pelo contador Google.
+======================================== */
 
-    });
+window.addEventListener("message", async (event) => {
+  if (event.origin !== BACKEND_URL) return;
+  if (!event.data || event.data.type !== "auth_success") return;
+  if (processandoLoginDiscord) return;
 
-    } else {
+  processandoLoginDiscord = true;
 
-      await ref.set({
-        uid: String(perfilID),
-        email: firebaseUser.email || "",
-        avatar: firebaseUser.photoURL || ""
-      }, { merge:true });
+  try {
+    const token = event.data.token;
 
+    if (!token) {
+      throw new Error("Token Discord ausente.");
     }
 
-localStorage.setItem(
-  "perfilID",
-  String(perfilID)
-);
- 
-    window.location.href =
-      "perfil.html";
+    localStorage.setItem("castchat_token", token);
 
-  } catch (err) {
-
-    console.error(
-      "Erro auto login Firebase:",
-      err
-    );
-
-    alert(err.message);
-
-  }
-
-});
-
-/* =========================
-   🔵 GOOGLE LOGIN
-========================= */
-document.getElementById("googleBtn")
-.addEventListener("click", async () => {
-
-  try {
-
-    await auth.signOut();
-
-    const provider =
-      new firebase.auth.GoogleAuthProvider();
-
-    provider.setCustomParameters({
-      prompt: "select_account"
+    const response = await fetch(`${BACKEND_URL}/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     });
 
-    await auth.signInWithPopup(provider);
+    if (!response.ok) {
+      throw new Error("Não foi possível validar a sessão Discord.");
+    }
 
-  } catch (err) {
-
-    console.error("ERRO GOOGLE LOGIN:");
-    console.error(err);
-    alert(err.message);
-
-  }
-
-});
-
-/* =========================
-   🟣 DISCORD LOGIN
-   VIA SERVER.JS
-========================= */
-document.getElementById("discordBtn")
-.addEventListener("click", () => {
-
-  window.open(
-    "https://castchat-backend.onrender.com/auth/discord",
-    "discordLogin",
-    "width=500,height=700"
-  );
-
-});
-
-/* =========================
-   RECEBE LOGIN DO SERVER.JS
-========================= */
-window.addEventListener("message", async (event) => {
-
-  if (!event.data) return;
-
-  if (
-    event.data.type !== "auth_success"
-  ) return;
-
-  const token =
-    event.data.token;
-
-  localStorage.setItem(
-    "castchat_token",
-    token
-  );
-
-  try {
-
-  const response =
-  await fetch("https://castchat-backend.onrender.com/me", {
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-});
-
-    const data =
-      await response.json();
+    const data = await response.json();
 
     if (!data.ok) {
-
-      alert("Erro ao validar login");
-      return;
-
+      throw new Error("O backend não confirmou o login.");
     }
 
-    const user =
-      data.user || {};
+    const user = data.user || {};
+    const uid = user.uid || user.id;
 
-    /* =========================
-       UID CORRIGIDO
-       aceita uid ou id
-    ========================= */
-    const uid =
-      user.uid || user.id;
-
-    if (!uid) {
-
-      console.error(
-        "Usuário sem UID vindo do servidor:",
-        user
-      );
-
-      alert(
-        "Erro: UID não veio do servidor"
-      );
-
-      return;
-
+    if (uid === undefined || uid === null || String(uid) === "") {
+      throw new Error("O servidor não retornou um UID válido.");
     }
 
-    const uidString =
-      String(uid);
+    const uidString = String(uid);
+    const isAdmin = uidString === "10000";
+    const nickname = isAdmin ? "AC CLUB" : `Usuário ${uidString}`;
 
-    const isAdmin =
-      uidString === "10000";
+    const userRef = db.collection("usuarios").doc(uidString);
+    const rankingRef = db.collection("ranking_social").doc(uidString);
 
-    const nickname =
-      isAdmin
-        ? "AC CLUB"
-        : `Usuário ${uidString}`;
+    // Criar ou atualizar sem apagar dados existentes.
+    await db.runTransaction(async (transaction) => {
+      const userDoc = await transaction.get(userRef);
+      const rankingDoc = await transaction.get(rankingRef);
 
-    /* =========================
-       🔥 FIRESTORE
-    ========================= */
-    await db.collection("usuarios")
-      .doc(uidString)
-      .set({
+      const agora = Date.now();
 
-        uid: uidString,
+      if (!userDoc.exists) {
+        transaction.set(userRef, {
+          uid: uidString,
+          nome: nickname,
+          nickname: nickname,
+          email: user.email || "",
+          avatar: user.avatar || "",
+          bio: "",
+          moldura: "",
+          selos: isAdmin ? ["official"] : [],
+          coins: 0,
+          diamonds: 0,
+          discordOrbs: 0,
+          seguidores: 0,
+          seguindo: 0,
+          followersCount: 0,
+          followingCount: 0,
+          petsAdquiridos: ["2"],
+          petsEquipados: [],
+          provider: "discord",
+          role: user.role || "user",
+          isACClub: isAdmin,
+          criadoEm: agora,
+          atualizadoEm: agora
+        });
+      } else {
+        transaction.set(userRef, {
+          uid: uidString,
+          atualizadoEm: agora
+        }, { merge: true });
+      }
 
-        nickname: nickname,
+      if (!rankingDoc.exists) {
+        transaction.set(rankingRef, {
+          curtidas: 0,
+          ultimaAtualizacao:
+            firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+    });
 
-        avatar: "",
-
-        moldura: "",
-
-        selos:
-          isAdmin
-            ? ["official"]
-            : [],
-
-        coins: 0,
-
-        diamonds: 0,
-
-        seguidores: 0,
-
-        seguindo: 0,
-
-        role:
-          user.role || "user",
-
-        isACClub:
-          isAdmin,
-
-        criadoEm:
-          Date.now()
-
-      }, { merge:true });
-
-    /* =========================
-       LOCAL
-    ========================= */
     localStorage.setItem(
       "profileData",
       JSON.stringify({
@@ -513,42 +544,36 @@ window.addEventListener("message", async (event) => {
       })
     );
 
-    localStorage.setItem(
-      "perfilID",
-      uidString
-    );
+    localStorage.setItem("perfilID", uidString);
 
-    window.location.href =
-      "perfil.html";
+    window.location.href = "perfil.html";
 
   } catch (err) {
+    console.error("Erro ao finalizar login Discord:", err);
+    alert("Erro ao finalizar login Discord: " + err.message);
 
-    console.error(
-      "ERRO AO FINALIZAR LOGIN:"
-    );
-
-    console.error(err);
-
-    alert(err.message);
-
+    processandoLoginDiscord = false;
   }
-
 });
 
-/* =========================
-   🚪 LOGOUT
-========================= */
-function logout(){
+/* ========================================
+   LOGOUT
+======================================== */
 
-  auth.signOut();
+async function logout() {
+  try {
+    await auth.signOut();
+  } catch (err) {
+    console.error("Erro no logout Firebase:", err);
+  }
 
   localStorage.removeItem("profileData");
   localStorage.removeItem("castchat_token");
   localStorage.removeItem("perfilID");
 
   window.location.reload();
-
 }
 </script>
+```
 </body>
 </html>
