@@ -179,7 +179,7 @@ async function obterNomeParticipante(perfilID, decoded) {
     );
   }
 
-  return `Usuário ${perfilID}`;
+  return "Usuário " + perfilID;
 }
 
 /* ========================================
