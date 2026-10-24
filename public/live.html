@@ -153,6 +153,37 @@ body{
   display:block;
 
 }
+
+.live-topo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: #111;
+}
+
+#liveAvatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+#liveNome {
+  flex: 1;
+  font-weight: bold;
+  overflow-wrap: anywhere;
+}
+
+#btnSeguirLive {
+  background: #FFD700;
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
 </style>
 </head>
 
@@ -473,36 +504,103 @@ let liveAtual = null;
 //================
 // ABRIR LIVE
 //================
-async function abrirLive(id){
+async function abrirLive(id) {
+  try {
+    liveAtual = id;
 
-  liveAtual = id;
+    // Busca os dados da live no Firestore
+    const liveDoc = await db
+      .collection("lives")
+      .doc(String(id))
+      .get();
 
-  // Esconde lista de lives
-  document.getElementById(
-    "listaLives"
-  ).style.display = "none";
+    if (!liveDoc.exists) {
+      alert("Esta live não foi encontrada.");
+      return;
+    }
 
-  // Esconde botão criar live
-  document.querySelector(
-    ".criar-live"
-  ).style.display = "none";
+    const live = liveDoc.data();
 
-  // Mostra tela da live
-  document.getElementById(
-    "telaLive"
-  ).style.display = "block";
+    // Confere se a live continua ativa
+    if (live.ativa !== true) {
+      alert("Esta live não está mais ativa.");
+      return;
+    }
 
-  console.log(
-    "Entrou na live:",
-    id
-  );
+    // Identifica o anfitrião usando o ID do perfil
+    const hostUid = String(live.hostUid || "");
+    const meuID = String(meuPerfilID || "");
+    const souHost = meuID !== "" && meuID === hostUid;
 
-  if(souStreamer){
+    // Busca o perfil do anfitrião como alternativa
+    let perfilHost = {};
 
-    await iniciarCompartilhamentoTela();
+    if (hostUid) {
+      const perfilDoc = await db
+        .collection("usuarios")
+        .doc(hostUid)
+        .get();
 
+      if (perfilDoc.exists) {
+        perfilHost = perfilDoc.data() || {};
+      }
+    }
+
+    // Define a foto do anfitrião
+    const avatar =
+      live.hostAvatar ||
+      perfilHost.avatarUpload ||
+      perfilHost.avatar ||
+      perfilHost.avatarEquipado ||
+      "avatarpreto01.png";
+
+    // Define o nome do anfitrião
+    const nome =
+      live.hostNome ||
+      perfilHost.nickname ||
+      perfilHost.nome ||
+      perfilHost.name ||
+      "Streamer";
+
+    // Atualiza a identificação na tela da live
+    const img = document.getElementById("liveAvatar");
+    img.src = avatar;
+    img.alt = "Foto de " + nome;
+
+    // Se a imagem falhar, usa a imagem padrão
+    img.onerror = function () {
+      this.onerror = null;
+      this.src = "avatarpreto01.png";
+    };
+
+    document.getElementById("liveNome").textContent = nome;
+
+    // O anfitrião não precisa seguir a si próprio
+    document.getElementById("btnSeguirLive").style.display =
+      souHost ? "none" : "inline-block";
+
+    // Atualiza a variável usada pelo restante do código
+    souStreamer = souHost;
+
+    // Esconde a lista de lives e o botão Criar Live
+    document.getElementById("listaLives").style.display = "none";
+    document.querySelector(".criar-live").style.display = "none";
+
+    // Mostra a tela da transmissão
+    document.getElementById("telaLive").style.display = "block";
+
+    console.log("Entrou na live:", id);
+    console.log("É o anfitrião:", souHost);
+
+    // Mantém o comportamento atual da transmissão
+    if (souHost) {
+      await iniciarCompartilhamentoTela();
+    }
+
+  } catch (error) {
+    console.error("Erro ao abrir a live:", error);
+    alert("Não foi possível abrir esta live. Tente novamente.");
   }
-
 }
 
 //=====================
