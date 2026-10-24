@@ -1,19 +1,18 @@
+
 {
   "name": "castchat-livekit",
   "version": "1.0.0",
-  "description": "API de autenticação e tokens LiveKit para o CastChat2.0",
+  "private": true,
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
-  },
-  "engines": {
-    "node": ">=20"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "firebase-admin": "^13.0.2",
-    "livekit-server-sdk": "^2.9.0"
+    "jsonwebtoken": "^9.0.2",
+    "livekit-server-sdk": "^2.9.6"
   }
 }
