@@ -1,16 +1,14 @@
+
 ```javascript
 require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
-
+const jwt = require("jsonwebtoken");
 const admin = require("firebase-admin");
 const { AccessToken } = require("livekit-server-sdk");
 
 const app = express();
-
-app.use(cors());
-app.use(express.json());
 
 /* ========================================
    CONFIGURAÇÕES
@@ -21,6 +19,15 @@ const PORT = process.env.PORT || 3000;
 const LIVEKIT_URL = process.env.LIVEKIT_URL;
 const LIVEKIT_API_KEY = process.env.LIVEKIT_API_KEY;
 const LIVEKIT_API_SECRET = process.env.LIVEKIT_API_SECRET;
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+/* ========================================
+   MIDDLEWARES
+======================================== */
+
+app.use(cors());
+app.use(express.json());
 
 /* ========================================
    FIREBASE ADMIN
@@ -60,6 +67,10 @@ if (!LIVEKIT_API_SECRET) {
   throw new Error("LIVEKIT_API_SECRET não configurado.");
 }
 
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET não configurado.");
+}
+
 /* ========================================
    ROTA DE TESTE
 ======================================== */
@@ -73,10 +84,10 @@ app.get("/health", (req, res) => {
 });
 
 /* ========================================
-   AUTENTICAÇÃO FIREBASE
+   AUTENTICAÇÃO CASTCHAT
 ======================================== */
 
-async function autenticarFirebase(req, res, next) {
+function autenticarCastChat(req, res, next) {
   try {
     const authorization =
       req.headers.authorization || "";
@@ -84,56 +95,91 @@ async function autenticarFirebase(req, res, next) {
     if (!authorization.startsWith("Bearer ")) {
       return res.status(401).json({
         ok: false,
-        error: "Token Firebase ausente."
+        error: "Token CastChat ausente."
       });
     }
 
     const token = authorization.substring(7);
 
-    const decoded =
-      await admin.auth().verifyIdToken(token);
+    const decoded = jwt.verify(
+      token,
+      JWT_SECRET
+    );
 
-    req.firebaseUser = decoded;
+    const perfilID = String(
+      decoded.uid || decoded.id || ""
+    ).trim();
+
+    if (!perfilID) {
+      return res.status(401).json({
+        ok: false,
+        error: "Token sem UID ou ID do perfil."
+      });
+    }
+
+    req.castchatUser = {
+      ...decoded,
+      perfilID
+    };
 
     next();
 
   } catch (error) {
-    console.error("Erro de autenticação:", error.message);
+    console.error(
+      "Erro de autenticação CastChat:",
+      error.message
+    );
 
     return res.status(401).json({
       ok: false,
-      error: "Token Firebase inválido."
+      error: "Token CastChat inválido ou expirado."
     });
   }
 }
 
 /* ========================================
-   OBTER PERFIL DO CASTCHAT
+   OBTER NOME DO PARTICIPANTE
 ======================================== */
 
-async function obterPerfilID(firebaseUID) {
-  const linkRef = db
-    .collection("authLinks")
-    .doc(String(firebaseUID));
+async function obterNomeParticipante(perfilID, decoded) {
+  const nomeDoToken =
+    decoded.name ||
+    decoded.nome ||
+    decoded.username ||
+    decoded.displayName;
 
-  const linkDoc = await linkRef.get();
+  if (nomeDoToken) {
+    return String(nomeDoToken);
+  }
 
-  if (!linkDoc.exists) {
-    throw new Error(
-      "Este usuário ainda não possui perfil vinculado."
+  try {
+    const perfilDoc = await db
+      .collection("usuarios")
+      .doc(String(perfilID))
+      .get();
+
+    if (perfilDoc.exists) {
+      const perfil = perfilDoc.data();
+
+      const nome =
+        perfil.nome ||
+        perfil.name ||
+        perfil.username ||
+        perfil.displayName;
+
+      if (nome) {
+        return String(nome);
+      }
+    }
+
+  } catch (error) {
+    console.error(
+      "Erro ao buscar nome do participante:",
+      error.message
     );
   }
 
-  const perfilID =
-    linkDoc.data().perfilID;
-
-  if (!perfilID) {
-    throw new Error(
-      "O vínculo Firebase não possui perfilID."
-    );
-  }
-
-  return String(perfilID);
+  return `Usuário ${perfilID}`;
 }
 
 /* ========================================
@@ -142,12 +188,12 @@ async function obterPerfilID(firebaseUID) {
 
 app.post(
   "/token",
-  autenticarFirebase,
+  autenticarCastChat,
   async (req, res) => {
 
     try {
-      const firebaseUID =
-        req.firebaseUser.uid;
+      const perfilID =
+        req.castchatUser.perfilID;
 
       const liveId =
         String(req.body.liveId || "").trim();
@@ -159,16 +205,15 @@ app.post(
         });
       }
 
-      // Descobrir o perfil do usuário.
-      const perfilID =
-        await obterPerfilID(firebaseUID);
+      /* ========================================
+         BUSCAR LIVE NO FIRESTORE
+      ======================================== */
 
-      // Buscar a live no Firestore.
-      const liveRef =
-        db.collection("lives").doc(liveId);
+      const liveRef = db
+        .collection("lives")
+        .doc(liveId);
 
-      const liveDoc =
-        await liveRef.get();
+      const liveDoc = await liveRef.get();
 
       if (!liveDoc.exists) {
         return res.status(404).json({
@@ -177,8 +222,7 @@ app.post(
         });
       }
 
-      const live =
-        liveDoc.data();
+      const live = liveDoc.data();
 
       if (live.ativa !== true) {
         return res.status(403).json({
@@ -187,61 +231,74 @@ app.post(
         });
       }
 
-      // O roomName será definido na criação da live.
-      // Se ainda não existir, usamos o próprio ID.
-      const roomName =
-        String(live.roomName || liveId);
+      /* ========================================
+         IDENTIFICAR HOST
+      ======================================== */
 
-      // Conferir se o usuário é o dono da transmissão.
       const hostUid =
         String(live.hostUid || "");
 
       const isHost =
         perfilID === hostUid;
 
-      // Espectadores podem apenas receber mídia.
-      // O streamer pode publicar áudio e vídeo.
+      /* ========================================
+         CONFIGURAR SALA LIVEKIT
+      ======================================== */
+
+      const roomName =
+        String(live.roomName || liveId);
+
       const participantName =
-        String(
-          req.firebaseUser.name ||
-          `Usuário ${perfilID}`
+        await obterNomeParticipante(
+          perfilID,
+          req.castchatUser
         );
 
-      const accessToken =
-        new AccessToken(
-          LIVEKIT_API_KEY,
-          LIVEKIT_API_SECRET,
-          {
-            identity: String(firebaseUID),
-            name: participantName,
-            ttl: "2h"
-          }
-        );
+      /* ========================================
+         GERAR TOKEN
+      ======================================== */
+
+      const accessToken = new AccessToken(
+        LIVEKIT_API_KEY,
+        LIVEKIT_API_SECRET,
+        {
+          identity: perfilID,
+          name: participantName,
+          ttl: "2h"
+        }
+      );
 
       accessToken.addGrant({
         roomJoin: true,
         room: roomName,
 
+        // Somente o host publica áudio e vídeo.
         canPublish: isHost,
 
+        // Host e espectadores podem receber mídia.
         canSubscribe: true,
 
+        // Somente o host pode publicar dados.
         canPublishData: isHost
       });
 
       const token =
         await accessToken.toJwt();
 
+      /* ========================================
+         RESPOSTA
+      ======================================== */
+
       return res.json({
         ok: true,
 
-        token: token,
+        token,
 
         serverUrl: LIVEKIT_URL,
 
-        roomName: roomName,
+        roomName,
 
-        perfilID: perfilID,
+        perfilID,
 
         role: isHost
           ? "host"
