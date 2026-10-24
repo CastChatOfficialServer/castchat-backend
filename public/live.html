@@ -184,6 +184,11 @@ body{
   font-weight: bold;
   cursor: pointer;
 }
+
+#btnSeguirLive:disabled {
+  opacity: 0.8;
+  cursor: default;
+}
 </style>
 </head>
 
@@ -657,7 +662,150 @@ async function criarOffer(liveId){
   );
 
 }
-  
+
+// ===============================
+// VERIFICAR SE O ESPECTADOR SEGUE O HOST
+// ===============================
+async function verificarSeSegueHost(hostUid) {
+
+  const btn = document.getElementById("btnSeguirLive");
+
+  if (!btn) return;
+
+  const meuId = String(meuPerfilID);
+  const alvoId = String(hostUid);
+
+  // O host não precisa seguir a própria conta
+  if (meuId === alvoId) {
+    btn.style.display = "none";
+    return;
+  }
+
+  btn.style.display = "block";
+  btn.disabled = false;
+  btn.textContent = "Seguir";
+
+  const seguindoRef = db
+    .collection("usuarios")
+    .doc(meuId)
+    .collection("seguindo")
+    .doc(alvoId);
+
+  const doc = await seguindoRef.get();
+
+  if (doc.exists) {
+    btn.textContent = "Seguindo";
+    btn.disabled = true;
+  }
+}
+
+
+// ===============================
+// SEGUIR HOST DA LIVE
+// ===============================
+async function seguirHostLive() {
+
+  const btn = document.getElementById("btnSeguirLive");
+
+  if (!liveAtual || !meuPerfilID) return;
+
+  try {
+
+    btn.disabled = true;
+
+    const liveDoc = await db
+      .collection("lives")
+      .doc(String(liveAtual))
+      .get();
+
+    if (!liveDoc.exists) {
+      alert("Esta live não foi encontrada.");
+      btn.disabled = false;
+      return;
+    }
+
+    const live = liveDoc.data();
+
+    const meuId = String(meuPerfilID);
+    const alvoId = String(live.hostUid);
+
+    if (meuId === alvoId) {
+      btn.style.display = "none";
+      return;
+    }
+
+    const seguindoRef = db
+      .collection("usuarios")
+      .doc(meuId)
+      .collection("seguindo")
+      .doc(alvoId);
+
+    const seguidorRef = db
+      .collection("usuarios")
+      .doc(alvoId)
+      .collection("seguidores")
+      .doc(meuId);
+
+    const jaSegue = await seguindoRef.get();
+
+    if (jaSegue.exists) {
+      btn.textContent = "Seguindo";
+      btn.disabled = true;
+      return;
+    }
+
+    await seguindoRef.set({
+      uid: alvoId,
+      criadoEm: Date.now()
+    });
+
+    await seguidorRef.set({
+      uid: meuId,
+      criadoEm: Date.now()
+    });
+
+    // Atualizar contadores dos perfis
+    await db.runTransaction(async (tx) => {
+
+      const meuRef = db
+        .collection("usuarios")
+        .doc(meuId);
+
+      const alvoRef = db
+        .collection("usuarios")
+        .doc(alvoId);
+
+      const meuDoc = await tx.get(meuRef);
+      const alvoDoc = await tx.get(alvoRef);
+
+      const followingAtual =
+        meuDoc.data()?.followingCount || 0;
+
+      const followersAtual =
+        alvoDoc.data()?.followersCount || 0;
+
+      tx.update(meuRef, {
+        followingCount: followingAtual + 1
+      });
+
+      tx.update(alvoRef, {
+        followersCount: followersAtual + 1
+      });
+
+    });
+
+    btn.textContent = "Seguindo";
+    btn.disabled = true;
+
+  } catch (error) {
+
+    console.error("Erro ao seguir host:", error);
+
+    alert("Não foi possível seguir este perfil.");
+
+    btn.disabled = false;
+  }
+}
 </script>
 </body>
 </html>
