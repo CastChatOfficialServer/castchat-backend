@@ -1,5 +1,3 @@
-
-```javascript
 require("dotenv").config();
 
 const express = require("express");
@@ -327,4 +325,3 @@ app.listen(PORT, () => {
   console.log("CastChat LiveKit API online na porta " + PORT);
 });
 });
-```
