@@ -324,4 +324,3 @@ app.post(
 app.listen(PORT, () => {
   console.log("CastChat LiveKit API online na porta " + PORT);
 });
-});
