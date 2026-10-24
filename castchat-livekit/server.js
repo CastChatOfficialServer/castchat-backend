@@ -324,8 +324,7 @@ app.post(
 ======================================== */
 
 app.listen(PORT, () => {
-  console.log(
-    `CastChat LiveKit API online na porta ${PORT}`
-  );
+  console.log("CastChat LiveKit API online na porta " + PORT);
+});
 });
 ```
