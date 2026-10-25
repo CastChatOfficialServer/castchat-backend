@@ -250,7 +250,6 @@ body{
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
 <script>
-
 const firebaseConfig = {
   apiKey: "AIzaSyBAOQC_mEjF-m5fdEO2no1-XfsQUjZc2mU",
   authDomain: "amongchat-848f9.firebaseapp.com",
@@ -267,256 +266,230 @@ if (!firebase.apps.length) {
 
 const db = firebase.firestore();
 
-const meuPerfilID =
-  localStorage.getItem("perfilID");
+const meuPerfilID = localStorage.getItem("perfilID");
 
 if (!meuPerfilID) {
   console.error("perfilID não encontrado");
 }
-  
+
 let souStreamer = false;
-  
+let liveAtual = null;
+
 //=========================
-//  CONFERIR SELO STREAMER
+// CONFERIR SELO STREAMER
 //=========================
-  async function verificarPermissaoLive(){
+async function verificarPermissaoLive() {
+  const btnCriarLive = document.getElementById("btnCriarLive");
 
-  const doc =
-    await db.collection("usuarios")
-    .doc(String(meuPerfilID))
-    .get();
+  if (!btnCriarLive || !meuPerfilID) {
+    return;
+  }
 
-  const dados =
-    doc.data() || {};
+  try {
+    const doc = await db
+      .collection("usuarios")
+      .doc(String(meuPerfilID))
+      .get();
 
-  const selos =
-    dados.selos || [];
+    const dados = doc.data() || {};
+    const selos = dados.selos || [];
 
-  const podeCriar =
-    selos.includes("streamer")
-    || String(meuPerfilID) === "10000";
+    const podeCriar =
+      selos.includes("streamer") ||
+      String(meuPerfilID) === "10000";
 
-  document.getElementById(
-    "btnCriarLive"
-  ).disabled = !podeCriar;
+    btnCriarLive.disabled = !podeCriar;
 
+  } catch (error) {
+    console.error("Erro ao verificar permissão de live:", error);
+    btnCriarLive.disabled = true;
+  }
 }
 
 //=======================
 // CRIAR LIVE
 //=======================
-  async function criarLive(){
-    
-  souStreamer = true;
-    
-  const perfil =
-    await db.collection("usuarios")
-    .doc(String(meuPerfilID))
-    .get();
-    
-  const dados =
-    perfil.data();
+async function criarLive() {
+  if (!meuPerfilID) {
+    alert("Você precisa estar conectado ao seu perfil.");
+    return;
+  }
 
-  const liveId =
-    Date.now().toString();
+  try {
+    souStreamer = true;
 
-  await db.collection("lives")
-.doc(liveId)
-.set({
+    const perfil = await db
+      .collection("usuarios")
+      .doc(String(meuPerfilID))
+      .get();
 
-  hostUid: String(meuPerfilID),
+    if (!perfil.exists) {
+      alert("Seu perfil não foi encontrado.");
+      return;
+    }
 
- hostNome:
-  dados.nickname ||
-  dados.nome ||
-  "Streamer",
+    const dados = perfil.data() || {};
+    const liveId = Date.now().toString();
 
- hostAvatar:
-  dados.avatarUpload ||
-  dados.avatar ||
-  dados.avatarEquipado ||
-  "icon_profile_selected.png",
+    await db
+      .collection("lives")
+      .doc(liveId)
+      .set({
+        hostUid: String(meuPerfilID),
 
-  viewers: 0,
+        hostNome:
+          dados.nickname ||
+          dados.nome ||
+          "Streamer",
 
-  ativa: true,
+        hostAvatar:
+          dados.avatarUpload ||
+          dados.avatar ||
+          dados.avatarEquipado ||
+          "icon_profile_selected.png",
 
-  criadaEm: Date.now(),
+        viewers: 0,
+        ativa: true,
+        criadaEm: Date.now(),
+        webrtc: true
+      });
 
-  webrtc: true
+    await db
+      .collection("lives")
+      .doc(liveId)
+      .collection("offers")
+      .doc("main")
+      .set({
+        createdAt: Date.now()
+      });
 
-});
+    await abrirLive(liveId);
 
-await db.collection("lives")
-.doc(liveId)
-.collection("offers")
-.doc("main")
-.set({
+    await criarOffer(liveId);
 
-  createdAt: Date.now()
-
-});
-
-await abrirLive(liveId);
-
-await criarOffer(liveId);
-
+  } catch (error) {
+    console.error("Erro ao criar live:", error);
+    alert("Não foi possível criar a live.");
+  }
 }
 
 //========================
 // COMPARTILHAR TELA
 //========================
-async function iniciarCompartilhamentoTela(){
-
-  try{
-
-    const stream =
-      await navigator.mediaDevices
-      .getDisplayMedia({
-
-        video:true,
-        audio:true
-
-      });
-
-    // ENVIA A TELA PARA O WEBRTC
-    stream.getTracks().forEach(track => {
-
-      peerConnection.addTrack(
-        track,
-        stream
-      );
-
+async function iniciarCompartilhamentoTela() {
+  try {
+    const stream = await navigator.mediaDevices.getDisplayMedia({
+      video: true,
+      audio: true
     });
 
-    const video =
-      document.getElementById(
-        "videoLive"
-      );
+    // Envia as faixas da tela para o WebRTC
+    stream.getTracks().forEach(track => {
+      peerConnection.addTrack(track, stream);
+    });
 
-    video.srcObject =
-      stream;
+    const video = document.getElementById("videoLive");
 
-    await video.play();
+    if (video) {
+      video.srcObject = stream;
+      await video.play();
+    }
 
-    console.log(
-      "Tela compartilhada"
-    );
+    console.log("Tela compartilhada");
 
-  }catch(err){
-
-    console.error(
-      "Erro ao compartilhar tela:",
-      err
-    );
-
+  } catch (err) {
+    console.error("Erro ao compartilhar tela:", err);
   }
-
 }
 
 //=====================
-// BOTÃO COMPARTILHAR
+// BOTÃO CRIAR LIVE
 //=====================
-document
-.getElementById(
-  "btnCriarLive"
-)
-.onclick =
-criarLive;
+const btnCriarLive = document.getElementById("btnCriarLive");
+
+if (btnCriarLive) {
+  btnCriarLive.onclick = criarLive;
+}
 
 //===================
-// CARREGAR LIVE
+// CARREGAR LIVES
 //===================
-async function carregarLives(){
+async function carregarLives() {
+  const lista = document.getElementById("listaLives");
 
-  const lista =
-    document.getElementById(
-      "listaLives"
-    );
+  if (!lista) {
+    return;
+  }
 
   lista.innerHTML = "";
 
-  const snap =
-    await db.collection("lives")
-    .where(
-      "ativa",
-      "==",
-      true
-    )
-    .get();
+  try {
+    const snap = await db
+      .collection("lives")
+      .where("ativa", "==", true)
+      .get();
 
-  snap.forEach(doc=>{
+    snap.forEach(doc => {
+      const live = doc.data() || {};
 
-    const live =
-      doc.data();
+      const card = document.createElement("div");
+      card.className = "live-card";
 
-    lista.innerHTML += `
+      const img = document.createElement("img");
+      img.src = live.hostAvatar || "avatarpreto01.png";
+      img.width = 50;
+      img.alt = "Foto de " + (live.hostNome || "Streamer");
 
-      <div class="live-card">
+      img.onerror = function () {
+        this.onerror = null;
+        this.src = "avatarpreto01.png";
+      };
 
-        <img
-          src="${live.hostAvatar}"
-          width="50"
-        >
+      const nome = document.createElement("b");
+      nome.textContent = live.hostNome || "Streamer";
 
-        <b>
-          ${live.hostNome}
-        </b>
+      const btnEntrar = document.createElement("button");
+      btnEntrar.textContent = "Entrar";
+      btnEntrar.onclick = () => entrarLive(doc.id);
 
-        <button
-          onclick="
-            entrarLive(
-              '${doc.id}'
-            )
-          "
-        >
-          Entrar
-        </button>
+      card.appendChild(img);
+      card.appendChild(nome);
+      card.appendChild(btnEntrar);
 
-      </div>
+      lista.appendChild(card);
+    });
 
-    `;
-
-  });
-
+  } catch (error) {
+    console.error("Erro ao carregar lives:", error);
+  }
 }
 
 //====================
 // ENTRAR NA LIVE
 //=====================
-function entrarLive(id){
-
+function entrarLive(id) {
   abrirLive(id);
-
 }
 
 //================
-// INICIAR LIVE
+// INICIAR PÁGINA
 //================
-window.onload = async ()=>{
-
+window.onload = async () => {
   await verificarPermissaoLive();
-
   await carregarLives();
-
 };
-
-//================
-// LIVE ATUAL
-//================
-let liveAtual = null;
 
 //================
 // ABRIR LIVE
 //================
 async function abrirLive(id) {
   try {
-    liveAtual = id;
+    liveAtual = String(id);
 
-    // Busca os dados da live no Firestore
+    // Busca os dados da live
     const liveDoc = await db
       .collection("lives")
-      .doc(String(id))
+      .doc(liveAtual)
       .get();
 
     if (!liveDoc.exists) {
@@ -524,7 +497,7 @@ async function abrirLive(id) {
       return;
     }
 
-    const live = liveDoc.data();
+    const live = liveDoc.data() || {};
 
     // Confere se a live continua ativa
     if (live.ativa !== true) {
@@ -532,10 +505,14 @@ async function abrirLive(id) {
       return;
     }
 
-    // Identifica o anfitrião usando o ID do perfil
+    // Identifica o anfitrião
     const hostUid = String(live.hostUid || "");
     const meuID = String(meuPerfilID || "");
-    const souHost = meuID !== "" && meuID === hostUid;
+
+    const souHost =
+      meuID !== "" &&
+      hostUid !== "" &&
+      meuID === hostUid;
 
     // Busca o perfil do anfitrião como alternativa
     let perfilHost = {};
@@ -567,32 +544,67 @@ async function abrirLive(id) {
       perfilHost.name ||
       "Streamer";
 
-    // Atualiza a identificação na tela da live
+    // Atualiza a identificação na tela
     const img = document.getElementById("liveAvatar");
-    img.src = avatar;
-    img.alt = "Foto de " + nome;
 
-    // Se a imagem falhar, usa a imagem padrão
-    img.onerror = function () {
-      this.onerror = null;
-      this.src = "avatarpreto01.png";
-    };
+    if (img) {
+      img.src = avatar;
+      img.alt = "Foto de " + nome;
 
-    document.getElementById("liveNome").textContent = nome;
+      img.onerror = function () {
+        this.onerror = null;
+        this.src = "avatarpreto01.png";
+      };
+    }
 
-    // O anfitrião não precisa seguir a si próprio
-    document.getElementById("btnSeguirLive").style.display =
-      souHost ? "none" : "inline-block";
+    const liveNome = document.getElementById("liveNome");
 
-    // Atualiza a variável usada pelo restante do código
+    if (liveNome) {
+      liveNome.textContent = nome;
+    }
+
+    // Atualiza a variável do anfitrião
     souStreamer = souHost;
 
-    // Esconde a lista de lives e o botão Criar Live
-    document.getElementById("listaLives").style.display = "none";
-    document.querySelector(".criar-live").style.display = "none";
+    // Configura o botão de seguir
+    const btnSeguirLive = document.getElementById("btnSeguirLive");
+
+    if (btnSeguirLive) {
+      if (souHost) {
+        // O anfitrião não segue a si próprio
+        btnSeguirLive.style.display = "none";
+        btnSeguirLive.onclick = null;
+
+      } else {
+        btnSeguirLive.style.display = "inline-block";
+
+        // Verifica se o espectador já segue o anfitrião
+        await verificarSeSegueHost(hostUid);
+
+        // Só permite clicar se ainda não estiver seguindo
+        btnSeguirLive.onclick = seguirHostLive;
+      }
+    }
+
+    // Esconde a lista de lives e o botão de criar
+    const listaLives = document.getElementById("listaLives");
+
+    if (listaLives) {
+      listaLives.style.display = "none";
+    }
+
+    const btnCriarLive = document.querySelector(".criar-live");
+
+    if (btnCriarLive) {
+      btnCriarLive.style.display = "none";
+    }
 
     // Mostra a tela da transmissão
-    document.getElementById("telaLive").style.display = "block";
+    const telaLive = document.getElementById("telaLive");
+
+    if (telaLive) {
+      telaLive.style.display = "block";
+    }
 
     console.log("Entrou na live:", id);
     console.log("É o anfitrião:", souHost);
@@ -611,107 +623,107 @@ async function abrirLive(id) {
 //=====================
 // WEBRTC
 //=====================
-const peerConnection =
-new RTCPeerConnection({
-
-  iceServers:[
-
+const peerConnection = new RTCPeerConnection({
+  iceServers: [
     {
-      urls:
-      "stun:stun.l.google.com:19302"
+      urls: "stun:stun.l.google.com:19302"
     }
-
   ]
-
 });
 
 //=====================
 // OFFER WEBRTC
 //=====================
-async function criarOffer(liveId){
+async function criarOffer(liveId) {
+  try {
+    const offer = await peerConnection.createOffer();
 
-  const offer =
-    await peerConnection
-    .createOffer();
+    await peerConnection.setLocalDescription(offer);
 
-  await peerConnection
-    .setLocalDescription(
-      offer
-    );
+    await db
+      .collection("lives")
+      .doc(String(liveId))
+      .collection("offers")
+      .doc("main")
+      .set({
+        type: offer.type,
+        sdp: offer.sdp,
+        criadaEm: Date.now()
+      });
 
-  await db
-    .collection("lives")
-    .doc(liveId)
-    .collection("offers")
-    .doc("main")
-    .set({
+    console.log("Offer criada");
 
-      type:
-        offer.type,
-
-      sdp:
-        offer.sdp,
-
-      criadaEm:
-        Date.now()
-
-    });
-
-  console.log(
-    "Offer criada"
-  );
-
+  } catch (error) {
+    console.error("Erro ao criar offer:", error);
+  }
 }
 
-// ===============================
+//====================================
 // VERIFICAR SE O ESPECTADOR SEGUE O HOST
-// ===============================
+//====================================
 async function verificarSeSegueHost(hostUid) {
-
   const btn = document.getElementById("btnSeguirLive");
 
-  if (!btn) return;
+  if (!btn || !meuPerfilID || !hostUid) {
+    return;
+  }
 
   const meuId = String(meuPerfilID);
   const alvoId = String(hostUid);
 
-  // O host não precisa seguir a própria conta
+  // O anfitrião não precisa seguir a própria conta
   if (meuId === alvoId) {
     btn.style.display = "none";
+    btn.onclick = null;
     return;
   }
 
-  btn.style.display = "block";
-  btn.disabled = false;
-  btn.textContent = "Seguir";
+  btn.style.display = "inline-block";
+  btn.disabled = true;
+  btn.textContent = "Verificando...";
 
-  const seguindoRef = db
-    .collection("usuarios")
-    .doc(meuId)
-    .collection("seguindo")
-    .doc(alvoId);
+  try {
+    const seguindoRef = db
+      .collection("usuarios")
+      .doc(meuId)
+      .collection("seguindo")
+      .doc(alvoId);
 
-  const doc = await seguindoRef.get();
+    const doc = await seguindoRef.get();
 
-  if (doc.exists) {
-    btn.textContent = "Seguindo";
-    btn.disabled = true;
+    if (doc.exists) {
+      btn.textContent = "Seguindo";
+      btn.disabled = true;
+      btn.onclick = null;
+
+    } else {
+      btn.textContent = "Seguir";
+      btn.disabled = false;
+      btn.onclick = seguirHostLive;
+    }
+
+  } catch (error) {
+    console.error("Erro ao verificar seguimento:", error);
+
+    btn.textContent = "Seguir";
+    btn.disabled = false;
+    btn.onclick = seguirHostLive;
   }
 }
 
-
-// ===============================
+//===============================
 // SEGUIR HOST DA LIVE
-// ===============================
+//===============================
 async function seguirHostLive() {
-
   const btn = document.getElementById("btnSeguirLive");
 
-  if (!liveAtual || !meuPerfilID) return;
+  if (!btn || !liveAtual || !meuPerfilID) {
+    return;
+  }
 
   try {
-
     btn.disabled = true;
+    btn.textContent = "Aguarde...";
 
     const liveDoc = await db
       .collection("lives")
@@ -720,17 +732,20 @@ async function seguirHostLive() {
 
     if (!liveDoc.exists) {
       alert("Esta live não foi encontrada.");
+      btn.textContent = "Seguir";
       btn.disabled = false;
       return;
     }
 
-    const live = liveDoc.data();
+    const live = liveDoc.data() || {};
 
     const meuId = String(meuPerfilID);
-    const alvoId = String(live.hostUid);
+    const alvoId = String(live.hostUid || "");
 
-    if (meuId === alvoId) {
+    // Não permite seguir a própria conta
+    if (!alvoId || meuId === alvoId) {
       btn.style.display = "none";
+      btn.onclick = null;
       return;
     }
 
@@ -746,27 +761,30 @@ async function seguirHostLive() {
       .collection("seguidores")
       .doc(meuId);
 
+    // Confere novamente para evitar duplicação
     const jaSegue = await seguindoRef.get();
 
     if (jaSegue.exists) {
       btn.textContent = "Seguindo";
       btn.disabled = true;
+      btn.onclick = null;
       return;
     }
 
+    // Registra que estou seguindo o anfitrião
     await seguindoRef.set({
       uid: alvoId,
       criadoEm: Date.now()
     });
 
+    // Registra que sou seguidor do anfitrião
     await seguidorRef.set({
       uid: meuId,
       criadoEm: Date.now()
     });
 
-    // Atualizar contadores dos perfis
+    // Atualiza os contadores dos perfis
     await db.runTransaction(async (tx) => {
-
       const meuRef = db
         .collection("usuarios")
         .doc(meuId);
@@ -779,10 +797,10 @@ async function seguirHostLive() {
       const alvoDoc = await tx.get(alvoRef);
 
       const followingAtual =
-        meuDoc.data()?.followingCount || 0;
+        Number(meuDoc.data()?.followingCount || 0);
 
       const followersAtual =
-        alvoDoc.data()?.followersCount || 0;
+        Number(alvoDoc.data()?.followersCount || 0);
 
       tx.update(meuRef, {
         followingCount: followingAtual + 1
@@ -791,19 +809,21 @@ async function seguirHostLive() {
       tx.update(alvoRef, {
         followersCount: followersAtual + 1
       });
-
     });
 
+    // Atualiza o botão após seguir
     btn.textContent = "Seguindo";
     btn.disabled = true;
+    btn.onclick = null;
 
   } catch (error) {
-
     console.error("Erro ao seguir host:", error);
 
     alert("Não foi possível seguir este perfil.");
 
+    btn.textContent = "Seguir";
     btn.disabled = false;
+    btn.onclick = seguirHostLive;
   }
 }
 </script>
