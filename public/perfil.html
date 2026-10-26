@@ -2303,24 +2303,41 @@ const db = firebase.firestore();
 // ID REAL DO USUÁRIO
 // ===============================
 let meuPerfilID = null;
-  
+
 // ===============================
 // PERFIL ABERTO
 // ===============================
 let perfilUID = null;
-
 let perfilVisitadoID = null;
 let visualizandoOutroPerfil = false;
 
 const params = new URLSearchParams(location.search);
 
 const visitado =
+  params.get("id") ||
   sessionStorage.getItem("perfilVisitado");
 
-perfilVisitadoID =
-  params.get("id") || visitado;
+perfilVisitadoID = visitado
+  ? String(visitado)
+  : null;
 
-visualizandoOutroPerfil = !!perfilVisitadoID;
+visualizandoOutroPerfil =
+  !!perfilVisitadoID &&
+  String(perfilVisitadoID) !== String(meuPerfilID);
+
+// ===============================
+// BOTÃO VOLTAR DO PERFIL VISITADO
+// ===============================
+function atualizarBotaoVoltarPerfil() {
+  const btn = document.getElementById("perfilBackBtn");
+
+  if (!btn) return;
+
+  btn.style.display =
+    visualizandoOutroPerfil
+      ? "block"
+      : "none";
+}
 
 /*=====================
 
@@ -4135,12 +4152,16 @@ function initApp() {
   if (typeof carregarMolduras === "function") carregarMolduras();
   if (typeof carregarCosmetics === "function") carregarCosmetics();
 
-  if (typeof atualizarEstadoLogin === "function")
-  atualizarEstadoLogin();
+  if (typeof atualizarEstadoLogin === "function") {
+    atualizarEstadoLogin();
+  }
 
   verificarModoPerfilVisitado();
   verificarSeguimento();
-    iniciarContadoresPerfil(
+
+  atualizarBotaoVoltarPerfil();
+
+  iniciarContadoresPerfil(
     perfilVisitadoID || meuPerfilID
   );
 }
