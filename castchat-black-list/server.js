@@ -82,7 +82,7 @@ const loginLimiter = rateLimit({
 });
 
 app.use(express.static(path.join(__dirname, "public"), {
-  index: "index.html"
+  index: "list.html"
 }));
 
 function requireAdmin(req, res, next) {
