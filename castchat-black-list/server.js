@@ -81,7 +81,7 @@ const loginLimiter = rateLimit({
   }
 });
 
-app.use(express.static(path.join(__dirname, "public"), {
+app.use(express.static(__dirname, {
   index: "list.html"
 }));
 
