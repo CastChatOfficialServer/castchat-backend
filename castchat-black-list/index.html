@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#a90000">
+  <title>CastChat Black List</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --red: #a90000;
+      --deep: #650000;
+      --line: #d74d4d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 28px 16px 48px;
+      color: #fff;
+      background: linear-gradient(145deg, #b40000, #720000 70%, #4d0000);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .wrap {
+      width: min(720px, 100%);
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 13px;
+      margin: 8px 0 10px;
+    }
+
+    .logo {
+      width: 58px;
+      height: 58px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(25px, 5vw, 36px);
+      letter-spacing: -.7px;
+    }
+
+    .subtitle {
+      text-align: center;
+      margin: 12px 0 26px;
+      color: #ffe0e0;
+      line-height: 1.5;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 19px;
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: 0;
+      border-radius: 9px;
+      padding: 11px 14px;
+      font-weight: 700;
+    }
+
+    button:focus-visible,
+    input:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: 2px;
+    }
+
+    .admin-toggle {
+      color: #780000;
+      background: #fff;
+    }
+
+    .panel {
+      background: rgba(65, 0, 0, .55);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      margin: 0 0 18px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .login-row, .add-row {
+      display: flex;
+      gap: 9px;
+    }
+
+    input {
+      min-width: 0;
+      flex: 1;
+      width: 100%;
+      padding: 12px 13px;
+      color: #222;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 9px;
+    }
+
+    .primary {
+      color: #fff;
+      background: #df2020;
+    }
+
+    .secondary {
+      color: #650000;
+      background: #f5e8e8;
+    }
+
+    .message {
+      min-height: 20px;
+      margin: 10px 0 0;
+      color: #ffe2a9;
+      font-size: 14px;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .user {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 15px;
+      border: 1px solid #d34c4c;
+      border-radius: 10px;
+      background: rgba(74, 0, 0, .58);
+      overflow-wrap: anywhere;
+    }
+
+    .name {
+      font-weight: 700;
+    }
+
+    .remove {
+      flex-shrink: 0;
+      padding: 8px 10px;
+      color: #650000;
+      background: #fff;
+      font-size: 13px;
+    }
+
+    .empty {
+      padding: 24px 12px;
+      text-align: center;
+      color: #ffdede;
+      border: 1px dashed #d34c4c;
+      border-radius: 10px;
+    }
+
+    .count {
+      color: #ffdede;
+      font-size: 13px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 26px;
+      color: #ffd0d0;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 480px) {
+      header {
+        gap: 9px;
+      }
+
+      .logo {
+        width: 47px;
+        height: 47px;
+      }
+
+      .login-row, .add-row {
+        flex-direction: column;
+      }
+
+      .topbar {
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <header>
+      <img class="logo" src="/castchat20.png" alt="Logo CastChat">
+      <h1>CastChat Black List</h1>
+    </header>
+
+    <p class="subtitle">
+      Lista pública de usuários sujeitos às restrições estabelecidas pelas regras do CastChat.
+    </p>
+
+    <div class="topbar">
+      <h2>Lista de usuários</h2>
+      <button id="adminToggle" class="admin-toggle" type="button">
+        Admin Mode
+      </button>
+    </div>
+
+    <section id="loginPanel" class="panel hidden">
+      <form id="loginForm" class="login-row">
+        <input
+          id="adminPassword"
+          type="password"
+          placeholder="Senha administrativa"
+          autocomplete="current-password"
+          maxlength="200"
+          required
+        >
+        <button class="primary" type="submit">Entrar</button>
+      </form>
+
+      <p id="loginMessage" class="message" role="status"></p>
+    </section>
+
+    <section id="adminPanel" class="panel hidden">
+      <div class="topbar">
+        <h2>Adicionar usuário</h2>
+        <button id="logoutButton" class="secondary" type="button">
+          Sair do modo admin
+        </button>
+      </div>
+
+      <form id="addForm" class="add-row">
+        <input
+          id="username"
+          type="text"
+          placeholder="Nome do usuário"
+          maxlength="80"
+          required
+        >
+        <button class="primary" type="submit">+ Adicionar</button>
+      </form>
+
+      <p id="addMessage" class="message" role="status"></p>
+    </section>
+
+    <div class="topbar">
+      <span id="count" class="count">Carregando lista…</span>
+    </div>
+
+    <section id="userList" class="list" aria-live="polite"></section>
+
+    <footer>
+      Esta página exibe somente nomes. Inclua apenas registros que tenham sido revisados e siga as regras de moderação do CastChat.
+    </footer>
+  </main>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
