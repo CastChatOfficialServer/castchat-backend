@@ -78,6 +78,17 @@ const AC_Official_001_DISCORD_ID =
 const PHONE_CODES = new Map();
 
 // ===============================
+// CASTCHAT BLACK LIST
+// ===============================
+
+app.use(
+  '/black-list',
+  express.static(
+    path.join(__dirname, 'castchat-black-list')
+  )
+);
+
+// ===============================
 // STATIC
 // ===============================
 
