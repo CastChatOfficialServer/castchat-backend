@@ -68,9 +68,13 @@ const DISCORD_CLIENT_ID =
 const DISCORD_CLIENT_SECRET =
   process.env.DISCORD_CLIENT_SECRET || '';
 
-const JWT_SECRET =
-  process.env.JWT_SECRET ||
-  'troque_essa_chave';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET || JWT_SECRET.length < 32) {
+  throw new Error(
+    'JWT_SECRET não configurado ou muito curto. Configure uma chave segura no Render.'
+  );
+}
 
 // ===============================
 // MASTER DISCORD
@@ -78,12 +82,6 @@ const JWT_SECRET =
 
 const AC_Official_001_DISCORD_ID =
   '908775623135219734';
-
-// ===============================
-// PHONE STORE
-// ===============================
-
-const PHONE_CODES = new Map();
 
 // ===============================
 // CASTCHAT BLACK LIST
@@ -187,7 +185,6 @@ async function gerarNovoUID() {
 // ===============================
 // CRIAR PERFIL
 // ===============================
-
 async function criarPerfil({
   uid,
   nickname,
@@ -226,7 +223,7 @@ if (snap.exists) {
     uid: String(uid),
 
     nickname:
-      nickname || Usuário ${uid},
+      nickname || `Usuário ${uid}`,
 
     email: email || '',
 
@@ -291,7 +288,6 @@ app.get('/auth/google', (req, res) => {
 // ===============================
 // GOOGLE CALLBACK
 // ===============================
-
 app.get(
   '/auth/google/callback',
   async (req, res) => {
@@ -440,14 +436,13 @@ app.get(
 
       const token =
         makeToken({
-
+      
           uid: perfil.uid,
-
-          role: perfil.role,
-
-          isACClub:
-            perfil.isACClub
-
+      
+          role: 'user',
+      
+          isACClub: false
+      
         });
 
       res.send(
@@ -459,15 +454,11 @@ app.get(
   console.error("ERRO GOOGLE:");
   console.error(err);
 
-  res.send(`
-    <h1>Erro Discord</h1>
-    <pre>${err}</pre>
-  `);
+  res.sendFile(
+  path.join(__dirname, 'auth_error.html')
+);
 
 }
-
-  }
-);
 
 // ===============================
 // DISCORD LOGIN
@@ -683,9 +674,9 @@ avatar =
 
         });
 
-      // ===============================
-      // TOKEN
-      // ===============================
+// ===============================
+// TOKEN
+// ===============================
 const token =
   makeToken({
     uid: String(uid),
@@ -706,192 +697,6 @@ res.send(
       res.sendFile(
         path.join(__dirname, 'auth_error.html')
       );
-
-    }
-
-  }
-);
-
-// ===============================
-// PHONE SEND
-// ===============================
-
-app.post(
-  '/auth/phone/send',
-  (req, res) => {
-
-    const phone =
-      String(req.body.phone || '');
-
-    if (!phone) {
-
-      return res.json({
-        ok: false
-      });
-
-    }
-
-    const code =
-      String(
-        Math.floor(
-          100000 +
-          Math.random() * 900000
-        )
-      );
-
-    PHONE_CODES.set(phone, {
-
-      code,
-
-      expiresAt:
-        Date.now() +
-        5 * 60 * 1000
-
-    });
-
-    console.log(
-      Código ${phone}: ${code}
-    );
-
-    res.json({
-      ok: true,
-      code
-    });
-
-  }
-);
-
-// ===============================
-// PHONE VERIFY
-// ===============================
-
-app.post(
-  '/auth/phone/verify',
-  async (req, res) => {
-
-    try {
-
-      const {
-        phone,
-        code
-      } = req.body;
-
-      const rec =
-        PHONE_CODES.get(phone);
-
-      if (!rec) {
-
-        return res.json({
-          ok: false
-        });
-
-      }
-
-      if (
-        Date.now() >
-        rec.expiresAt
-      ) {
-
-        PHONE_CODES.delete(phone);
-
-        return res.json({
-          ok: false
-        });
-
-      }
-
-      if (
-        rec.code !==
-        String(code)
-      ) {
-
-        return res.json({
-          ok: false
-        });
-
-      }
-
-      const providerKey =
-        phone:${phone};
-
-      const authRef =
-        db.collection('authLinks')
-          .doc(providerKey);
-
-      const authDoc =
-        await authRef.get();
-
-      let uid;
-
-      if (authDoc.exists) {
-
-        uid =
-          authDoc.data().perfilID;
-
-      } else {
-
-        uid =
-          await gerarNovoUID();
-
-        await authRef.set({
-
-          perfilID: uid,
-
-          provider: 'phone',
-
-          providerID: phone,
-
-          criadoEm: Date.now()
-
-        });
-
-      }
-
-      const perfil =
-        await criarPerfil({
-
-          uid,
-
-          nickname:
-            Usuário ${uid},
-
-          provider:
-            'phone',
-
-          role:
-            'user',
-
-          isACClub:
-            false
-
-        });
-
-      PHONE_CODES.delete(phone);
-
-      const token =
-        makeToken({
-
-          uid: perfil.uid,
-
-          role: perfil.role,
-
-          isACClub:
-            perfil.isACClub
-
-        });
-
-      res.json({
-        ok: true,
-        token
-      });
-
-    } catch (err) {
-
-      console.error(err);
-
-      res.json({
-        ok: false
-      });
 
     }
 
@@ -930,24 +735,22 @@ app.get('/me', (req, res) => {
     decoded.uid || decoded.id;
 
   res.json({
-    ok: true,
-    user: {
-      uid: String(uid),
-      id: String(uid),
-      role: decoded.role || "user",
-      isACClub: decoded.isACClub || false
-    }
-  });
-
+  ok: true,
+  user: {
+  uid: String(uid),
+  id: String(uid),
+  role: decoded.role || "user",
+  isACClub: decoded.isACClub || false
+  }
+});
 });
 
 // ===============================
 // SUCCESS PAGE
 // ===============================
-
 function generateSuccessPage(token) {
 
-  return `
+return `
 <!doctype html>
 <html>
 <head>
@@ -986,7 +789,6 @@ setTimeout(() => {
 // ===============================
 // CASTCHAT STORE
 // ===============================
-
 app.use(
   '/castchatstore',
   express.static(
@@ -994,12 +796,10 @@ app.use(
   )
 );
 
-
 // ==========================================
 // CASTCHAT 2.0 - EVENTOS COMPARTILHADOS
 // Somente o administrador oficial pode alterar
 // ==========================================
-
 const EVENTOS_PERMITIDOS = [
   "evento_boas_vindas",
   "evento_seguidores",
@@ -1100,7 +900,6 @@ app.put("/api/eventos/:key", async (req, res) => {
 // ===============================
 // START
 // ===============================
-
 app.listen(PORT, () => {
 
   console.log('======================');
