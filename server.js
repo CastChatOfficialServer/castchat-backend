@@ -19,7 +19,15 @@ const admin = require('firebase-admin');
 // FIREBASE ADMIN
 // ===============================
 
-const serviceAccount = require('./serviceAccountKey.json');
+const fs = require('fs');
+
+const serviceAccountPath = fs.existsSync('/etc/secrets/serviceAccountKey.json')
+  ? '/etc/secrets/serviceAccountKey.json'
+  : path.join(__dirname, 'serviceAccountKey.json');
+
+const serviceAccount = JSON.parse(
+  fs.readFileSync(serviceAccountPath, 'utf8')
+);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -46,7 +54,7 @@ const PORT = process.env.PORT || 3000;
 
 const SERVER_ROOT =
   process.env.SERVER_ROOT ||
-  http://localhost:${PORT};
+  `http://localhost:${PORT}`;
 
 const GOOGLE_CLIENT_ID =
   process.env.GOOGLE_CLIENT_ID || '';
@@ -261,7 +269,7 @@ if (snap.exists) {
 app.get('/auth/google', (req, res) => {
 
   const redirect_uri =
-    ${SERVER_ROOT}/auth/google/callback;
+  `${SERVER_ROOT}/auth/google/callback`;
 
   const scope =
     encodeURIComponent(
@@ -269,12 +277,12 @@ app.get('/auth/google', (req, res) => {
     );
 
   const url =
-    https://accounts.google.com/o/oauth2/v2/auth +
-    ?response_type=code +
-    &client_id=${encodeURIComponent(GOOGLE_CLIENT_ID)} +
-    &redirect_uri=${encodeURIComponent(redirect_uri)} +
-    &scope=${scope} +
-    &prompt=select_account;
+  `https://accounts.google.com/o/oauth2/v2/auth` +
+  `?response_type=code` +
+  `&client_id=${encodeURIComponent(GOOGLE_CLIENT_ID)}` +
+  `&redirect_uri=${encodeURIComponent(redirect_uri)}` +
+  `&scope=${scope}` +
+  `&prompt=select_account`;
 
   res.redirect(url);
 
@@ -298,8 +306,8 @@ app.get(
         );
       }
 
-      const redirect_uri =
-        ${SERVER_ROOT}/auth/google/callback;
+     const redirect_uri =
+      `${SERVER_ROOT}/auth/google/callback`;
 
       const params =
         new URLSearchParams({
@@ -347,7 +355,7 @@ app.get(
           {
             headers: {
               Authorization:
-                Bearer ${tokenJson.access_token}
+                `Bearer ${tokenJson.access_token}`
             }
           }
         );
@@ -355,8 +363,8 @@ app.get(
       const profile =
         await profileResp.json();
 
-      const providerKey =
-        google:${profile.id};
+     const providerKey =
+      `google:${profile.id}`;
 
       const authRef =
         db.collection('authLinks')
@@ -467,20 +475,18 @@ app.get(
 
 app.get('/auth/discord', (req, res) => {
 
-  const redirect =
-    ${SERVER_ROOT}/auth/discord/callback;
+ const redirect =
+  `${SERVER_ROOT}/auth/discord/callback`;
 
-  const scope =
-    encodeURIComponent(
-      'identify email'
-    );
+const scope =
+  encodeURIComponent('identify email');
 
-  const url =
-    https://discord.com/api/oauth2/authorize +
-    ?response_type=code +
-    &client_id=${encodeURIComponent(DISCORD_CLIENT_ID)} +
-    &scope=${scope} +
-    &redirect_uri=${encodeURIComponent(redirect)};
+const url =
+  `https://discord.com/api/oauth2/authorize` +
+  `?response_type=code` +
+  `&client_id=${encodeURIComponent(DISCORD_CLIENT_ID)}` +
+  `&scope=${scope}` +
+  `&redirect_uri=${encodeURIComponent(redirect)}`;
 
   res.redirect(url);
 
@@ -508,7 +514,7 @@ app.get(
       }
 
       const redirect_uri =
-        ${SERVER_ROOT}/auth/discord/callback;
+        `${SERVER_ROOT}/auth/discord/callback`;
 
       const params =
         new URLSearchParams({
@@ -560,7 +566,7 @@ if (!tokenJson.access_token) {
           {
             headers: {
               Authorization:
-                Bearer ${tokenJson.access_token}
+                `Bearer ${tokenJson.access_token}`
             }
           }
         );
@@ -569,7 +575,7 @@ if (!tokenJson.access_token) {
         await userResp.json();
 
       const providerKey =
-        discord:${profile.id};
+        `discord:${profile.id}`;
 
       const authRef =
         db.collection('authLinks')
@@ -638,18 +644,18 @@ if (!uid || uid === "undefined") {
   throw new Error("UID não foi definido antes do token");
 }
 
-      // ===============================
-      // AVATAR
-      // ===============================
+// ===============================
+// AVATAR
+// ===============================
 
-      let avatar = null;
+let avatar = null;
 
-      if (profile.avatar) {
+if (profile.avatar) {
 
-        avatar =
-          https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png;
+avatar =
+  `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`;
 
-      }
+}
 
       // ===============================
       // PERFIL
