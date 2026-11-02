@@ -1037,40 +1037,94 @@ const eventos = [
   { key:"evento_castChat2.0_Gachapon_Events", img:"castchateventsgachaónn.png", link:"festa.html" },
 ];
 
+let eventosAtivos = [];
 let bannerIndex = 0;
 
-/* BANNER LOOP */
-function atualizarBanner(){
+function atualizarBanner() {
   const banner = document.getElementById("eventoBanner");
-  const ativos = eventos.filter(e => localStorage.getItem(e.key)==="true");
 
-  if(ativos.length === 0){
-    banner.style.display="none";
+  if (!banner) return;
+
+  if (eventosAtivos.length === 0) {
+    banner.style.display = "none";
     return;
   }
 
-  const evento = ativos[bannerIndex % ativos.length];
-  banner.src = evento.img;
-  banner.onclick = ()=>window.location.href = evento.link;
-  banner.style.display="block";
+  const evento = eventosAtivos[bannerIndex % eventosAtivos.length];
 
-  bannerIndex++;
+  banner.src = evento.img;
+  banner.style.display = "block";
+
+  banner.onclick = () => {
+    if (evento.link) {
+      window.location.href = evento.link;
+    }
+  };
 }
 
+function iniciarEventosCompartilhados() {
+  db.collection("configuracoes")
+    .doc("eventos")
+    .onSnapshot((doc) => {
+      const dados = doc.exists ? doc.data() : {};
+
+      eventosAtivos = eventos.filter(
+        evento => dados[evento.key] === true
+      );
+
+      bannerIndex = 0;
+      atualizarBanner();
+    }, (erro) => {
+      console.error("Erro ao carregar eventos:", erro);
+    });
+}
+
+setInterval(() => {
+  if (eventosAtivos.length > 1) {
+    bannerIndex++;
+    atualizarBanner();
+  }
+}, 10000);
+
 document.addEventListener("DOMContentLoaded", () => {
-  atualizarBanner();
-  setInterval(atualizarBanner, 10000);
+  iniciarEventosCompartilhados();
 });
 
 /* SWITCHES */
-document.querySelectorAll(".switch").forEach(sw=>{
-  const key = sw.dataset.key;
-  if(localStorage.getItem(key)==="true") sw.classList.add("on");
 
-  sw.onclick=()=>{
-    const ativo = sw.classList.toggle("on");
-    localStorage.setItem(key, ativo);
-    atualizarBanner();
+document.querySelectorAll(".switch").forEach(sw => {
+  const key = sw.dataset.key;
+
+  sw.onclick = async () => {
+    const ativo = !sw.classList.contains("on");
+
+    try {
+      const response = await fetch(
+        `/api/eventos/${encodeURIComponent(key)}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("castchat_token")}`
+          },
+          body: JSON.stringify({
+            ativo: ativo
+          })
+        }
+      );
+
+      const resultado = await response.json();
+
+      if (!response.ok || !resultado.ok) {
+        throw new Error(resultado.error || "Não foi possível atualizar o evento.");
+      }
+
+      sw.classList.toggle("on", ativo);
+
+    } catch (erro) {
+      console.error("Erro ao atualizar evento:", erro);
+      alert("Não foi possível alterar o evento.");
+    }
   };
 });
 
