@@ -46,7 +46,7 @@ const PORT = process.env.PORT || 3000;
 
 const SERVER_ROOT =
   process.env.SERVER_ROOT ||
-  `http://localhost:${PORT}`;
+  http://localhost:${PORT};
 
 const GOOGLE_CLIENT_ID =
   process.env.GOOGLE_CLIENT_ID || '';
@@ -117,7 +117,8 @@ function makeToken(user) {
       uid: String(uid),
       id: String(uid),
       role: user.role || "user",
-      isACClub: user.isACClub || false
+      isACClub: user.isACClub || false,
+      discordID: user.discordID || null
     },
     JWT_SECRET,
     { expiresIn: "7d" }
@@ -217,7 +218,7 @@ if (snap.exists) {
     uid: String(uid),
 
     nickname:
-      nickname || `Usuário ${uid}`,
+      nickname || Usuário ${uid},
 
     email: email || '',
 
@@ -260,7 +261,7 @@ if (snap.exists) {
 app.get('/auth/google', (req, res) => {
 
   const redirect_uri =
-    `${SERVER_ROOT}/auth/google/callback`;
+    ${SERVER_ROOT}/auth/google/callback;
 
   const scope =
     encodeURIComponent(
@@ -268,12 +269,12 @@ app.get('/auth/google', (req, res) => {
     );
 
   const url =
-    `https://accounts.google.com/o/oauth2/v2/auth` +
-    `?response_type=code` +
-    `&client_id=${encodeURIComponent(GOOGLE_CLIENT_ID)}` +
-    `&redirect_uri=${encodeURIComponent(redirect_uri)}` +
-    `&scope=${scope}` +
-    `&prompt=select_account`;
+    https://accounts.google.com/o/oauth2/v2/auth +
+    ?response_type=code +
+    &client_id=${encodeURIComponent(GOOGLE_CLIENT_ID)} +
+    &redirect_uri=${encodeURIComponent(redirect_uri)} +
+    &scope=${scope} +
+    &prompt=select_account;
 
   res.redirect(url);
 
@@ -298,7 +299,7 @@ app.get(
       }
 
       const redirect_uri =
-        `${SERVER_ROOT}/auth/google/callback`;
+        ${SERVER_ROOT}/auth/google/callback;
 
       const params =
         new URLSearchParams({
@@ -346,7 +347,7 @@ app.get(
           {
             headers: {
               Authorization:
-                `Bearer ${tokenJson.access_token}`
+                Bearer ${tokenJson.access_token}
             }
           }
         );
@@ -355,7 +356,7 @@ app.get(
         await profileResp.json();
 
       const providerKey =
-        `google:${profile.id}`;
+        google:${profile.id};
 
       const authRef =
         db.collection('authLinks')
@@ -467,7 +468,7 @@ app.get(
 app.get('/auth/discord', (req, res) => {
 
   const redirect =
-    `${SERVER_ROOT}/auth/discord/callback`;
+    ${SERVER_ROOT}/auth/discord/callback;
 
   const scope =
     encodeURIComponent(
@@ -475,11 +476,11 @@ app.get('/auth/discord', (req, res) => {
     );
 
   const url =
-    `https://discord.com/api/oauth2/authorize` +
-    `?response_type=code` +
-    `&client_id=${encodeURIComponent(DISCORD_CLIENT_ID)}` +
-    `&scope=${scope}` +
-    `&redirect_uri=${encodeURIComponent(redirect)}`;
+    https://discord.com/api/oauth2/authorize +
+    ?response_type=code +
+    &client_id=${encodeURIComponent(DISCORD_CLIENT_ID)} +
+    &scope=${scope} +
+    &redirect_uri=${encodeURIComponent(redirect)};
 
   res.redirect(url);
 
@@ -507,7 +508,7 @@ app.get(
       }
 
       const redirect_uri =
-        `${SERVER_ROOT}/auth/discord/callback`;
+        ${SERVER_ROOT}/auth/discord/callback;
 
       const params =
         new URLSearchParams({
@@ -559,7 +560,7 @@ if (!tokenJson.access_token) {
           {
             headers: {
               Authorization:
-                `Bearer ${tokenJson.access_token}`
+                Bearer ${tokenJson.access_token}
             }
           }
         );
@@ -568,7 +569,7 @@ if (!tokenJson.access_token) {
         await userResp.json();
 
       const providerKey =
-        `discord:${profile.id}`;
+        discord:${profile.id};
 
       const authRef =
         db.collection('authLinks')
@@ -646,7 +647,7 @@ if (!uid || uid === "undefined") {
       if (profile.avatar) {
 
         avatar =
-          `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`;
+          https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png;
 
       }
 
@@ -684,7 +685,8 @@ const token =
     uid: String(uid),
     id: String(uid),
     role: role,
-    isACClub: isACClub
+    isACClub: isACClub,
+    discordID: profile.id
   });
 
 res.send(
@@ -742,7 +744,7 @@ app.post(
     });
 
     console.log(
-      `Código ${phone}: ${code}`
+      Código ${phone}: ${code}
     );
 
     res.json({
@@ -804,7 +806,7 @@ app.post(
       }
 
       const providerKey =
-        `phone:${phone}`;
+        phone:${phone};
 
       const authRef =
         db.collection('authLinks')
@@ -845,7 +847,7 @@ app.post(
           uid,
 
           nickname:
-            `Usuário ${uid}`,
+            Usuário ${uid},
 
           provider:
             'phone',
@@ -985,6 +987,121 @@ app.use(
     path.join(__dirname, 'castchatstore')
   )
 );
+
+
+// ==========================================
+// CASTCHAT 2.0 - EVENTOS COMPARTILHADOS
+// Somente o administrador oficial pode alterar
+// ==========================================
+
+const EVENTOS_PERMITIDOS = [
+  "evento_boas_vindas",
+  "evento_seguidores",
+  "evento_namorados",
+  "evento_laboratorio",
+  "evento_caca_baus",
+  "evento_olimpiadas",
+  "evento_copa_do_mundo",
+  "evento_primavera",
+  "evento_desconto",
+  "evento_fim_de_ano",
+  "evento_halloween",
+  "evento_natal",
+  "evento_pascoa",
+  "evento_aniversário",
+  "evento_castChat2.0_Gachapon_Events"
+];
+
+app.put("/api/eventos/:key", async (req, res) => {
+  try {
+    // 1. Validar token
+    const authorization = req.headers.authorization || "";
+    const token = authorization.startsWith("Bearer ")
+      ? authorization.slice(7)
+      : "";
+
+    const usuario = token ? decodeToken(token) : null;
+
+    if (!usuario) {
+      return res.status(401).json({
+        ok: false,
+        error: "Não autorizado."
+      });
+    }
+
+    // 2. Validar administrador oficial
+    const uid = String(usuario.uid || usuario.id || "");
+
+    if (
+      uid !== "10000" ||
+      usuario.role !== "admin" ||
+      usuario.isACClub !== true
+    ) {
+      return res.status(403).json({
+        ok: false,
+        error: "Apenas o administrador oficial pode alterar eventos."
+      });
+    }
+
+    // 3. Validar evento
+    const key = req.params.key;
+
+    if (!EVENTOS_PERMITIDOS.includes(key)) {
+      return res.status(400).json({
+        ok: false,
+        error: "Evento inválido."
+      });
+    }
+
+    // 4. Validar estado
+    const ativo = req.body?.ativo;
+
+    if (typeof ativo !== "boolean") {
+      return res.status(400).json({
+        ok: false,
+        error: "Estado do evento inválido."
+      });
+    }
+
+    // 5. Salvar no Firestore
+    await db.collection("configuracoes")
+      .doc("eventos")
+      .set({
+        [key]: ativo,
+        atualizadoEm: admin.firestore.FieldValue.serverTimestamp(),
+        atualizadoPor: "10000"
+      }, {
+        merge: true
+      });
+
+    return res.json({
+      ok: true,
+      evento: key,
+      ativo: ativo
+    });
+
+if (
+  uid !== "10000" ||
+  usuario.role !== "admin" ||
+  usuario.isACClub !== true ||
+  usuario.discordID !== AC_Official_001_DISCORD_ID
+) {
+  return res.status(403).json({
+    ok: false,
+    error: "Apenas o administrador oficial pode alterar eventos."
+  });
+}
+    
+  } catch (erro) {
+    console.error("Erro ao atualizar evento:", erro);
+
+    return res.status(500).json({
+      ok: false,
+      error: "Erro interno ao atualizar evento."
+    });
+  }
+});
+
 
 // ===============================
 // START
