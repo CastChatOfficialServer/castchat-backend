@@ -1035,7 +1035,8 @@ app.put("/api/eventos/:key", async (req, res) => {
     if (
       uid !== "10000" ||
       usuario.role !== "admin" ||
-      usuario.isACClub !== true
+      usuario.isACClub !== true ||
+      usuario.discordID !== AC_Official_001_DISCORD_ID
     ) {
       return res.status(403).json({
         ok: false,
@@ -1080,18 +1081,6 @@ app.put("/api/eventos/:key", async (req, res) => {
       ativo: ativo
     });
 
-if (
-  uid !== "10000" ||
-  usuario.role !== "admin" ||
-  usuario.isACClub !== true ||
-  usuario.discordID !== AC_Official_001_DISCORD_ID
-) {
-  return res.status(403).json({
-    ok: false,
-    error: "Apenas o administrador oficial pode alterar eventos."
-  });
-}
-    
   } catch (erro) {
     console.error("Erro ao atualizar evento:", erro);
 
@@ -1101,7 +1090,6 @@ if (
     });
   }
 });
-
 
 // ===============================
 // START
