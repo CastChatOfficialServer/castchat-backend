@@ -457,8 +457,9 @@ app.get(
   res.sendFile(
   path.join(__dirname, 'auth_error.html')
 );
-
 }
+  }
+);
 
 // ===============================
 // DISCORD LOGIN
