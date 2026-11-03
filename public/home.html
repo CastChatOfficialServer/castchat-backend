@@ -1090,44 +1090,6 @@ document.addEventListener("DOMContentLoaded", () => {
   iniciarEventosCompartilhados();
 });
 
-/* SWITCHES */
-
-document.querySelectorAll(".switch").forEach(sw => {
-  const key = sw.dataset.key;
-
-  sw.onclick = async () => {
-    const ativo = !sw.classList.contains("on");
-
-    try {
-      const response = await fetch(
-        `/api/eventos/${encodeURIComponent(key)}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem("castchat_token")}`
-          },
-          body: JSON.stringify({
-            ativo: ativo
-          })
-        }
-      );
-
-      const resultado = await response.json();
-
-      if (!response.ok || !resultado.ok) {
-        throw new Error(resultado.error || "Não foi possível atualizar o evento.");
-      }
-
-      sw.classList.toggle("on", ativo);
-
-    } catch (erro) {
-      console.error("Erro ao atualizar evento:", erro);
-      alert("Não foi possível alterar o evento.");
-    }
-  };
-});
-
 /* PLACEHOLDERS */
 function abrirPesquisa(){}
 function abrirCriarSala(){}
@@ -1181,41 +1143,91 @@ function fecharEventos(){
   document.getElementById("modalEventos").classList.add("hidden");
 }
 
-function renderEventosAdmin(){
+
+async function renderEventosAdmin() {
   const box = document.getElementById("eventosAdmin");
-  if(!box) return;
+  if (!box) return;
 
-  box.innerHTML = "";
+  box.innerHTML = "<p>Carregando eventos...</p>";
 
-  eventos.forEach(ev => {
-    const ativo = localStorage.getItem(ev.key) === "true";
+  try {
+    const doc = await db.collection("configuracoes")
+      .doc("eventos")
+      .get();
 
-    const row = document.createElement("div");
-    row.className = "evento-admin";
+    const dados = doc.exists ? doc.data() : {};
 
-    row.innerHTML = `
-      <div style="display:flex;align-items:center;gap:10px">
-        <img src="${ev.img}" style="width:42px;border-radius:8px">
-        <span>${ev.key
-          .replace("evento_","")
-          .replace("_"," ")
-          .toUpperCase()}</span>
-      </div>
+    box.innerHTML = "";
 
-      <label class="switch">
-        <input type="checkbox" ${ativo ? "checked":""}>
-        <span class="slider"></span>
-      </label>
-    `;
+    eventos.forEach(ev => {
+      const ativo = dados[ev.key] === true;
 
-    row.querySelector("input").onchange = e => {
-      localStorage.setItem(ev.key, e.target.checked);
-      atualizarBanner();
-    };
+      const row = document.createElement("div");
+      row.className = "evento-admin";
 
-    box.appendChild(row);
-  });
+      row.innerHTML = `
+        <img src="${ev.img}" alt="">
+        <span>${ev.key}</span>
+        <label class="switch">
+          <input type="checkbox" ${ativo ? "checked" : ""}>
+          <span class="slider"></span>
+        </label>
+      `;
+
+      const input = row.querySelector("input");
+
+      input.addEventListener("change", async () => {
+        const novoEstado = input.checked;
+        const token = localStorage.getItem("castchat_token");
+
+        input.disabled = true;
+
+        try {
+          if (!token) {
+            throw new Error("Faça login novamente como administrador.");
+          }
+
+          const resposta = await fetch(
+            `/api/eventos/${encodeURIComponent(ev.key)}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                ativo: novoEstado
+              })
+            }
+          );
+
+          const resultado = await resposta.json();
+
+          if (!resposta.ok) {
+            throw new Error(resultado.erro || resultado.message ||
+              "Não foi possível atualizar o evento.");
+          }
+
+          console.log("Evento atualizado:", ev.key, novoEstado);
+
+        } catch (erro) {
+          console.error("Erro ao atualizar evento:", erro);
+          input.checked = !novoEstado;
+          alert(erro.message);
+        } finally {
+          input.disabled = false;
+        }
+      });
+
+      box.appendChild(row);
+    });
+
+  } catch (erro) {
+    console.error("Erro ao carregar eventos:", erro);
+    box.innerHTML = "<p>Não foi possível carregar os eventos.</p>";
+  }
 }
+
 
 function atualizarEstadoInternet(){
   const online = document.getElementById("online");
