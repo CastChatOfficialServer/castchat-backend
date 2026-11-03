@@ -675,6 +675,16 @@ avatar =
 
         });
 
+      if (profile.id === AC_Official_001_DISCORD_ID) {
+  await db.collection("usuarios")
+    .doc("10000")
+    .set({
+      discordID: profile.id,
+      role: "admin",
+      isACClub: true
+    }, { merge: true });
+}
+
 // ===============================
 // TOKEN
 // ===============================
