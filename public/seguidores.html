@@ -5,93 +5,105 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Evento de Seguidores</title>
 
+```css
 <style>
-body{
-  margin:0;
-  font-family:system-ui,Arial;
-  background:#000;
-  display:flex;
-  justify-content:center;
+body {
+  margin: 0;
+  font-family: system-ui, Arial;
+  background: #000;
+  display: flex;
+  justify-content: center;
 }
 
 /* FORMATO CELULAR */
-.app{
-  position:relative;
-  width:390px;
-  min-height:100vh;
-  background:#041368;
-  padding:16px;
+.app {
+  position: relative;
+  width: 390px;
+  min-height: 100vh;
+  background: #041368;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
 /* TOP 3 */
-.top3{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-end;
-  margin-top:20px;
+.top3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 20px;
 }
-.top-card{
-  width:30%;
-  text-align:center;
+
+.top-card {
+  width: 30%;
+  text-align: center;
 }
-.top-card .name{
-  font-weight:bold;
-  margin-bottom:6px;
+
+.top-card .name {
+  font-weight: bold;
+  margin-bottom: 6px;
 }
 
 /* MOLDURA + AVATAR */
-.avatar-frame{
-  position:relative;
-  width:86px;
-  height:86px;
-  margin:0 auto 6px;
+.avatar-frame {
+  position: relative;
+  width: 86px;
+  height: 86px;
+  margin: 0 auto 6px;
 }
-.avatar-frame img.frame{
-  width:100%;
-  height:100%;
+
+.avatar-frame img.frame {
+  width: 100%;
+  height: 100%;
 }
-.avatar-frame img.avatar{
-  position:absolute;
-  top:50%;
-  left:50%;
-  width:52px;
-  height:52px;
-  border-radius:50%;
-  transform:translate(-50%,-50%);
-  background:#ccc;
+
+.avatar-frame img.avatar {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: #ccc;
 }
 
 /* LISTA */
-.list{
-  margin-top:24px;
+.list {
+  margin-top: 24px;
 }
-.user-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  background:#041368;
-  border-radius:12px;
-  padding:10px;
-  margin-bottom:10px;
+
+.user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #041368;
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 10px;
 }
-.user-info{
-  display:flex;
-  align-items:center;
-  gap:10px;
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.user-info img{
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  background:#ccc;
+
+.user-info img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #ccc;
+  flex-shrink: 0;
 }
-.follow-btn{
-  background:#ffd400;
-  border:none;
-  border-radius:8px;
-  padding:6px 14px;
-  font-weight:bold;
-  cursor:pointer;
+
+.follow-btn {
+  background: #ffd400;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-weight: bold;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .following {
@@ -102,45 +114,55 @@ body{
   font-weight: bold;
 }
 
-/* RECOMPENSAS */
-.rewards{
-  margin-top:32px;
-}
-.rewards h2{
-  text-align:center;
-  margin-bottom:18px;
+/* RECOMPENSAS E SELOS */
+.rewards {
+  margin-top: 32px;
 }
 
-.reward-row{
-  display:flex;
-  align-items:center;
-  margin-bottom:14px;
+.rewards h2 {
+  text-align: center;
+  margin-bottom: 18px;
 }
 
-.reward-text{
-  color:#000;
-  font-weight:bold;
+.reward-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
 }
 
-.reward-img{
-  width:50px;
-  height:50px;
-  object-fit:contain;
+.reward-text {
+  color: #000;
+  font-weight: bold;
 }
 
-.back-btn{
-  position:absolute;
-  top:12px;
-  left:12px;
-  z-index:999;
+/* TAMANHO DOS SELOS */
+.reward-img {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  flex: 0 0 42px;
+  object-fit: contain;
+  display: block;
 }
 
-.back-btn img{
-  width:42px;
-  height:42px;
-  cursor:pointer;
+/* BOTÃO VOLTAR */
+.back-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 999;
+}
+
+.back-btn img {
+  width: 42px;
+  height: 42px;
+  cursor: pointer;
 }
 </style>
+```
 </head>
 
 <body>
