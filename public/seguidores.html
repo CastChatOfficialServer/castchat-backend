@@ -93,9 +93,13 @@ body{
   font-weight:bold;
   cursor:pointer;
 }
-.following{
-  color:#000;
-  font-weight:bold;
+
+.following {
+  color: #000;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-weight: bold;
 }
 
 /* RECOMPENSAS */
@@ -319,80 +323,183 @@ const db = firebase.firestore();
   
 const list = document.getElementById("list");
 
+/*==========================
+PERFIL ID
+===========================*/
+
+const meuPerfilID = String(localStorage.getItem("perfilID") || "");
+
+async function verificarSeguimento(alvoId) {
+  if (!meuPerfilID || !alvoId) return false;
+
+  const doc = await db
+    .collection("usuarios")
+    .doc(meuPerfilID)
+    .collection("seguindo")
+    .doc(String(alvoId))
+    .get();
+
+  return doc.exists;
+}
+
+async function seguirUsuario(alvoId) {
+  alvoId = String(alvoId);
+
+  if (!meuPerfilID) {
+    alert("Faça login para seguir usuários.");
+    return false;
+  }
+
+  if (meuPerfilID === alvoId) {
+    alert("Você não pode seguir sua própria conta.");
+    return false;
+  }
+
+  const meuPerfilRef = db.collection("usuarios").doc(meuPerfilID);
+  const perfilAlvoRef = db.collection("usuarios").doc(alvoId);
+
+  const seguindoRef = meuPerfilRef
+    .collection("seguindo")
+    .doc(alvoId);
+
+  const seguidoresRef = perfilAlvoRef
+    .collection("seguidores")
+    .doc(meuPerfilID);
+
+  try {
+    await db.runTransaction(async transaction => {
+      const seguindoDoc = await transaction.get(seguindoRef);
+      const seguidoresDoc = await transaction.get(seguidoresRef);
+
+      const meuPerfilDoc = await transaction.get(meuPerfilRef);
+      const perfilAlvoDoc = await transaction.get(perfilAlvoRef);
+
+      if (seguindoDoc.exists || seguidoresDoc.exists) {
+        return;
+      }
+
+      if (!meuPerfilDoc.exists || !perfilAlvoDoc.exists) {
+        throw new Error("Perfil não encontrado.");
+      }
+
+      transaction.set(seguindoRef, {
+        uid: alvoId,
+        criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      transaction.set(seguidoresRef, {
+        uid: meuPerfilID,
+        criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      transaction.update(meuPerfilRef, {
+        followingCount: firebase.firestore.FieldValue.increment(1)
+      });
+
+      transaction.update(perfilAlvoRef, {
+        followersCount: firebase.firestore.FieldValue.increment(1)
+      });
+    });
+
+    return true;
+
+  } catch (erro) {
+    console.error("Erro ao seguir usuário:", erro);
+    alert("Não foi possível seguir este usuário.");
+    return false;
+  }
+}
+
+  
 /* =========================
    CRIAR LINHA
 ========================== */
 
-function criarLinhaRanking(
+await criarLinhaRanking(
   posicao,
+  doc.id,
   nome,
   avatar,
-  curtidas,
-  selos = []
-){
-
+  rankData.curtidas || 0,
+  selos
+); {
   const row = document.createElement("div");
   row.className = "user-row";
 
   row.innerHTML = `
     <div class="user-info">
-
       <img src="${avatar || 'avatar_default.png'}">
 
       <div>
-
         <strong>${posicao}º ${nome}</strong>
-
         <div class="selos"></div>
-
         <div>❤️ ${curtidas}</div>
-
       </div>
-
     </div>
 
-    <button class="follow-btn">
-      Seguir
-    </button>
+    <div class="follow-container"></div>
   `;
 
-  const btn = row.querySelector("button");
+  const followContainer = row.querySelector(".follow-container");
 
-  btn.onclick = () => {
+  const seguindo = await verificarSeguimento(uid);
 
-    btn.outerHTML =
-    '<span class="following">Seguindo</span>';
+  if (String(uid) === meuPerfilID || seguindo) {
+    const texto = document.createElement("span");
+    texto.className = "following";
+    texto.textContent = "Seguindo";
 
-  };
+    followContainer.appendChild(texto);
+
+  } else {
+    const btn = document.createElement("button");
+    btn.className = "follow-btn";
+    btn.textContent = "Seguir";
+
+    btn.onclick = async () => {
+      btn.disabled = true;
+
+      const sucesso = await seguirUsuario(uid);
+
+      if (sucesso) {
+        const texto = document.createElement("span");
+        texto.className = "following";
+        texto.textContent = "Seguindo";
+
+        followContainer.replaceChildren(texto);
+
+      } else {
+        btn.disabled = false;
+      }
+    };
+
+    followContainer.appendChild(btn);
+  }
 
   const icones = {
-    official:"ic_official.png",
-    verifyPadrao:"ic_settings_verify.png",
-    verifyAmarelo:"ic_settings_verify_amarelo.png",
-    verifyVermelho:"ic_settings_verify_vermelho.png"
+    official: "ic_official.png",
+    verifyPadrao: "ic_settings_verify.png",
+    verifyAmarelo: "ic_settings_verify_amarelo.png",
+    verifyVermelho: "ic_settings_verify_vermelho.png"
   };
 
-  const seloBox =
-    row.querySelector(".selos");
+  const seloBox = row.querySelector(".selos");
 
   selos.forEach(s => {
+    if (!icones[s]) return;
 
-    if(!icones[s]) return;
-
-    const img =
-      document.createElement("img");
-
+    const img = document.createElement("img");
     img.src = icones[s];
     img.style.width = "18px";
     img.style.marginRight = "4px";
 
     seloBox.appendChild(img);
-
   });
 
   list.appendChild(row);
-
 }
+
+
 
 /* =========================
    CARREGAR RANKING
