@@ -82,29 +82,34 @@ h1{
   font-size:15px;
 }
 
-.usuario{
-  display:flex;
-  align-items:center;
-  gap:12px;
-
-  padding:12px;
-
-  background:#111;
-  border-radius:12px;
-
-  margin-bottom:10px;
+#listaSeguindo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.usuario img{
-  width:50px;
-  height:50px;
-  border-radius:50%;
-  object-fit:cover;
+.usuario {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #111;
+  border-radius: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.usuario .nome{
-  font-size:15px;
-  font-weight:600;
+.usuario img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.usuario span {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
 }
 
 </style>
@@ -139,10 +144,10 @@ h1{
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-<script>
 
+<script>
 const firebaseConfig = {
-  apiKey: "AIzaSyBAOQC_mEjF-m5fdEO2no1-XfsQUjZc2mU",
+  apiKey: "AIzaSyBAOQC_mEj-Fm5fdEO2no1-XfsQUjZc2mU",
   authDomain: "amongchat-848f9.firebaseapp.com",
   projectId: "amongchat-848f9",
   storageBucket: "amongchat-848f9.firebasestorage.app",
@@ -156,78 +161,92 @@ if (!firebase.apps.length) {
 }
 
 const db = firebase.firestore();
-  async function carregarSeguindo(){
 
-  const lista =
-    document.getElementById(
-      "listaSeguindo"
-    );
+const meuUID = String(localStorage.getItem("perfilID") || "");
+
+async function carregarSeguindo() {
+  const lista = document.getElementById("listaSeguindo");
+
+  if (!lista) return;
 
   lista.innerHTML = "";
 
-  const snap =
-    await db
-    .collection("usuarios")
-    .doc(String(meuUID))
-    .collection("seguindo")
-    .get();
-
-  for(const doc of snap.docs){
-
-    const uidSeguido =
-      doc.id;
-
-    const perfil =
-      await db
-      .collection("usuarios")
-      .doc(uidSeguido)
-      .get();
-
-    if(!perfil.exists) continue;
-
-    const dados =
-      perfil.data();
-
-    lista.innerHTML += `
-      <div class="usuario">
-
-        <img
-          src="${
-            dados.avatar ||
-            dados.avatarEquipado ||
-            'img/default.png'
-          }"
-        >
-
-        <div>
-
-          <b>
-            ${dados.nome || dados.nickname}
-          </b>
-
-          <br>
-
-          ID:
-          ${uidSeguido}
-
-        </div>
-
-        <button
-          onclick="
-            abrirPerfil(
-              '${uidSeguido}'
-            )
-          "
-        >
-          Ver Perfil
-        </button>
-
-      </div>
-    `;
-
+  if (!meuUID) {
+    lista.innerHTML = "<p>Faça login para visualizar quem você segue.</p>";
+    return;
   }
 
+  try {
+    const snap = await db
+      .collection("usuarios")
+      .doc(meuUID)
+      .collection("seguindo")
+      .get();
+
+    if (snap.empty) {
+      lista.innerHTML = "<p>Você ainda não segue ninguém.</p>";
+      return;
+    }
+
+    for (const doc of snap.docs) {
+      const uidSeguido = doc.id;
+
+      const perfil = await db
+        .collection("usuarios")
+        .doc(uidSeguido)
+        .get();
+
+      if (!perfil.exists) continue;
+
+      const dados = perfil.data();
+
+      const nome =
+        dados.nickname ||
+        dados.nome ||
+        `Usuário ${uidSeguido}`;
+
+      let avatar = "avatar_default.png";
+
+      if (dados.avatarUpload) {
+        avatar = dados.avatarUpload;
+      } else if (
+        dados.avatarEquipado &&
+        dados.avatarEquipado.valor
+      ) {
+        avatar = dados.avatarEquipado.valor;
+      } else if (dados.avatar) {
+        avatar = dados.avatar;
+      }
+
+      const usuario = document.createElement("div");
+      usuario.className = "usuario";
+
+      const imagem = document.createElement("img");
+      imagem.src = avatar;
+      imagem.alt = "Foto de perfil";
+      imagem.onerror = () => {
+        imagem.src = "avatar_default.png";
+      };
+
+      const nomeUsuario = document.createElement("span");
+      nomeUsuario.textContent = nome;
+
+      usuario.appendChild(imagem);
+      usuario.appendChild(nomeUsuario);
+
+      lista.appendChild(usuario);
+    }
+
+  } catch (erro) {
+    console.error("Erro ao carregar seguindo:", erro);
+
+    lista.innerHTML =
+      "<p>Não foi possível carregar as pessoas que você segue.</p>";
+  }
 }
+
+carregarSeguindo();
 </script>
+
 </body>
 </html>
