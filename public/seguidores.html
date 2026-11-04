@@ -411,18 +411,19 @@ async function seguirUsuario(alvoId) {
 }
 
   
+
 /* =========================
    CRIAR LINHA
 ========================== */
 
-await criarLinhaRanking(
+async function criarLinhaRanking(
   posicao,
-  doc.id,
+  uid,
   nome,
   avatar,
-  rankData.curtidas || 0,
-  selos
-); {
+  curtidas,
+  selos = []
+) {
   const row = document.createElement("div");
   row.className = "user-row";
 
@@ -442,36 +443,48 @@ await criarLinhaRanking(
 
   const followContainer = row.querySelector(".follow-container");
 
-  const seguindo = await verificarSeguimento(uid);
+  try {
+    const seguindo = await verificarSeguimento(uid);
 
-  if (String(uid) === meuPerfilID || seguindo) {
-    const texto = document.createElement("span");
-    texto.className = "following";
-    texto.textContent = "Seguindo";
+    if (String(uid) === meuPerfilID || seguindo) {
+      const texto = document.createElement("span");
+      texto.className = "following";
+      texto.textContent = "Seguindo";
 
-    followContainer.appendChild(texto);
+      followContainer.appendChild(texto);
 
-  } else {
+    } else {
+      const btn = document.createElement("button");
+      btn.className = "follow-btn";
+      btn.textContent = "Seguir";
+
+      btn.onclick = async () => {
+        btn.disabled = true;
+
+        const sucesso = await seguirUsuario(uid);
+
+        if (sucesso) {
+          const texto = document.createElement("span");
+          texto.className = "following";
+          texto.textContent = "Seguindo";
+
+          followContainer.replaceChildren(texto);
+
+        } else {
+          btn.disabled = false;
+        }
+      };
+
+      followContainer.appendChild(btn);
+    }
+
+  } catch (erro) {
+    console.error("Erro ao verificar seguimento:", erro);
+
     const btn = document.createElement("button");
     btn.className = "follow-btn";
     btn.textContent = "Seguir";
-
-    btn.onclick = async () => {
-      btn.disabled = true;
-
-      const sucesso = await seguirUsuario(uid);
-
-      if (sucesso) {
-        const texto = document.createElement("span");
-        texto.className = "following";
-        texto.textContent = "Seguindo";
-
-        followContainer.replaceChildren(texto);
-
-      } else {
-        btn.disabled = false;
-      }
-    };
+    btn.disabled = true;
 
     followContainer.appendChild(btn);
   }
@@ -498,7 +511,6 @@ await criarLinhaRanking(
 
   list.appendChild(row);
 }
-
 
 
 /* =========================
@@ -618,13 +630,14 @@ async function carregarRanking(){
 
     else{
 
-      criarLinhaRanking(
-        posicao,
-        nome,
-        avatar,
-        rankData.curtidas || 0,
-        selos
-      );
+await criarLinhaRanking(
+  posicao,
+  doc.id,
+  nome,
+  avatar,
+  rankData.curtidas || 0,
+  selos
+);
 
     }
 
