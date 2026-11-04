@@ -82,29 +82,49 @@ h1{
   font-size:15px;
 }
 
-.usuario{
-  display:flex;
-  align-items:center;
-  gap:12px;
-
-  padding:12px;
-
-  background:#111;
-  border-radius:12px;
-
-  margin-bottom:10px;
+#listaSeguidores {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.usuario img{
-  width:50px;
-  height:50px;
-  border-radius:50%;
-  object-fit:cover;
+.usuario {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #111;
+  border-radius: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.usuario .nome{
-  font-size:15px;
-  font-weight:600;
+.usuario img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.usuario span {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.follow-btn {
+  background: #ffcc00;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.follow-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 </style>
@@ -134,10 +154,10 @@ h1{
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-<script>
 
+<script>
 const firebaseConfig = {
-  apiKey: "AIzaSyBAOQC_mEjF-m5fdEO2no1-XfsQUjZc2mU",
+  apiKey: "AIzaSyBAOQC_mEj-Fm5fdEO2no1-XfsQUjZc2mU",
   authDomain: "amongchat-848f9.firebaseapp.com",
   projectId: "amongchat-848f9",
   storageBucket: "amongchat-848f9.firebasestorage.app",
@@ -151,78 +171,210 @@ if (!firebase.apps.length) {
 }
 
 const db = firebase.firestore();
-  async function carregarSeguidores(){
 
-  const lista =
-    document.getElementById(
-      "listaSeguidores"
-    );
+const meuUID = String(localStorage.getItem("perfilID") || "");
+
+/* =========================
+   VERIFICAR SE JÁ SEGUE
+========================== */
+
+async function verificarSeguimento(alvoId) {
+  if (!meuUID || !alvoId) return false;
+
+  const doc = await db
+    .collection("usuarios")
+    .doc(meuUID)
+    .collection("seguindo")
+    .doc(String(alvoId))
+    .get();
+
+  return doc.exists;
+}
+
+/* =========================
+   SEGUIR USUÁRIO
+========================== */
+
+async function seguirUsuario(alvoId) {
+  alvoId = String(alvoId);
+
+  if (!meuUID) {
+    alert("Faça login para seguir usuários.");
+    return false;
+  }
+
+  if (meuUID === alvoId) {
+    return false;
+  }
+
+  const meuPerfilRef = db.collection("usuarios").doc(meuUID);
+  const perfilAlvoRef = db.collection("usuarios").doc(alvoId);
+
+  const seguindoRef = meuPerfilRef
+    .collection("seguindo")
+    .doc(alvoId);
+
+  const seguidoresRef = perfilAlvoRef
+    .collection("seguidores")
+    .doc(meuUID);
+
+  try {
+    await db.runTransaction(async transaction => {
+      const seguindoDoc = await transaction.get(seguindoRef);
+      const seguidoresDoc = await transaction.get(seguidoresRef);
+
+      const meuPerfilDoc = await transaction.get(meuPerfilRef);
+      const perfilAlvoDoc = await transaction.get(perfilAlvoRef);
+
+      if (seguindoDoc.exists || seguidoresDoc.exists) {
+        return;
+      }
+
+      if (!meuPerfilDoc.exists || !perfilAlvoDoc.exists) {
+        throw new Error("Perfil não encontrado.");
+      }
+
+      transaction.set(seguindoRef, {
+        uid: alvoId,
+        criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      transaction.set(seguidoresRef, {
+        uid: meuUID,
+        criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      transaction.update(meuPerfilRef, {
+        followingCount: firebase.firestore.FieldValue.increment(1)
+      });
+
+      transaction.update(perfilAlvoRef, {
+        followersCount: firebase.firestore.FieldValue.increment(1)
+      });
+    });
+
+    return true;
+
+  } catch (erro) {
+    console.error("Erro ao seguir usuário:", erro);
+    alert("Não foi possível seguir este usuário.");
+    return false;
+  }
+}
+
+/* =========================
+   CARREGAR SEGUIDORES
+========================== */
+
+async function carregarSeguidores() {
+  const lista = document.getElementById("listaSeguidores");
+
+  if (!lista) return;
 
   lista.innerHTML = "";
 
-  const snap =
-    await db
-    .collection("usuarios")
-    .doc(String(meuUID))
-    .collection("seguidores")
-    .get();
-
-  for(const doc of snap.docs){
-
-    const uidSeguidor =
-      doc.id;
-
-    const perfil =
-      await db
-      .collection("usuarios")
-      .doc(uidSeguidor)
-      .get();
-
-    if(!perfil.exists) continue;
-
-    const dados =
-      perfil.data();
-
-    lista.innerHTML += `
-      <div class="usuario">
-
-        <img
-          src="${
-            dados.avatar ||
-            dados.avatarEquipado ||
-            'img/default.png'
-          }"
-        >
-
-        <div>
-
-          <b>
-            ${dados.nome || dados.nickname}
-          </b>
-
-          <br>
-
-          ID:
-          ${uidSeguidor}
-
-        </div>
-
-        <button
-          onclick="
-            abrirPerfil(
-              '${uidSeguidor}'
-            )
-          "
-        >
-          Ver Perfil
-        </button>
-
-      </div>
-    `;
-
+  if (!meuUID) {
+    lista.innerHTML = "<p>Faça login para visualizar seus seguidores.</p>";
+    return;
   }
 
+  try {
+    const snap = await db
+      .collection("usuarios")
+      .doc(meuUID)
+      .collection("seguidores")
+      .get();
+
+    if (snap.empty) {
+      lista.innerHTML = "<p>Você ainda não possui seguidores.</p>";
+      return;
+    }
+
+    for (const doc of snap.docs) {
+      const uidSeguidor = doc.id;
+
+      const perfil = await db
+        .collection("usuarios")
+        .doc(uidSeguidor)
+        .get();
+
+      if (!perfil.exists) continue;
+
+      const dados = perfil.data();
+
+      const nome =
+        dados.nickname ||
+        dados.nome ||
+        `Usuário ${uidSeguidor}`;
+
+      let avatar = "avatar_default.png";
+
+      if (dados.avatarUpload) {
+        avatar = dados.avatarUpload;
+      } else if (
+        dados.avatarEquipado &&
+        dados.avatarEquipado.valor
+      ) {
+        avatar = dados.avatarEquipado.valor;
+      } else if (dados.avatar) {
+        avatar = dados.avatar;
+      }
+
+      const usuario = document.createElement("div");
+      usuario.className = "usuario";
+
+      const imagem = document.createElement("img");
+      imagem.src = avatar;
+      imagem.alt = "Foto de perfil";
+
+      imagem.onerror = () => {
+        imagem.src = "avatar_default.png";
+      };
+
+      const seguindo = await verificarSeguimento(uidSeguidor);
+
+      if (String(uidSeguidor) !== meuUID && !seguindo) {
+        const btn = document.createElement("button");
+
+        btn.className = "follow-btn";
+        btn.textContent = "Seguir";
+
+        btn.onclick = async () => {
+          btn.disabled = true;
+
+          const sucesso = await seguirUsuario(uidSeguidor);
+
+          if (sucesso) {
+            btn.remove();
+          } else {
+            btn.disabled = false;
+          }
+        };
+
+        usuario.appendChild(imagem);
+        usuario.appendChild(btn);
+
+      } else {
+        usuario.appendChild(imagem);
+      }
+
+      const nomeUsuario = document.createElement("span");
+      nomeUsuario.textContent = nome;
+
+      usuario.appendChild(nomeUsuario);
+      lista.appendChild(usuario);
+    }
+
+  } catch (erro) {
+    console.error("Erro ao carregar seguidores:", erro);
+
+    lista.innerHTML =
+      "<p>Não foi possível carregar seus seguidores.</p>";
+  }
 }
+
+carregarSeguidores();
 </script>
+
 </body>
 </html>
