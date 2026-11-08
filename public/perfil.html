@@ -4180,11 +4180,18 @@ async function carregarMolduras() {
 
   area.innerHTML = "";
 
+  let user = {};
+
+try {
   const doc = await db.collection("usuarios")
     .doc(String(perfilUID))
     .get();
 
-  const user = doc.data() || {};
+  user = doc.exists ? doc.data() : {};
+
+} catch (erro) {
+  console.error("Erro ao carregar dados das molduras:", erro);
+}
 
   const equipada = user.molduraEquipada || null;
 
@@ -4197,7 +4204,7 @@ async function carregarMolduras() {
     /* IMAGEM */
 
     const img = document.createElement("img");
-    img.src = m.img;
+    img.src = `/public/${m.img}`;
     img.className = "moldura-img";
 
     /* REQUISITO */
@@ -4464,7 +4471,6 @@ async function aplicarMoldura() {
       avatarFrame.style.setProperty("--frame", "none");
       return;
     }
-
     const user = doc.data();
 
     const moldura = user.molduraEquipada;
@@ -4477,7 +4483,7 @@ async function aplicarMoldura() {
 
       avatarFrame.style.setProperty(
         "--frame",
-        `url("${moldura}")`
+        `url("/public/${moldura}")`
       );
 
       avatarFrame.style.setProperty(
