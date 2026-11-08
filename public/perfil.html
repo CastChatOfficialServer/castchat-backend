@@ -4139,6 +4139,366 @@ async function verificarSeguimento(){
 
 }
 
+
+/* ===============================
+   LISTA DE MOLDURAS (LOJA)
+================================ */
+
+const molduras = [
+  { img: "molduraoficial.png", tipo: "badge", badge: "official" },
+  { img: "molduraverificadovermelho.png", tipo: "badge", badge: "verifyVermelho" },
+  { img: "molduraverificadoamarelo.png", tipo: "badge", badge: "verifyAmarelo" },
+  { img: "molduraverificada.png", tipo: "badge", badge: "verifyPadrao" },
+
+  { img: "moldura.png", tipo: "orbs", valor: 2000 },
+  { img: "moldura14.png", tipo: "diamantes", valor: 110 },
+  { img: "moldura13.png", tipo: "orbs", valor: 100 },
+  { img: "moldura12.png", tipo: "moedas", valor: 80 },
+  { img: "moldura11.png", tipo: "moedas", valor: 40 },
+  { img: "moldura10.png", tipo: "diamantes", valor: 90 },
+  { img: "moldura09.png", tipo: "orbs", valor: 120 },
+  { img: "moldura08.png", tipo: "moedas", valor: 70 },
+  { img: "moldura07.png", tipo: "moedas", valor: 50 },
+  { img: "moldura06.png", tipo: "diamantes", valor: 120 },
+  { img: "moldura05.png", tipo: "moedas", valor: 10 },
+  { img: "moldura04.png", tipo: "moedas", valor: 100 },
+  { img: "moldura03.png", tipo: "diamantes", valor: 80 },
+  { img: "moldurapremium.png", tipo: "orbs", valor: 5000 },
+  { img: "moldura02.png", tipo: "moedas", valor: 5 },
+  { img: "moldura01.png", tipo: "gratis" }
+];
+
+
+/* ===============================
+   GRID DE MOLDURAS
+================================ */
+
+async function carregarMolduras() {
+  const area = document.querySelector(".molduras-grid");
+
+  if (!area) return;
+
+  area.innerHTML = "";
+
+  const doc = await db.collection("usuarios")
+    .doc(String(perfilUID))
+    .get();
+
+  const user = doc.data() || {};
+
+  const equipada = user.molduraEquipada || null;
+
+  const acessoTotal = meuPerfilID === "10000";
+
+  molduras.forEach(m => {
+    const card = document.createElement("div");
+    card.className = "moldura-card";
+
+    /* IMAGEM */
+
+    const img = document.createElement("img");
+    img.src = m.img;
+    img.className = "moldura-img";
+
+    /* REQUISITO */
+
+    const req = document.createElement("div");
+    req.className = "moldura-req";
+
+    const icon = document.createElement("img");
+    const texto = document.createElement("span");
+
+    const comprada =
+      Array.isArray(moldurasCompradas) &&
+      moldurasCompradas.includes(m.img);
+
+    const equipadaAgora = equipada === m.img;
+
+    function setReq(src, text = "") {
+      icon.src = src;
+      texto.textContent = text;
+    }
+
+    if (equipadaAgora) {
+      setReq("ic_custom_selected.png");
+
+    } else if (comprada) {
+      setReq("ic_custom_unselect.png");
+
+    } else if (m.tipo === "badge") {
+      setReq(
+        icons[m.badge] || "ic_custom_unselect.png"
+      );
+
+    } else if (m.tipo === "moedas") {
+      setReq("coin_rotate_06.png", m.valor);
+
+    } else if (m.tipo === "diamantes") {
+      setReq("ic_diamond.png", m.valor);
+
+    } else if (m.tipo === "orbs") {
+      setReq("discordorbs.gif", m.valor);
+
+    } else {
+      setReq("ic_custom_unselect.png");
+    }
+
+    req.appendChild(icon);
+    req.appendChild(texto);
+
+    /* BOTÃO EQUIPAR */
+
+    const btn = document.createElement("button");
+
+    btn.className = "equip-btn";
+
+    btn.textContent =
+      equipada === m.img ? "Desequipar" : "Equipar";
+
+    btn.onclick = async () => {
+      const ref = db.collection("usuarios")
+        .doc(String(meuPerfilID));
+
+      /* DESEQUIPAR */
+
+      if (equipada === m.img) {
+        await ref.set(
+          { molduraEquipada: null },
+          { merge: true }
+        );
+
+        aplicarMoldura();
+        carregarMolduras();
+
+        return;
+      }
+
+      /* ACESSO TOTAL */
+
+      if (acessoTotal) {
+        await ref.set(
+          { molduraEquipada: m.img },
+          { merge: true }
+        );
+
+        aplicarMoldura();
+        carregarMolduras();
+
+        return;
+      }
+
+      /* BADGE */
+
+      if (m.tipo === "badge") {
+        if (!userBadges.includes(m.badge)) {
+          mostrarMensagemBloqueio(
+            "Você precisa desse badge para usar essa moldura",
+            icons[m.badge]
+          );
+
+          return;
+        }
+
+        await ref.set(
+          { molduraEquipada: m.img },
+          { merge: true }
+        );
+      }
+
+      /* GRÁTIS */
+
+      else if (m.tipo === "gratis") {
+        await ref.set(
+          { molduraEquipada: m.img },
+          { merge: true }
+        );
+      }
+
+      /* MOEDAS */
+
+      else if (m.tipo === "moedas") {
+        if (!moldurasCompradas.includes(m.img)) {
+          if (moedas < m.valor) {
+            alert("Moedas insuficientes");
+            return;
+          }
+
+          moedas -= m.valor;
+          moldurasCompradas.push(m.img);
+
+          await ref.update({
+            coins: moedas,
+            moldurasCompradas
+          });
+        }
+
+        await ref.set(
+          { molduraEquipada: m.img },
+          { merge: true }
+        );
+      }
+
+      /* DIAMANTES */
+
+      else if (m.tipo === "diamantes") {
+        if (!moldurasCompradas.includes(m.img)) {
+          if (diamantes < m.valor) {
+            alert("Diamantes insuficientes");
+            return;
+          }
+
+          diamantes -= m.valor;
+          moldurasCompradas.push(m.img);
+
+          await ref.update({
+            diamonds: diamantes,
+            moldurasCompradas
+          });
+        }
+
+        await ref.set(
+          { molduraEquipada: m.img },
+          { merge: true }
+        );
+      }
+
+      /* DISCORD ORBS */
+
+      else if (m.tipo === "orbs") {
+        if (m.img === "moldurapremium.png") {
+          if (orbs < m.valor) {
+            alert("Orbs insuficientes");
+            return;
+          }
+
+          orbs -= m.valor;
+
+          await ref.update({
+            discordOrbs: orbs
+          });
+
+        } else {
+          if (!moldurasCompradas.includes(m.img)) {
+            if (orbs < m.valor) {
+              alert("Orbs insuficientes");
+              return;
+            }
+
+            orbs -= m.valor;
+            moldurasCompradas.push(m.img);
+
+            await ref.update({
+              discordOrbs: orbs,
+              moldurasCompradas
+            });
+          }
+        }
+
+        await ref.set(
+          { molduraEquipada: m.img },
+          { merge: true }
+        );
+      }
+
+      aplicarMoldura();
+      carregarMolduras();
+    };
+
+    /* MONTAGEM */
+
+    card.appendChild(img);
+    card.appendChild(req);
+    card.appendChild(btn);
+
+    area.appendChild(card);
+  });
+}
+
+
+/* ===============================
+   CONFIGURAÇÃO DAS MOLDURAS
+================================ */
+
+const FIELD_MOLDURA = "molduraEquipada";
+
+const molduraConfig = {
+  "molduraoficial.png": { scale: 0.73, y: 35 },
+  "molduraverificadovermelho.png": { scale: 0.75, y: 37 },
+  "molduraverificadoamarelo.png": { scale: 0.75, y: 37 },
+  "molduraverificada.png": { scale: 0.75, y: 37 },
+
+  "moldura14.png": { scale: 0.75, y: 37 },
+  "moldura13.png": { scale: 0.80, y: 35 },
+  "moldura12.png": { scale: 0.80, y: 37 },
+  "moldura11.png": { scale: 0.77, y: 32 },
+  "moldura10.png": { scale: 0.75, y: 37 },
+  "moldura09.png": { scale: 0.85, y: 40 },
+  "moldura08.png": { scale: 0.84, y: 40 },
+  "moldura07.png": { scale: 0.80, y: 34 },
+  "moldura06.png": { scale: 0.84, y: 35 },
+  "moldura05.png": { scale: 0.84, y: 35 },
+  "moldura04.png": { scale: 0.80, y: 35 },
+
+  "moldurapremium.png": { scale: 0.90, y: 40 },
+  "moldura03.png": { scale: 0.94, y: 11 },
+  "moldura02.png": { scale: 0.83, y: 32 },
+  "moldura01.png": { scale: 0.90, y: 35 }
+};
+
+
+/* ===============================
+   APLICAR MOLDURA NO PERFIL
+================================ */
+
+async function aplicarMoldura() {
+  const avatarFrame = document.getElementById("avatarFrame");
+
+  if (!avatarFrame) return;
+
+  try {
+    const doc = await db.collection("usuarios")
+      .doc(String(perfilUID))
+      .get();
+
+    if (!doc.exists) {
+      avatarFrame.style.setProperty("--frame", "none");
+      return;
+    }
+
+    const user = doc.data();
+
+    const moldura = user.molduraEquipada;
+
+    if (moldura) {
+      const config = molduraConfig[moldura] || {
+        scale: 1,
+        y: 50
+      };
+
+      avatarFrame.style.setProperty(
+        "--frame",
+        `url("${moldura}")`
+      );
+
+      avatarFrame.style.setProperty(
+        "--scale",
+        config.scale
+      );
+
+      avatarFrame.style.setProperty(
+        "--y",
+        config.y + "%"
+      );
+
+    } else {
+      avatarFrame.style.setProperty("--frame", "none");
+    }
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 /*==================================
 INICIALIZAÇÃO
 ====================================*/
