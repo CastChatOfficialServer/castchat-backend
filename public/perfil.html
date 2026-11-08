@@ -4499,6 +4499,42 @@ async function aplicarMoldura() {
   }
 }
 
+
+/* =====================================
+   MENU DE PERSONALIZAÇÃO DO AVATAR
+===================================== */
+
+document.querySelectorAll(".avatar-tabs button").forEach(botao => {
+
+  botao.addEventListener("click", function () {
+
+    const secaoSelecionada = this.dataset.section;
+
+    // Remove o ativo de todos os botões
+    document.querySelectorAll(".avatar-tabs button").forEach(btn => {
+      btn.classList.remove("active");
+    });
+
+    // Ativa somente o botão clicado
+    this.classList.add("active");
+
+    // Oculta todas as áreas
+    document.querySelectorAll(".avatar-content .avatar-section").forEach(secao => {
+      secao.classList.remove("active");
+    });
+
+    // Mostra somente a área correspondente
+    const secao = document.getElementById(secaoSelecionada);
+
+    if (secao) {
+      secao.classList.add("active");
+    }
+
+  });
+
+});
+
+  
 /*==================================
 INICIALIZAÇÃO
 ====================================*/
