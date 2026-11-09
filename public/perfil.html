@@ -4186,22 +4186,43 @@ async function carregarMolduras() {
 
   area.innerHTML = "";
 
+  const uidDono = String(meuPerfilID || "");
+  const uidVisualizado = String(perfilUID || "");
+
+  const podeEditar =
+    uidDono !== "" && uidDono === uidVisualizado;
+
+  const acessoTotal = uidDono === "10000";
+
+  if (!uidVisualizado) {
+    console.warn("Perfil ainda não identificado para carregar molduras.");
+    return;
+  }
+
   let user = {};
 
-try {
-  const doc = await db.collection("usuarios")
-    .doc(String(perfilUID))
-    .get();
+  try {
+    const doc = await db.collection("usuarios")
+      .doc(uidVisualizado)
+      .get();
 
-  user = doc.exists ? doc.data() : {};
+    user = doc.exists ? doc.data() || {} : {};
 
-} catch (erro) {
-  console.error("Erro ao carregar dados das molduras:", erro);
-}
+  } catch (erro) {
+    console.error("Erro ao carregar dados das molduras:", erro);
+    area.textContent = "Não foi possível carregar as molduras.";
+    return;
+  }
 
   const equipada = user.molduraEquipada || null;
 
-  const acessoTotal = meuPerfilID === "10000";
+  const moldurasCompradas = Array.isArray(user.moldurasCompradas)
+    ? user.moldurasCompradas
+    : [];
+
+  const selos = Array.isArray(user.selos)
+    ? user.selos
+    : [];
 
   molduras.forEach(m => {
     const card = document.createElement("div");
@@ -4212,6 +4233,11 @@ try {
     const img = document.createElement("img");
     img.src = `/${m.img}`;
     img.className = "moldura-img";
+    img.alt = "Moldura";
+
+    img.onerror = () => {
+      console.error("Imagem de moldura não encontrada:", img.src);
+    };
 
     /* REQUISITO */
 
@@ -4222,8 +4248,7 @@ try {
     const texto = document.createElement("span");
 
     const comprada =
-      Array.isArray(moldurasCompradas) &&
-      moldurasCompradas.includes(m.img);
+      acessoTotal || moldurasCompradas.includes(m.img);
 
     const equipadaAgora = equipada === m.img;
 
@@ -4262,159 +4287,149 @@ try {
     /* BOTÃO EQUIPAR */
 
     const btn = document.createElement("button");
-
     btn.className = "equip-btn";
 
-    btn.textContent =
-      equipada === m.img ? "Desequipar" : "Equipar";
+    btn.textContent = equipadaAgora
+      ? "Desequipar"
+      : "Equipar";
+
+    if (!podeEditar) {
+      btn.disabled = true;
+      btn.textContent = "Seu perfil";
+      btn.title = "Você só pode alterar as molduras do seu próprio perfil";
+    }
 
     btn.onclick = async () => {
+      if (!podeEditar) return;
+
+      btn.disabled = true;
+
       const ref = db.collection("usuarios")
-        .doc(String(meuPerfilID));
+        .doc(uidDono);
 
-      /* DESEQUIPAR */
+      try {
+        await db.runTransaction(async transaction => {
+          const doc = await transaction.get(ref);
 
-      if (equipada === m.img) {
-        await ref.set(
-          { molduraEquipada: null },
-          { merge: true }
-        );
+          if (!doc.exists) {
+            throw new Error("PERFIL_NAO_ENCONTRADO");
+          }
 
-        aplicarMoldura();
-        carregarMolduras();
+          const dados = doc.data() || {};
 
-        return;
-      }
+          const moldurasAtuais =
+            Array.isArray(dados.moldurasCompradas)
+              ? dados.moldurasCompradas
+              : [];
 
-      /* ACESSO TOTAL */
+          const selosAtuais =
+            Array.isArray(dados.selos)
+              ? dados.selos
+              : [];
 
-      if (acessoTotal) {
-        await ref.set(
-          { molduraEquipada: m.img },
-          { merge: true }
-        );
+          const molduraAtual =
+            dados.molduraEquipada || null;
 
-        aplicarMoldura();
-        carregarMolduras();
+          /* DESEQUIPAR */
 
-        return;
-      }
+          if (molduraAtual === m.img) {
+            transaction.update(ref, {
+              molduraEquipada: null
+            });
 
-      /* BADGE */
+            return;
+          }
 
-      if (m.tipo === "badge") {
-        if (!userBadges.includes(m.badge)) {
+          /* BADGE */
+
+          if (m.tipo === "badge") {
+            if (!selosAtuais.includes(m.badge) && !acessoTotal) {
+              throw new Error("BADGE_NAO_POSSUIDO");
+            }
+
+            transaction.update(ref, {
+              molduraEquipada: m.img
+            });
+
+            return;
+          }
+
+          /* GRÁTIS */
+
+          if (m.tipo === "gratis") {
+            transaction.update(ref, {
+              molduraEquipada: m.img
+            });
+
+            return;
+          }
+
+          /* MOEDAS, DIAMANTES E ORBS */
+
+          const camposSaldo = {
+            moedas: "coins",
+            diamantes: "diamonds",
+            orbs: "discordOrbs"
+          };
+
+          const campoSaldo = camposSaldo[m.tipo];
+
+          if (!campoSaldo) {
+            throw new Error("TIPO_DE_MOLDURA_INVALIDO");
+          }
+
+          const jaComprada =
+            moldurasAtuais.includes(m.img);
+
+          const atualizacoes = {
+            molduraEquipada: m.img
+          };
+
+          /* ADMIN NÃO PAGA */
+
+          if (!acessoTotal && !jaComprada) {
+            const saldo = Number(dados[campoSaldo]) || 0;
+            const preco = Number(m.valor) || 0;
+
+            if (saldo < preco) {
+              throw new Error("SALDO_INSUFICIENTE");
+            }
+
+            atualizacoes[campoSaldo] = saldo - preco;
+
+            atualizacoes.moldurasCompradas = [
+              ...moldurasAtuais,
+              m.img
+            ];
+          }
+
+          transaction.update(ref, atualizacoes);
+        });
+
+        await aplicarMoldura();
+        await carregarMolduras();
+
+      } catch (erro) {
+        console.error("Erro ao equipar moldura:", erro);
+
+        if (erro.message === "BADGE_NAO_POSSUIDO") {
           mostrarMensagemBloqueio(
             "Você precisa desse badge para usar essa moldura",
             icons[m.badge]
           );
 
-          return;
-        }
+        } else if (erro.message === "SALDO_INSUFICIENTE") {
+          alert("Saldo insuficiente para comprar essa moldura.");
 
-        await ref.set(
-          { molduraEquipada: m.img },
-          { merge: true }
-        );
-      }
-
-      /* GRÁTIS */
-
-      else if (m.tipo === "gratis") {
-        await ref.set(
-          { molduraEquipada: m.img },
-          { merge: true }
-        );
-      }
-
-      /* MOEDAS */
-
-      else if (m.tipo === "moedas") {
-        if (!moldurasCompradas.includes(m.img)) {
-          if (moedas < m.valor) {
-            alert("Moedas insuficientes");
-            return;
-          }
-
-          moedas -= m.valor;
-          moldurasCompradas.push(m.img);
-
-          await ref.update({
-            coins: moedas,
-            moldurasCompradas
-          });
-        }
-
-        await ref.set(
-          { molduraEquipada: m.img },
-          { merge: true }
-        );
-      }
-
-      /* DIAMANTES */
-
-      else if (m.tipo === "diamantes") {
-        if (!moldurasCompradas.includes(m.img)) {
-          if (diamantes < m.valor) {
-            alert("Diamantes insuficientes");
-            return;
-          }
-
-          diamantes -= m.valor;
-          moldurasCompradas.push(m.img);
-
-          await ref.update({
-            diamonds: diamantes,
-            moldurasCompradas
-          });
-        }
-
-        await ref.set(
-          { molduraEquipada: m.img },
-          { merge: true }
-        );
-      }
-
-      /* DISCORD ORBS */
-
-      else if (m.tipo === "orbs") {
-        if (m.img === "moldurapremium.png") {
-          if (orbs < m.valor) {
-            alert("Orbs insuficientes");
-            return;
-          }
-
-          orbs -= m.valor;
-
-          await ref.update({
-            discordOrbs: orbs
-          });
+        } else if (erro.message === "PERFIL_NAO_ENCONTRADO") {
+          alert("Não foi possível encontrar seu perfil.");
 
         } else {
-          if (!moldurasCompradas.includes(m.img)) {
-            if (orbs < m.valor) {
-              alert("Orbs insuficientes");
-              return;
-            }
-
-            orbs -= m.valor;
-            moldurasCompradas.push(m.img);
-
-            await ref.update({
-              discordOrbs: orbs,
-              moldurasCompradas
-            });
-          }
+          alert("Não foi possível equipar a moldura. Consulte o Console.");
         }
 
-        await ref.set(
-          { molduraEquipada: m.img },
-          { merge: true }
-        );
+        btn.disabled = false;
       }
-
-      aplicarMoldura();
-      carregarMolduras();
     };
 
     /* MONTAGEM */
@@ -4427,7 +4442,7 @@ try {
   });
 }
 
-
+  
 /* ===============================
    CONFIGURAÇÃO DAS MOLDURAS
 ================================ */
