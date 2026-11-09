@@ -4210,7 +4210,7 @@ try {
     /* IMAGEM */
 
     const img = document.createElement("img");
-    img.src = `/public/${m.img}`;
+    img.src = `/${m.img}`;
     img.className = "moldura-img";
 
     /* REQUISITO */
@@ -4489,7 +4489,7 @@ async function aplicarMoldura() {
 
       avatarFrame.style.setProperty(
         "--frame",
-        `url("/public/${moldura}")`
+        `url("/${moldura}")`
       );
 
       avatarFrame.style.setProperty(
