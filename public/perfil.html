@@ -4299,150 +4299,167 @@ async function carregarMolduras() {
       btn.title = "Você só pode alterar as molduras do seu próprio perfil";
     }
 
-    btn.onclick = async () => {
-      if (!podeEditar) return;
+   
+btn.onclick = async () => {
+  if (!podeEditar) return;
 
-      btn.disabled = true;
+  btn.disabled = true;
 
-      const ref = db.collection("usuarios")
-        .doc(uidDono);
+  const ref = db.collection("usuarios")
+    .doc(uidDono);
 
-      try {
-        await db.runTransaction(async transaction => {
-          const doc = await transaction.get(ref);
+  // Guarda o estado final da moldura após a transação.
+  let molduraFicouEquipada = false;
 
-          if (!doc.exists) {
-            throw new Error("PERFIL_NAO_ENCONTRADO");
-          }
+  try {
+    await db.runTransaction(async transaction => {
+      const doc = await transaction.get(ref);
 
-          const dados = doc.data() || {};
+      if (!doc.exists) {
+        throw new Error("PERFIL_NAO_ENCONTRADO");
+      }
 
-          const moldurasAtuais =
-            Array.isArray(dados.moldurasCompradas)
-              ? dados.moldurasCompradas
-              : [];
+      const dados = doc.data() || {};
 
-          const selosAtuais =
-            Array.isArray(dados.selos)
-              ? dados.selos
-              : [];
+      const moldurasAtuais =
+        Array.isArray(dados.moldurasCompradas)
+          ? dados.moldurasCompradas
+          : [];
 
-          const molduraAtual =
-            dados.molduraEquipada || null;
+      const selosAtuais =
+        Array.isArray(dados.selos)
+          ? dados.selos
+          : [];
 
-          /* DESEQUIPAR */
+      const molduraAtual =
+        dados.molduraEquipada || null;
 
-          if (molduraAtual === m.img) {
-            transaction.update(ref, {
-              molduraEquipada: null
-            });
+      /* DESEQUIPAR */
 
-            return;
-          }
-
-          /* BADGE */
-
-          if (m.tipo === "badge") {
-            if (!selosAtuais.includes(m.badge) && !acessoTotal) {
-              throw new Error("BADGE_NAO_POSSUIDO");
-            }
-
-            transaction.update(ref, {
-              molduraEquipada: m.img
-            });
-
-            return;
-          }
-
-          /* GRÁTIS */
-
-          if (m.tipo === "gratis") {
-            transaction.update(ref, {
-              molduraEquipada: m.img
-            });
-
-            return;
-          }
-
-          /* MOEDAS, DIAMANTES E ORBS */
-
-          const camposSaldo = {
-            moedas: "coins",
-            diamantes: "diamonds",
-            orbs: "discordOrbs"
-          };
-
-          const campoSaldo = camposSaldo[m.tipo];
-
-          if (!campoSaldo) {
-            throw new Error("TIPO_DE_MOLDURA_INVALIDO");
-          }
-
-          const jaComprada =
-            moldurasAtuais.includes(m.img);
-
-          const atualizacoes = {
-            molduraEquipada: m.img
-          };
-
-          /* ADMIN NÃO PAGA */
-
-          if (!acessoTotal && !jaComprada) {
-            const saldo = Number(dados[campoSaldo]) || 0;
-            const preco = Number(m.valor) || 0;
-
-            if (saldo < preco) {
-              throw new Error("SALDO_INSUFICIENTE");
-            }
-
-            atualizacoes[campoSaldo] = saldo - preco;
-
-            atualizacoes.moldurasCompradas = [
-              ...moldurasAtuais,
-              m.img
-            ];
-          }
-
-          transaction.update(ref, atualizacoes);
+      if (molduraAtual === m.img) {
+        transaction.update(ref, {
+          molduraEquipada: null
         });
 
-        await aplicarMoldura();
-        await carregarMolduras();
+        molduraFicouEquipada = false;
+        return;
+      }
 
-      } catch (erro) {
-        console.error("Erro ao equipar moldura:", erro);
+      /* BADGE */
 
-        if (erro.message === "BADGE_NAO_POSSUIDO") {
-          mostrarMensagemBloqueio(
-            "Você precisa desse badge para usar essa moldura",
-            icons[m.badge]
-          );
-
-        } else if (erro.message === "SALDO_INSUFICIENTE") {
-          alert("Saldo insuficiente para comprar essa moldura.");
-
-        } else if (erro.message === "PERFIL_NAO_ENCONTRADO") {
-          alert("Não foi possível encontrar seu perfil.");
-
-        } else {
-          alert("Não foi possível equipar a moldura. Consulte o Console.");
+      if (m.tipo === "badge") {
+        if (!selosAtuais.includes(m.badge) && !acessoTotal) {
+          throw new Error("BADGE_NAO_POSSUIDO");
         }
 
-        btn.disabled = false;
+        transaction.update(ref, {
+          molduraEquipada: m.img
+        });
+
+        molduraFicouEquipada = true;
+        return;
       }
-    };
 
-    /* MONTAGEM */
+      /* GRÁTIS */
 
-    card.appendChild(img);
-    card.appendChild(req);
-    card.appendChild(btn);
+      if (m.tipo === "gratis") {
+        transaction.update(ref, {
+          molduraEquipada: m.img
+        });
 
-    area.appendChild(card);
-  });
-}
+        molduraFicouEquipada = true;
+        return;
+      }
 
-  
+      /* MOEDAS, DIAMANTES E ORBS */
+
+      const camposSaldo = {
+        moedas: "coins",
+        diamantes: "diamonds",
+        orbs: "discordOrbs"
+      };
+
+      const campoSaldo = camposSaldo[m.tipo];
+
+      if (!campoSaldo) {
+        throw new Error("TIPO_DE_MOLDURA_INVALIDO");
+      }
+
+      const jaComprada =
+        moldurasAtuais.includes(m.img);
+
+      const atualizacoes = {
+        molduraEquipada: m.img
+      };
+
+      /* ADMIN NÃO PAGA */
+
+      if (!acessoTotal && !jaComprada) {
+        const saldo = Number(dados[campoSaldo]) || 0;
+        const preco = Number(m.valor) || 0;
+
+        if (saldo < preco) {
+          throw new Error("SALDO_INSUFICIENTE");
+        }
+
+        atualizacoes[campoSaldo] = saldo - preco;
+
+        atualizacoes.moldurasCompradas = [
+          ...moldurasAtuais,
+          m.img
+        ];
+      }
+
+      transaction.update(ref, atualizacoes);
+
+      molduraFicouEquipada = true;
+    });
+
+    /* ATUALIZAÇÃO IMEDIATA DO BOTÃO */
+
+    btn.textContent = molduraFicouEquipada
+      ? "Desequipar"
+      : "Equipar";
+
+    /* ATUALIZAÇÃO DO ÍCONE DE REQUISITO */
+
+    if (molduraFicouEquipada) {
+      setReq("ic_custom_selected.png");
+    } else if (m.tipo === "badge" && !acessoTotal) {
+      setReq(icons[m.badge] || "ic_custom_unselect.png");
+    } else {
+      setReq("ic_custom_unselect.png");
+    }
+
+    btn.disabled = false;
+
+    /* ATUALIZA A MOLDURA NO PERFIL */
+
+    await aplicarMoldura();
+
+  } catch (erro) {
+    console.error("Erro ao equipar moldura:", erro);
+
+    if (erro.message === "BADGE_NAO_POSSUIDO") {
+      mostrarMensagemBloqueio(
+        "Você precisa desse badge para usar essa moldura",
+        icons[m.badge]
+      );
+
+    } else if (erro.message === "SALDO_INSUFICIENTE") {
+      alert("Saldo insuficiente para comprar essa moldura.");
+
+    } else if (erro.message === "PERFIL_NAO_ENCONTRADO") {
+      alert("Não foi possível encontrar seu perfil.");
+
+    } else {
+      alert("Não foi possível equipar a moldura. Consulte o Console.");
+    }
+
+    btn.disabled = false;
+  }
+};
+
 /* ===============================
    CONFIGURAÇÃO DAS MOLDURAS
 ================================ */
