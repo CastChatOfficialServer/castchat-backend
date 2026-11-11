@@ -259,6 +259,197 @@ if (snap.exists) {
 
 }
 
+
+// ==========================================
+// GOOGLE FIREBASE AUTH - CRIAÇÃO SEGURA
+// O servidor controla os vínculos e IDs.
+// ==========================================
+
+app.post('/api/auth/google/profile', async (req, res) => {
+  try {
+    const authorization = req.headers.authorization || '';
+    const match = authorization.match(/^Bearer (.+)$/);
+
+    if (!match) {
+      return res.status(401).json({
+        ok: false,
+        error: 'Token Firebase ausente.'
+      });
+    }
+
+    // Validar o token emitido pelo Firebase Authentication.
+    const decoded = await admin.auth().verifyIdToken(match[1]);
+
+    const firebaseUID = String(decoded.uid);
+    const provider = decoded.firebase?.sign_in_provider;
+
+    // Impedir que sessões Discord ou outros provedores
+    // utilizem esta rota como se fossem Google.
+    if (provider !== 'google.com') {
+      return res.status(403).json({
+        ok: false,
+        error: 'Esta rota aceita somente autenticação Google.'
+      });
+    }
+
+    const email = decoded.email || '';
+    const nickname = decoded.name || 'Usuário';
+    const avatar = decoded.picture || null;
+
+    const linkRef = db.collection('authLinks').doc(firebaseUID);
+    const contadorRef = db.collection('config').doc('contadorIDs');
+
+    const perfilID = await db.runTransaction(async (transaction) => {
+      const linkDoc = await transaction.get(linkRef);
+
+      let id;
+      let novoVinculo = false;
+      let userDoc;
+      let rankingDoc;
+      let userRef;
+      let rankingRef;
+
+      if (linkDoc.exists) {
+        const link = linkDoc.data() || {};
+
+        if (
+          String(link.firebaseUID || '') !== firebaseUID ||
+          link.provider !== 'google' ||
+          !link.perfilID
+        ) {
+          throw new Error('Vínculo Google inválido ou inconsistente.');
+        }
+
+        id = String(link.perfilID);
+
+        userRef = db.collection('usuarios').doc(id);
+        rankingRef = db.collection('ranking_social').doc(id);
+
+        userDoc = await transaction.get(userRef);
+        rankingDoc = await transaction.get(rankingRef);
+
+      } else {
+        novoVinculo = true;
+
+        const contadorDoc = await transaction.get(contadorRef);
+
+        let ultimoID = 10000;
+
+        if (contadorDoc.exists) {
+          const valor = Number(contadorDoc.data().ultimoID || 10000);
+
+          if (!Number.isSafeInteger(valor) || valor < 10000) {
+            throw new Error('Contador de IDs inválido.');
+          }
+
+          ultimoID = valor;
+        }
+
+        let encontrado = false;
+
+        for (let tentativa = 0; tentativa < 1000; tentativa++) {
+          const candidato = String(ultimoID + 1);
+          const candidatoRef = db.collection('usuarios').doc(candidato);
+          const candidatoDoc = await transaction.get(candidatoRef);
+
+          if (!candidatoDoc.exists) {
+            id = candidato;
+            userRef = candidatoRef;
+            encontrado = true;
+            break;
+          }
+
+          ultimoID++;
+        }
+
+        if (!encontrado) {
+          throw new Error('Não foi possível encontrar um ID disponível.');
+        }
+
+        rankingRef = db.collection('ranking_social').doc(id);
+
+        userDoc = await transaction.get(userRef);
+        rankingDoc = await transaction.get(rankingRef);
+      }
+
+      const agora = Date.now();
+
+      if (novoVinculo) {
+        transaction.set(contadorRef, {
+          ultimoID: Number(id)
+        }, { merge: true });
+
+        transaction.create(linkRef, {
+          perfilID: id,
+          firebaseUID,
+          provider: 'google',
+          email,
+          criadoEm: agora
+        });
+      }
+
+      if (!userDoc.exists) {
+        transaction.set(userRef, {
+          uid: id,
+          nome: nickname,
+          nickname,
+          email,
+          avatar,
+          bio: '',
+          moldura: '',
+          selos: [],
+          coins: 0,
+          diamonds: 0,
+          discordOrbs: 0,
+          seguidores: 0,
+          seguindo: 0,
+          followersCount: 0,
+          followingCount: 0,
+          petsAdquiridos: ['2'],
+          petsEquipados: [],
+          provider: 'google',
+          role: 'user',
+          isACClub: false,
+          criadoEm: agora,
+          atualizadoEm: agora
+        });
+      } else {
+        // Não substituir moedas, itens, pets, selos ou outros dados.
+        transaction.set(userRef, {
+          uid: id,
+          email,
+          avatar,
+          atualizadoEm: agora
+        }, { merge: true });
+      }
+
+      if (!rankingDoc.exists) {
+        transaction.set(rankingRef, {
+          curtidas: 0,
+          ultimaAtualizacao:
+            admin.firestore.FieldValue.serverTimestamp()
+        });
+      }
+
+      return id;
+    });
+
+    return res.json({
+      ok: true,
+      perfilID: String(perfilID)
+    });
+
+  } catch (err) {
+    console.error('Erro na autenticação Google segura:', err);
+
+    return res.status(500).json({
+      ok: false,
+      error: 'Não foi possível finalizar o perfil Google.'
+    });
+  }
+});
+
+
 // ===============================
 // GOOGLE LOGIN
 // ===============================
