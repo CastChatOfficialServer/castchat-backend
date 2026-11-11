@@ -688,17 +688,28 @@ avatar =
 // ===============================
 // TOKEN
 // ===============================
-const token =
-  makeToken({
-    uid: String(uid),
-    id: String(uid),
-    role: role,
-    isACClub: isACClub,
-    discordID: profile.id
-  });
+const token = makeToken({
+  uid: String(uid),
+  id: String(uid),
+  role: role,
+  isACClub: isACClub,
+  discordID: profile.id
+});
+
+// Criar a ponte com Firebase Authentication
+const firebaseCustomToken =
+  await admin.auth().createCustomToken(
+    String(uid),
+    {
+      perfilID: String(uid),
+      role: role,
+      isACClub: isACClub,
+      discordID: String(profile.id)
+    }
+  );
 
 res.send(
-  generateSuccessPage(token)
+  generateSuccessPage(token, firebaseCustomToken)
 );
 
     } catch (err) {
@@ -759,7 +770,7 @@ app.get('/me', (req, res) => {
 // ===============================
 // SUCCESS PAGE
 // ===============================
-function generateSuccessPage(token) {
+function generateSuccessPage(token, firebaseCustomToken) {
 
 return `
 <!doctype html>
@@ -774,13 +785,14 @@ return `
 
 if (window.opener) {
 
-  window.opener.postMessage(
-    {
-      type:'auth_success',
-      token:${JSON.stringify(token)}
-    },
-    '*'
-  );
+ window.opener.postMessage(
+  {
+    type: 'auth_success',
+    token: ${JSON.stringify(token)},
+    firebaseCustomToken: ${JSON.stringify(firebaseCustomToken)}
+  },
+  '*'
+);
 
 }
 
