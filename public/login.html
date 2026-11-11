@@ -393,6 +393,13 @@ auth.getRedirectResult()
 auth.onAuthStateChanged((firebaseUser) => {
   if (!firebaseUser) return;
 
+  // Não tratar uma sessão Discord como login Google.
+  if (
+    localStorage.getItem("castchat_auth_provider") === "discord"
+  ) {
+    return;
+  }
+
   finalizarLoginGoogle(firebaseUser);
 });
 
@@ -405,6 +412,11 @@ document.getElementById("googleBtn")
     try {
       await auth.signOut();
 
+    localStorage.setItem(
+      "castchat_auth_provider",
+      "google"
+    );
+     
       const provider =
         new firebase.auth.GoogleAuthProvider();
 
@@ -435,7 +447,6 @@ document.getElementById("discordBtn")
 
 /* ========================================
    RECEBER LOGIN DISCORD DO BACKEND
-
    IMPORTANTE:
    O backend deve ser a fonte confiável
    do UID do Discord. Este trecho não
@@ -451,13 +462,13 @@ window.addEventListener("message", async (event) => {
 
   try {
     const token = event.data.token;
+    const firebaseCustomToken = event.data.firebaseCustomToken;
 
-    if (!token) {
-      throw new Error("Token Discord ausente.");
+    if (!token || !firebaseCustomToken) {
+      throw new Error("Tokens de autenticação ausentes.");
     }
 
-    localStorage.setItem("castchat_token", token);
-
+    // Validar a sessão própria do CastChat.
     const response = await fetch(`${BACKEND_URL}/me`, {
       headers: {
         Authorization: `Bearer ${token}`
@@ -477,84 +488,71 @@ window.addEventListener("message", async (event) => {
     const user = data.user || {};
     const uid = user.uid || user.id;
 
-    if (uid === undefined || uid === null || String(uid) === "") {
+    if (
+      uid === undefined ||
+      uid === null ||
+      String(uid) === ""
+    ) {
       throw new Error("O servidor não retornou um UID válido.");
     }
 
     const uidString = String(uid);
-    const isAdmin = uidString === "10000";
-    const nickname = isAdmin ? "AC CLUB" : `Usuário ${uidString}`;
 
-    const userRef = db.collection("usuarios").doc(uidString);
+    // Impedir que o listener do Google trate esta sessão como Google.
+    localStorage.setItem("castchat_auth_provider", "discord");
+
+    // Autenticar também no Firebase Authentication.
+    const credential = await auth.signInWithCustomToken(
+      firebaseCustomToken
+    );
+
+    if (String(credential.user.uid) !== uidString) {
+      throw new Error(
+        "O UID do Firebase não corresponde ao perfil CastChat."
+      );
+    }
+
+    // Preservar o comportamento de criação do ranking.
     const rankingRef = db.collection("ranking_social").doc(uidString);
 
-    // Criar ou atualizar sem apagar dados existentes.
-    await db.runTransaction(async (transaction) => {
-      const userDoc = await transaction.get(userRef);
-      const rankingDoc = await transaction.get(rankingRef);
+    const rankingDoc = await rankingRef.get();
 
-      const agora = Date.now();
+    if (!rankingDoc.exists) {
+      await rankingRef.set({
+        curtidas: 0,
+        ultimaAtualizacao:
+          firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
 
-      if (!userDoc.exists) {
-        transaction.set(userRef, {
-          uid: uidString,
-          nome: nickname,
-          nickname: nickname,
-          email: user.email || "",
-          avatar: user.avatar || "",
-          bio: "",
-          moldura: "",
-          selos: isAdmin ? ["official"] : [],
-          coins: 0,
-          diamonds: 0,
-          discordOrbs: 0,
-          seguidores: 0,
-          seguindo: 0,
-          followersCount: 0,
-          followingCount: 0,
-          petsAdquiridos: ["2"],
-          petsEquipados: [],
-          provider: "discord",
-          role: user.role || "user",
-          isACClub: isAdmin,
-          criadoEm: agora,
-          atualizadoEm: agora
-        });
-      } else {
-        transaction.set(userRef, {
-          uid: uidString,
-          atualizadoEm: agora
-        }, { merge: true });
-      }
-
-      if (!rankingDoc.exists) {
-        transaction.set(rankingRef, {
-          curtidas: 0,
-          ultimaAtualizacao:
-            firebase.firestore.FieldValue.serverTimestamp()
-        });
-      }
-    });
+    // Preservar os dados usados pelo backend atual.
+    localStorage.setItem("castchat_token", token);
+    localStorage.setItem("perfilID", uidString);
 
     localStorage.setItem(
       "profileData",
       JSON.stringify({
         uid: uidString,
-        nickname: nickname
+        nickname: user.nickname || `Usuário ${uidString}`
       })
     );
-
-    localStorage.setItem("perfilID", uidString);
 
     window.location.href = "perfil.html";
 
   } catch (err) {
     console.error("Erro ao finalizar login Discord:", err);
-    alert("Erro ao finalizar login Discord: " + err.message);
+
+    localStorage.removeItem("castchat_auth_provider");
+
+    alert(
+      "Erro ao finalizar login Discord: " + err.message
+    );
 
     processandoLoginDiscord = false;
   }
 });
+
+
 
 /* ========================================
    LOGOUT
@@ -570,7 +568,7 @@ async function logout() {
   localStorage.removeItem("profileData");
   localStorage.removeItem("castchat_token");
   localStorage.removeItem("perfilID");
-
+  localStorage.removeItem("castchat_auth_provider");
   window.location.reload();
 }
 </script>
