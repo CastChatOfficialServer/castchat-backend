@@ -179,161 +179,35 @@ auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
    usuário e cria o ranking na mesma
    transação do Firestore.
 ======================================== */
-
 async function obterOuCriarPerfilGoogle(firebaseUser) {
-  const linkRef = db
-    .collection("authLinks")
-    .doc(String(firebaseUser.uid));
+  if (!firebaseUser) {
+    throw new Error('Usuário Google não autenticado.');
+  }
 
-  const contadorRef = db
-    .collection("config")
-    .doc("contadorIDs");
+  // Obter o token de identidade do Firebase.
+  const firebaseToken = await firebaseUser.getIdToken();
 
-  const perfilID = await db.runTransaction(
-    async (transaction) => {
-      // Primeiro, verificar se a conta já possui vínculo.
-      const linkDoc = await transaction.get(linkRef);
-
-      let id;
-      let novoVinculo = false;
-      let contadorDoc = null;
-      let userDoc = null;
-
-      if (linkDoc.exists) {
-        id = String(linkDoc.data().perfilID || "");
-
-        if (!id || id === "undefined" || id === "null") {
-          throw new Error(
-            "O vínculo authLinks existe, mas não possui perfilID válido."
-          );
-        }
-
-        const userRef = db.collection("usuarios").doc(id);
-        userDoc = await transaction.get(userRef);
-
-      } else {
-        novoVinculo = true;
-
-        contadorDoc = await transaction.get(contadorRef);
-
-        let ultimoID = 10000;
-
-        if (contadorDoc.exists) {
-          const valor = Number(
-            contadorDoc.data().ultimoID || 10000
-          );
-
-          if (!Number.isFinite(valor) || valor < 10000) {
-            throw new Error(
-              "O contadorIDs contém um ultimoID inválido."
-            );
-          }
-
-          ultimoID = Math.floor(valor);
-        }
-
-        // Procurar um documento de usuário livre.
-        // Todas as leituras acontecem antes das gravações.
-        let encontrado = false;
-
-        for (let tentativa = 0; tentativa < 1000; tentativa++) {
-          const candidato = String(ultimoID + 1);
-          const candidatoRef = db
-            .collection("usuarios")
-            .doc(candidato);
-
-          const candidatoDoc = await transaction.get(candidatoRef);
-
-          if (!candidatoDoc.exists) {
-            id = candidato;
-            userDoc = candidatoDoc;
-            encontrado = true;
-            break;
-          }
-
-          ultimoID++;
-        }
-
-        if (!encontrado) {
-          throw new Error(
-            "Não foi possível encontrar um ID livre. Tente novamente."
-          );
-        }
+  // Solicitar ao servidor a criação ou recuperação do perfil.
+  const response = await fetch(
+    `${BACKEND_URL}/api/auth/google/profile`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${firebaseToken}`
       }
-
-      const userRef = db.collection("usuarios").doc(id);
-      const rankingRef = db.collection("ranking_social").doc(id);
-
-      // Ler o ranking antes de gravar qualquer documento.
-      const rankingDoc = await transaction.get(rankingRef);
-
-      const agora = Date.now();
-
-      if (novoVinculo) {
-        // O contador só avança quando o vínculo e o perfil
-        // também forem confirmados pela transação.
-        transaction.set(contadorRef, {
-          ultimoID: Number(id)
-        }, { merge: true });
-
-        transaction.set(linkRef, {
-          perfilID: id,
-          firebaseUID: firebaseUser.uid,
-          provider: "google",
-          email: firebaseUser.email || "",
-          criadoEm: agora
-        });
-      }
-
-      if (!userDoc.exists) {
-        // Perfil novo ou perfil ausente de um vínculo antigo.
-        transaction.set(userRef, {
-          uid: id,
-          nome: firebaseUser.displayName || `Usuário ${id}`,
-          nickname: firebaseUser.displayName || `Usuário ${id}`,
-          email: firebaseUser.email || "",
-          avatar: firebaseUser.photoURL || "",
-          bio: "",
-          moldura: "",
-          selos: [],
-          coins: 0,
-          diamonds: 0,
-          discordOrbs: 0,
-          seguidores: 0,
-          seguindo: 0,
-          followersCount: 0,
-          followingCount: 0,
-          petsAdquiridos: ["2"],
-          petsEquipados: [],
-          role: "user",
-          isACClub: false,
-          criadoEm: agora,
-          atualizadoEm: agora
-        });
-      } else {
-        // Atualizar apenas dados de autenticação.
-        // Não apagar moedas, pets, selos ou outros dados.
-        transaction.set(userRef, {
-          uid: id,
-          email: firebaseUser.email || "",
-          avatar: firebaseUser.photoURL || "",
-          atualizadoEm: agora
-        }, { merge: true });
-      }
-
-      if (!rankingDoc.exists) {
-        transaction.set(rankingRef, {
-          curtidas: 0,
-          ultimaAtualizacao:
-            firebase.firestore.FieldValue.serverTimestamp()
-        });
-      }
-
-      return id;
     }
   );
 
-  return String(perfilID);
+  const data = await response.json();
+
+  if (!response.ok || !data.ok || !data.perfilID) {
+    throw new Error(
+      data.error || 'Não foi possível obter o perfil Google.'
+    );
+  }
+
+  return String(data.perfilID);
 }
 
 /* ========================================
