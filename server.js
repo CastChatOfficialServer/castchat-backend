@@ -1112,6 +1112,1298 @@ app.put("/api/eventos/:key", async (req, res) => {
 });
 
 // ===============================
+// 1. AUTENTICAÇÃO DOS PARTICIPANTES
+// ===============================
+
+async function autenticarParticipante(req, res, next) {
+
+  try {
+
+    const authorization = req.headers.authorization || "";
+
+    if (!authorization.startsWith("Bearer ")) {
+      return res.status(401).json({
+        sucesso: false,
+        erro: "Token de autenticação não informado."
+      });
+    }
+
+    const token = authorization.slice(7).trim();
+
+    if (!token) {
+      return res.status(401).json({
+        sucesso: false,
+        erro: "Token inválido."
+      });
+    }
+
+    // Verifica o token diretamente no Firebase
+    const decoded = await admin.auth().verifyIdToken(token, true);
+
+    let perfilID = null;
+    let provider = null;
+    let discordID = null;
+
+    const tipoLogin = decoded.firebase?.sign_in_provider;
+
+    // LOGIN GOOGLE
+    if (tipoLogin === "google.com") {
+
+      provider = "google";
+
+      const vinculo = await db
+        .collection("authLinks")
+        .doc(decoded.uid)
+        .get();
+
+      if (!vinculo.exists) {
+        return res.status(403).json({
+          sucesso: false,
+          erro: "Vínculo da conta Google não encontrado."
+        });
+      }
+
+      const dadosVinculo = vinculo.data();
+
+      if (
+        dadosVinculo.provider !== "google" ||
+        String(dadosVinculo.firebaseUID) !== String(decoded.uid)
+      ) {
+        return res.status(403).json({
+          sucesso: false,
+          erro: "Vínculo da conta Google inválido."
+        });
+      }
+
+      perfilID = String(dadosVinculo.perfilID);
+
+    }
+
+    // LOGIN DISCORD
+    else if (tipoLogin === "custom") {
+
+      provider = "discord";
+
+      perfilID = String(decoded.perfilID || "");
+      discordID = String(decoded.discordID || "");
+
+      if (
+        !perfilID ||
+        !discordID ||
+        String(decoded.uid) !== perfilID
+      ) {
+        return res.status(403).json({
+          sucesso: false,
+          erro: "Identificação da conta Discord inválida."
+        });
+      }
+
+      const vinculo = await db
+        .collection("authLinks")
+        .doc(`discord:${discordID}`)
+        .get();
+
+      if (!vinculo.exists) {
+        return res.status(403).json({
+          sucesso: false,
+          erro: "Vínculo da conta Discord não encontrado."
+        });
+      }
+
+      const dadosVinculo = vinculo.data();
+
+      if (
+        dadosVinculo.provider !== "discord" ||
+        String(dadosVinculo.perfilID) !== perfilID
+      ) {
+        return res.status(403).json({
+          sucesso: false,
+          erro: "Vínculo da conta Discord inválido."
+        });
+      }
+
+    }
+
+    else {
+
+      return res.status(403).json({
+        sucesso: false,
+        erro: "Método de autenticação não permitido."
+      });
+
+    }
+
+    // Confirma que o perfil existe no CastChat
+    if (!/^\d+$/.test(perfilID)) {
+      return res.status(403).json({
+        sucesso: false,
+        erro: "ID de perfil inválido."
+      });
+    }
+
+    const usuario = await db
+      .collection("usuarios")
+      .doc(perfilID)
+      .get();
+
+    if (!usuario.exists) {
+      return res.status(403).json({
+        sucesso: false,
+        erro: "Perfil CastChat não encontrado."
+      });
+    }
+
+    
+// Verifica se o perfil está suspenso
+const moderacaoRef = db
+  .collection("moderacao_usuarios")
+  .doc(perfilID);
+
+const moderacaoSnap = await moderacaoRef.get();
+
+if (moderacaoSnap.exists) {
+
+  const dadosModeracao = moderacaoSnap.data();
+
+  if (
+    dadosModeracao.suspenso === true &&
+    dadosModeracao.suspensoAte
+  ) {
+
+    const dataFinal = dadosModeracao.suspensoAte.toDate();
+
+    if (dataFinal > new Date()) {
+
+      return res.status(403).json({
+        sucesso: false,
+        suspenso: true,
+        erro: "Sua conta está suspensa por violação das regras do CastChat.",
+        suspensoAte: dataFinal.toISOString()
+      });
+
+    }
+
+    // A suspensão terminou: libera o acesso
+    await moderacaoRef.set({
+      suspenso: false,
+      atualizadoEm:
+        admin.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+
+  }
+
+}
+
+
+    // Identidade autenticada disponível para as próximas etapas
+    req.participante = {
+      perfilID,
+      provider,
+      discordID,
+      uidFirebase: decoded.uid,
+      role: decoded.role || null,
+      isACClub: decoded.isACClub === true
+    };
+
+    next();
+
+  } catch (erro) {
+
+    console.error(
+      "Erro na autenticação do chat privado:",
+      erro
+    );
+
+    return res.status(401).json({
+      sucesso: false,
+      erro: "Não foi possível autenticar sua conta."
+    });
+
+  }
+
+}
+
+
+// ===============================
+// 2. IDENTIFICAÇÃO DA CONVERSA
+// ===============================
+
+function gerarIDConversa(perfilIDA, perfilIDB) {
+
+  const idA = String(perfilIDA || "").trim();
+  const idB = String(perfilIDB || "").trim();
+
+  // Verifica se os dois IDs são válidos
+  if (
+    !/^\d+$/.test(idA) ||
+    !/^\d+$/.test(idB)
+  ) {
+    throw new Error("ID de participante inválido.");
+  }
+
+  // Impede uma conversa de um perfil consigo mesmo
+  if (idA === idB) {
+    throw new Error("Não é possível conversar consigo mesmo.");
+  }
+
+  // Ordena os IDs numericamente
+  const participantes = [idA, idB].sort(
+    (a, b) => Number(a) - Number(b)
+  );
+
+  // Gera sempre o mesmo identificador para os dois participantes
+  return `${participantes[0]}_${participantes[1]}`;
+
+}
+
+
+/* ===============================
+   3. CRIAR OU RECUPERAR CONVERSA
+================================ */
+
+app.post(
+  "/api/chat-privado/conversas",
+  autenticarParticipante,
+  async (req, res) => {
+
+    try {
+
+      const meuID = String(req.participante.perfilID);
+
+      const destinatarioID = String(
+        req.body.destinatarioID || ""
+      ).trim();
+
+      // Verifica o ID do destinatário
+      if (!/^\d+$/.test(destinatarioID)) {
+        return res.status(400).json({
+          sucesso: false,
+          erro: "ID do destinatário inválido."
+        });
+      }
+
+      // Impede conversar consigo mesmo
+      if (meuID === destinatarioID) {
+        return res.status(400).json({
+          sucesso: false,
+          erro: "Você não pode conversar consigo mesmo."
+        });
+      }
+
+      // Confirma que o destinatário existe
+      const destinatario = await db
+        .collection("usuarios")
+        .doc(destinatarioID)
+        .get();
+
+      if (!destinatario.exists) {
+        return res.status(404).json({
+          sucesso: false,
+          erro: "Destinatário não encontrado."
+        });
+      }
+
+      // Gera o identificador único da conversa
+      const conversaID = gerarIDConversa(
+        meuID,
+        destinatarioID
+      );
+
+      const conversaRef = db
+        .collection("conversas_privadas")
+        .doc(conversaID);
+
+      // Cria ou recupera a conversa de forma segura
+      const resultado = await db.runTransaction(
+        async (transaction) => {
+
+          const conversa = await transaction.get(conversaRef);
+
+          if (conversa.exists) {
+
+            const dados = conversa.data();
+
+            const participantes = dados.participantes || [];
+
+            // Confirma que os participantes correspondem
+            if (
+              !participantes.includes(meuID) ||
+              !participantes.includes(destinatarioID)
+            ) {
+              throw new Error(
+                "Os participantes da conversa são inválidos."
+              );
+            }
+
+            return {
+              criada: false,
+              dados
+            };
+
+          }
+
+          const novaConversa = {
+            participantes: [
+              meuID,
+              destinatarioID
+            ],
+
+            ultimaMensagem: null,
+
+            criadoEm: admin.firestore.FieldValue.serverTimestamp(),
+
+            atualizadoEm: admin.firestore.FieldValue.serverTimestamp()
+          };
+
+          transaction.set(conversaRef, novaConversa);
+
+          return {
+            criada: true,
+            dados: novaConversa
+          };
+
+        }
+      );
+
+      return res.status(200).json({
+        sucesso: true,
+        conversaID,
+        criada: resultado.criada,
+        mensagem: resultado.criada
+          ? "Conversa criada com sucesso."
+          : "Conversa recuperada com sucesso."
+      });
+
+    } catch (erro) {
+
+      console.error(
+        "Erro ao criar ou recuperar conversa:",
+        erro
+      );
+
+      return res.status(500).json({
+        sucesso: false,
+        erro: "Não foi possível abrir a conversa."
+      });
+
+    }
+
+  }
+);
+
+
+// ===============================
+// 4. ENVIAR MENSAGEM
+// ===============================
+
+app.post(
+  "/api/chat-privado/enviar",
+  autenticarParticipante,
+  async (req, res) => {
+
+    try {
+
+      const remetenteID = String(
+        req.participante.perfilID
+      );
+
+      const conversaID = String(
+        req.body.conversaID || ""
+      ).trim();
+
+      const texto = typeof req.body.texto === "string"
+        ? req.body.texto.trim()
+        : "";
+
+      // Verifica os dados recebidos
+      if (!conversaID || !texto) {
+        return res.status(400).json({
+          sucesso: false,
+          erro: "Informe a conversa e a mensagem."
+        });
+      }
+
+      if (texto.length > 5000) {
+        return res.status(400).json({
+          sucesso: false,
+          erro: "A mensagem ultrapassou o limite de 5.000 caracteres."
+        });
+      }
+
+      // Confirma se o ID da conversa é válido
+      if (!/^\d+_\d+$/.test(conversaID)) {
+        return res.status(400).json({
+          sucesso: false,
+          erro: "Identificador de conversa inválido."
+        });
+      }
+
+      // Localiza a conversa
+      const conversaRef = db
+        .collection("conversas_privadas")
+        .doc(conversaID);
+
+      const conversaSnap = await conversaRef.get();
+
+      if (!conversaSnap.exists) {
+        return res.status(404).json({
+          sucesso: false,
+          erro: "Conversa não encontrada."
+        });
+      }
+
+      const dadosConversa = conversaSnap.data();
+
+      const participantes = dadosConversa.participantes || [];
+
+      // Confirma que o remetente pertence à conversa
+      if (!participantes.includes(remetenteID)) {
+        return res.status(403).json({
+          sucesso: false,
+          erro: "Você não participa desta conversa."
+        });
+      }
+
+      const destinatarioID = participantes.find(
+        id => id !== remetenteID
+      );
+
+      if (!destinatarioID) {
+        return res.status(400).json({
+          sucesso: false,
+          erro: "Destinatário da conversa inválido."
+        });
+      }
+
+      // MODERAÇÃO:
+      // Esta função será implementada na etapa 6.
+      // Ela também cuidará da exceção do perfil oficial 10000.
+      const moderacao = await moderarMensagem({
+        remetenteID,
+        destinatarioID,
+        conversaID,
+        texto
+      });
+
+      // Se a mensagem for proibida, não será entregue nem salva
+      if (!moderacao.permitida) {
+        return res.status(moderacao.status || 422).json({
+          sucesso: false,
+          erro: moderacao.mensagem || "Mensagem não permitida.",
+          infracoes: moderacao.infracoes || 0,
+          suspensoAte: moderacao.suspensoAte || null
+        });
+      }
+
+      // Cria o documento da mensagem
+      const mensagemRef = conversaRef
+        .collection("mensagens")
+        .doc();
+
+      const agora = admin.firestore.FieldValue.serverTimestamp();
+
+      const novaMensagem = {
+        remetenteID,
+        destinatarioID,
+        texto,
+        tipo: "texto",
+        criadoEm: agora
+      };
+
+      // Salva a mensagem e atualiza a última mensagem
+      // em uma única operação
+      const batch = db.batch();
+
+      batch.set(mensagemRef, novaMensagem);
+
+      batch.update(conversaRef, {
+        ultimaMensagem: {
+          remetenteID,
+          texto,
+          tipo: "texto",
+          criadoEm: agora
+        },
+        atualizadoEm: agora
+      });
+
+      await batch.commit();
+
+      return res.status(201).json({
+        sucesso: true,
+        mensagem: "Mensagem enviada com sucesso.",
+        mensagemID: mensagemRef.id
+      });
+
+    } catch (erro) {
+
+      console.error(
+        "Erro ao enviar mensagem privada:",
+        erro
+      );
+
+      return res.status(500).json({
+        sucesso: false,
+        erro: "Não foi possível enviar a mensagem."
+      });
+
+    }
+
+  }
+);
+
+
+// ===============================
+// 5. CARREGAR HISTÓRICO
+// ===============================
+
+app.get(
+  "/api/chat-privado/historico/:conversaID",
+  autenticarParticipante,
+  async (req, res) => {
+
+    try {
+
+      const participanteID = String(
+        req.participante.perfilID
+      );
+
+      const conversaID = String(
+        req.params.conversaID || ""
+      );
+
+      // Verifica o identificador da conversa
+      if (!/^\d+_\d+$/.test(conversaID)) {
+        return res.status(400).json({
+          sucesso: false,
+          erro: "Identificador de conversa inválido."
+        });
+      }
+
+      // Localiza a conversa
+      const conversaRef = db
+        .collection("conversas_privadas")
+        .doc(conversaID);
+
+      const conversaSnap = await conversaRef.get();
+
+      if (!conversaSnap.exists) {
+        return res.status(404).json({
+          sucesso: false,
+          erro: "Conversa não encontrada."
+        });
+      }
+
+      const dadosConversa = conversaSnap.data();
+
+      const participantes = dadosConversa.participantes || [];
+
+      // Somente os participantes podem acessar o histórico
+      if (!participantes.includes(participanteID)) {
+        return res.status(403).json({
+          sucesso: false,
+          erro: "Você não tem permissão para acessar esta conversa."
+        });
+      }
+
+      // Limita a quantidade de mensagens por consulta
+      let limite = parseInt(req.query.limite, 10);
+
+      if (!Number.isInteger(limite) || limite < 1) {
+        limite = 50;
+      }
+
+      limite = Math.min(limite, 100);
+
+      // Consulta as mensagens mais recentes
+      let consulta = conversaRef
+        .collection("mensagens")
+        .orderBy("criadoEm", "desc")
+        .limit(limite);
+
+      // Permite carregar mensagens anteriores
+      const antesDe = String(req.query.antesDe || "").trim();
+
+      if (antesDe) {
+
+        if (antesDe.length > 150) {
+          return res.status(400).json({
+            sucesso: false,
+            erro: "Referência de paginação inválida."
+          });
+        }
+
+        const referenciaMensagem = await conversaRef
+          .collection("mensagens")
+          .doc(antesDe)
+          .get();
+
+        if (!referenciaMensagem.exists) {
+          return res.status(400).json({
+            sucesso: false,
+            erro: "Mensagem de referência não encontrada."
+          });
+        }
+
+        consulta = consulta.startAfter(referenciaMensagem);
+
+      }
+
+      const resultado = await consulta.get();
+
+      const mensagens = resultado.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      return res.status(200).json({
+        sucesso: true,
+        conversaID,
+        mensagens,
+        quantidade: mensagens.length,
+        proximaPagina: mensagens.length === limite
+          ? mensagens[mensagens.length - 1].id
+          : null
+      });
+
+    } catch (erro) {
+
+      console.error(
+        "Erro ao carregar histórico privado:",
+        erro
+      );
+
+      return res.status(500).json({
+        sucesso: false,
+        erro: "Não foi possível carregar o histórico."
+      });
+
+    }
+
+  }
+);
+
+
+// ===============================
+// 6. MODERAÇÃO DE MENSAGENS
+// ===============================
+
+// Normaliza o texto para dificultar tentativas
+// de burlar o filtro usando símbolos ou acentos.
+
+function normalizarTextoModeracao(texto) {
+
+  return String(texto || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+
+    // Substituições comuns de caracteres
+    .replace(/@/g, "a")
+    .replace(/\$/g, "s")
+    .replace(/0/g, "o")
+    .replace(/1/g, "i")
+    .replace(/3/g, "e")
+    .replace(/4/g, "a")
+    .replace(/5/g, "s")
+    .replace(/7/g, "t")
+
+    // Transforma pontuação e símbolos em espaços
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+}
+
+
+// Lista de palavras e expressões proibidas
+const PALAVRAS_PROIBIDAS = [
+
+  // INGLÊS
+  "assholes",
+  "bitch",
+  "dick",
+  "damn",
+  "disgrace",
+  "fuck",
+  "fuck you",
+  "fuck you brother",
+  "fuck yourself",
+  "fucked up",
+  "get it in the ass",
+  "get it in the ass yours",
+  "go fuck yourself",
+  "go fucking",
+  "monkey",
+  "nudes",
+  "pussy",
+  "send a naked picture of yourself",
+  "send a picture of yourself without clothes",
+  "send your nudes",
+  "shit",
+  "son of a bitch",
+  "you bunch of shit",
+  "fuckcacaralho",
+
+  // PORTUGUÊS
+  "babacas",
+  "vadia",
+  "puta",
+  "pau",
+  "piroca",
+  "caralho",
+  "foda se",
+  "foder",
+  "vai se foder",
+  "vai tomar no cu",
+  "vai se foder irmao",
+  "se fode",
+  "seu desgracado",
+  "desgracado",
+  "desgraca",
+  "disgraca",
+  "enfia no seu cu",
+  "vai se foder sozinho",
+  "macaco",
+  "buceta",
+  "manda uma foto pelada sua",
+  "manda uma foto sua sem roupa",
+  "manda seus nudes",
+  "merda",
+  "filho da puta",
+  "seus merdas",
+  "bct",
+  "fds",
+
+  // FRANCÊS
+  "connard",
+  "connasse",
+  "salope",
+  "putain",
+  "bite",
+  "merde",
+  "foutre",
+  "va te faire foutre",
+  "va te faire foutre mon frere",
+  "defonce toi",
+  "espece de merde",
+  "mets le dans ton cul",
+  "va te faire voir",
+  "singe",
+  "chatte",
+  "envoie une photo de toi nue",
+  "envoie une photo de toi sans vetements",
+  "envoie tes nudes",
+  "fils de pute",
+  "bande de merde",
+  "honte",
+
+  // ESPANHOL
+  "gilipollas",
+  "imbecil",
+  "perra",
+  "polla",
+  "pene",
+  "mierda",
+  "joder",
+  "que te jodan",
+  "que te jodan hermano",
+  "jodete",
+  "estas jodido",
+  "metetelo por el culo",
+  "vete a la mierda",
+  "mono",
+  "coño",
+  "manda una foto tuya desnuda",
+  "manda una foto tuya sin ropa",
+  "manda tus nudes",
+  "hijo de puta",
+  "monton de mierda",
+  "carajo"
+
+].map(normalizarTextoModeracao);
+
+
+// Verifica se o texto contém algum termo proibido
+function encontrarTermoProibido(texto) {
+
+  const textoNormalizado = normalizarTextoModeracao(texto);
+
+  if (!textoNormalizado) {
+    return null;
+  }
+
+  for (const termo of PALAVRAS_PROIBIDAS) {
+
+    // Procura a expressão completa, não apenas
+    // uma sequência de letras dentro de outra palavra.
+    const expressao = new RegExp(
+      `(?:^| )${termo.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?= |$)`
+    );
+
+    if (expressao.test(textoNormalizado)) {
+      return termo;
+    }
+
+  }
+
+  return null;
+
+}
+
+
+// Função principal utilizada pelo Código 4
+async function moderarMensagem({
+  remetenteID,
+  destinatarioID,
+  conversaID,
+  texto
+}) {
+
+  // O perfil oficial 10000 é isento do filtro.
+  // A mensagem original será preservada.
+  if (String(remetenteID) === "10000") {
+
+    return {
+      permitida: true,
+      texto,
+      isento: true
+    };
+
+  }
+
+  // Verifica o conteúdo da mensagem
+  const termoEncontrado = encontrarTermoProibido(texto);
+
+  // Mensagem sem termos proibidos
+  if (!termoEncontrado) {
+
+    return {
+      permitida: true,
+      texto,
+      isento: false
+    };
+
+  }
+
+  // A mensagem foi rejeitada.
+  // O registro da infração será implementado no Código 7.
+  const resultado = await registrarInfracao({
+    perfilID: remetenteID,
+    destinatarioID,
+    conversaID,
+    termoEncontrado,
+    textoOriginal: texto
+  });
+
+  return {
+    permitida: false,
+    status: resultado.suspenso ? 403 : 422,
+    mensagem: resultado.mensagem ||
+      "Sua mensagem foi bloqueada por conter conteúdo proibido.",
+    infracoes: resultado.infracoes || 0,
+    suspensoAte: resultado.suspensoAte || null
+  };
+
+}
+
+
+// ===============================
+// 7. CONTROLE DE INFRAÇÕES
+// ===============================
+
+async function registrarInfracao({
+  perfilID,
+  destinatarioID,
+  conversaID,
+  termoEncontrado,
+  textoOriginal
+}) {
+
+  const idUsuario = String(perfilID);
+
+  // O perfil oficial nunca recebe infrações
+  if (idUsuario === "10000") {
+    return {
+      infracoes: 0,
+      suspenso: false,
+      mensagem: "Perfil oficial isento."
+    };
+  }
+
+  const usuarioRef = db
+    .collection("moderacao_usuarios")
+    .doc(idUsuario);
+
+  const infracaoRef = usuarioRef
+    .collection("infracoes")
+    .doc();
+
+  try {
+
+    // Registra a infração e incrementa a contagem
+    // em uma única transação.
+    const resultado = await db.runTransaction(
+      async (transaction) => {
+
+        const usuarioSnap = await transaction.get(usuarioRef);
+
+        const dados = usuarioSnap.exists
+          ? usuarioSnap.data()
+          : {};
+
+        const infracoesAnteriores = Number(
+          dados.totalInfracoes || 0
+        );
+
+        const totalInfracoes = infracoesAnteriores + 1;
+
+        transaction.set(
+          usuarioRef,
+          {
+            perfilID: idUsuario,
+            totalInfracoes,
+            ultimaInfracaoEm:
+              admin.firestore.FieldValue.serverTimestamp(),
+            atualizadoEm:
+              admin.firestore.FieldValue.serverTimestamp()
+          },
+          { merge: true }
+        );
+
+        transaction.set(infracaoRef, {
+          destinatarioID: String(destinatarioID),
+          conversaID: String(conversaID),
+          termoEncontrado,
+          textoOriginal,
+          numeroInfracao: totalInfracoes,
+          criadoEm:
+            admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        return {
+          infracoes: totalInfracoes
+        };
+
+      }
+    );
+
+    const total = resultado.infracoes;
+
+    // A terceira infração acionará a suspensão
+    // que será implementada no Código 8.
+    if (total >= 3) {
+
+      const suspensao = await aplicarSuspensao30Dias(
+        idUsuario,
+        "Terceira infração nas mensagens privadas."
+      );
+
+      return {
+        infracoes: total,
+        suspenso: true,
+        suspensoAte: suspensao.suspensoAte,
+        mensagem:
+          "Você atingiu três infrações. Sua conta foi suspensa por 30 dias."
+      };
+
+    }
+
+    return {
+      infracoes: total,
+      suspenso: false,
+      mensagem: total === 1
+        ? "Primeira infração: sua mensagem foi bloqueada. Atenção às regras do CastChat."
+        : "Segunda infração: sua mensagem foi bloqueada. Uma nova infração resultará em suspensão."
+    };
+
+  } catch (erro) {
+
+    console.error(
+      "Erro ao registrar infração:",
+      erro
+    );
+
+    // Se não for possível registrar a infração,
+    // a mensagem não deve ser liberada.
+    throw new Error(
+      "Não foi possível concluir a verificação de moderação."
+    );
+
+  }
+
+}
+
+
+// ===============================
+// 8. SUSPENSÃO DE 30 DIAS
+// ===============================
+
+async function aplicarSuspensao30Dias(perfilID, motivo) {
+
+  const idUsuario = String(perfilID);
+
+  // O perfil oficial não pode ser suspenso por este sistema
+  if (idUsuario === "10000") {
+    return {
+      suspenso: false,
+      suspensoAte: null
+    };
+  }
+
+  const usuarioRef = db
+    .collection("moderacao_usuarios")
+    .doc(idUsuario);
+
+  // Calcula o prazo de 30 dias
+  const agora = new Date();
+
+  const dataSuspensao = new Date(
+    agora.getTime() + (30 * 24 * 60 * 60 * 1000)
+  );
+
+  const suspensoAte = admin.firestore.Timestamp.fromDate(
+    dataSuspensao
+  );
+
+  // Registra a suspensão no Firestore
+  await usuarioRef.set({
+
+    perfilID: idUsuario,
+
+    suspenso: true,
+
+    suspensoEm:
+      admin.firestore.FieldValue.serverTimestamp(),
+
+    suspensoAte,
+
+    motivoSuspensao: String(motivo || "Violação das regras."),
+
+    atualizadoEm:
+      admin.firestore.FieldValue.serverTimestamp()
+
+  }, { merge: true });
+
+  // Tenta revogar os tokens para encerrar sessões existentes.
+  // A suspensão no Firestore continua sendo a proteção principal.
+  try {
+
+    const usuario = await db
+      .collection("usuarios")
+      .doc(idUsuario)
+      .get();
+
+    if (usuario.exists) {
+
+      // O UID do Firebase é diferente para Google e Discord.
+      // A autenticação já validou esse vínculo anteriormente.
+      const authLinks = await db
+        .collection("authLinks")
+        .get();
+
+      const vinculos = authLinks.docs.filter(doc => {
+        const dados = doc.data();
+        return String(dados.perfilID) === idUsuario;
+      });
+
+      for (const vinculo of vinculos) {
+
+        if (vinculo.id.startsWith("discord:")) {
+          continue;
+        }
+
+        await admin.auth().revokeRefreshTokens(vinculo.id);
+
+      }
+
+      // No login Discord, o UID Firebase é o próprio perfilID.
+      try {
+        await admin.auth().revokeRefreshTokens(idUsuario);
+      } catch (erroDiscord) {
+        console.warn(
+          "Não foi possível revogar o token Discord:",
+          erroDiscord.message
+        );
+      }
+
+    }
+
+  } catch (erro) {
+
+    console.error(
+      "Aviso ao revogar sessões:",
+      erro
+    );
+
+  }
+
+  return {
+    suspenso: true,
+    suspensoAte: dataSuspensao.toISOString()
+  };
+
+}
+
+
+// ===============================
+// 9. LISTAGEM DE CONVERSAS
+// ===============================
+
+app.get(
+  "/api/chat-privado/conversas",
+  autenticarParticipante,
+  async (req, res) => {
+
+    try {
+
+      const meuID = String(
+        req.participante.perfilID
+      );
+
+      // Limite de conversas por consulta
+      let limite = parseInt(req.query.limite, 10);
+
+      if (!Number.isInteger(limite) || limite < 1) {
+        limite = 30;
+      }
+
+      limite = Math.min(limite, 50);
+
+      // Busca somente conversas das quais o usuário participa
+      let consulta = db
+        .collection("conversas_privadas")
+        .where("participantes", "array-contains", meuID)
+        .orderBy("atualizadoEm", "desc")
+        .limit(limite);
+
+      // Paginação para carregar conversas mais antigas
+      const antesDe = String(
+        req.query.antesDe || ""
+      ).trim();
+
+      if (antesDe) {
+
+        if (!/^\d+_\d+$/.test(antesDe)) {
+          return res.status(400).json({
+            sucesso: false,
+            erro: "Referência de paginação inválida."
+          });
+        }
+
+        const cursorRef = db
+          .collection("conversas_privadas")
+          .doc(antesDe);
+
+        const cursorSnap = await cursorRef.get();
+
+        if (!cursorSnap.exists) {
+          return res.status(400).json({
+            sucesso: false,
+            erro: "Conversa de referência não encontrada."
+          });
+        }
+
+        const dadosCursor = cursorSnap.data();
+
+        if (
+          !Array.isArray(dadosCursor.participantes) ||
+          !dadosCursor.participantes.includes(meuID)
+        ) {
+          return res.status(403).json({
+            sucesso: false,
+            erro: "Você não tem acesso a essa conversa."
+          });
+        }
+
+        consulta = consulta.startAfter(cursorSnap);
+
+      }
+
+      const resultado = await consulta.get();
+
+      // Monta a lista de conversas
+      const conversas = await Promise.all(
+        resultado.docs.map(async (doc) => {
+
+          const dados = doc.data();
+
+          const participantes = dados.participantes || [];
+
+          const outroParticipante = participantes.find(
+            id => String(id) !== meuID
+          );
+
+          if (!outroParticipante) {
+            return null;
+          }
+
+          // Busca os dados públicos do outro participante
+          const perfilSnap = await db
+            .collection("usuarios")
+            .doc(String(outroParticipante))
+            .get();
+
+          const perfil = perfilSnap.exists
+            ? perfilSnap.data()
+            : {};
+
+          return {
+
+            conversaID: doc.id,
+
+            participanteID: String(outroParticipante),
+
+            nome: perfil.nome || perfil.name || "Usuário",
+
+            foto: perfil.foto || perfil.avatar || null,
+
+            ultimaMensagem: dados.ultimaMensagem || null,
+
+            criadoEm: dados.criadoEm || null,
+
+            atualizadoEm: dados.atualizadoEm || null
+
+          };
+
+        })
+      );
+
+      // Remove possíveis registros inválidos
+      const listaFinal = conversas.filter(Boolean);
+
+      return res.status(200).json({
+
+        sucesso: true,
+
+        conversas: listaFinal,
+
+        quantidade: listaFinal.length,
+
+        proximaPagina: resultado.docs.length === limite
+          ? resultado.docs[resultado.docs.length - 1].id
+          : null
+
+      });
+
+    } catch (erro) {
+
+      console.error(
+        "Erro ao listar conversas privadas:",
+        erro
+      );
+
+      return res.status(500).json({
+        sucesso: false,
+        erro: "Não foi possível carregar suas conversas."
+      });
+
+    }
+
+  }
+);
+
+
+// ===============================
 // START
 // ===============================
 app.listen(PORT, () => {
