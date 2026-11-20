@@ -133,179 +133,37 @@ html,body{
   border-radius:10px;
 }
 
+
 /* RANK */
 
 .rank-list{
   display:flex;
   flex-direction:column;
-  gap:12px;
-  margin-top:14px;
+  gap:5px;
+  margin-top:10px;
+  padding:0 3px;
 }
 
 .rank-item{
   display:flex;
   align-items:center;
-  gap:12px;
-  background:#241613;
-  padding:12px;
-  border-radius:12px;
-}
-
-.avatar-wrapper{
-  position:relative;
-  width:60px;
-  height:60px;
-}
-
-.avatar{
-  width:60px;
-  height:60px;
-  border-radius:50%;
-  overflow:hidden;
-  border:3px solid #333;
-}
-
-.avatar img{
+  gap:8px;
+  background:rgba(65,35,24,0.72);
+  padding:8px 7px;
+  border-radius:9px;
+  min-height:58px;
   width:100%;
-  height:100%;
-  object-fit:cover;
 }
 
-.rank-number{
-  position:absolute;
-  top:-12px;
-  left:-10px;
-  font-size:22px;
-  font-weight:900;
-}
-
-.gold{color:#ffd700}
-.silver{color:#c0c0c0}
-.bronze{color:#cd7f32}
-
-.crown{
-  position:absolute;
-  top:-14px;
-  right:-6px;
-  width:28px;
-}
-
-.meta{flex:1;font-weight:700}
-
-.like-btn{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  cursor:pointer;
-}
-
-.heart{
-  width:26px;
-}
-
-.like-btn span{
-  font-weight:700;
-  font-size:16px;
-}
-
-.toast{
-  position:fixed;
-  bottom:16px;
-  left:50%;
-  transform:translateX(-50%);
-  background:rgba(0,0,0,0.8);
-  padding:8px 14px;
-  border-radius:8px;
-  display:none;
-}
-
-#petCardOverlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.7);
-  display:none; /* começa fechado */
-  justify-content:center;
-  align-items:center;
-  z-index:9999;
-}
-
-#petCard{
-  background:#111;
-  width:90%;
-  max-width:380px;
-  padding:20px;
-  border-radius:16px;
-  max-height:420px;
-  display:flex;
-  flex-direction:column;
-}
-
-.petHeader{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.petClose{
-  cursor:pointer;
-  font-size:20px;
-  font-weight:bold;
-}
-
-#petLista{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  margin-top:15px;
-  overflow-y:auto;
-  max-height:260px;
-  padding-right:4px;
-}
-
-.petItem{
-  width:100%;
-  max-width:70px;
-  cursor:pointer;
-  padding:6px;
-  border-radius:10px;
-  transition:0.2s;
-  border:2px solid transparent;
-  margin:auto;
-}
-
-.petItem:hover{
-  border:2px solid #ffd700;
-  transform:scale(1.05);
-}
-
-@keyframes fadeIn{
-  from{opacity:0; transform:scale(0.9);}
-  to{opacity:1; transform:scale(1);}
-}
-
-.rank-pets{
-  display:flex;
-  gap:4px;
-  margin-top:4px;
-}
-
-.rank-pets img{
-  width:22px;
-  height:22px;
-}
-
-.admin-edit{
-  width:55px;
-  height:24px;
-  font-size:14px;
-  padding:2px;
-}
+/* POSIÇÃO */
 
 .rank-pos{
-  width:28px;
+  flex:0 0 20px;
+  width:20px;
   text-align:center;
   font-weight:900;
-  font-size:18px;
+  font-size:15px;
+  color:#fff;
 }
 
 .rank-pos.gold{
@@ -320,13 +178,136 @@ html,body{
   color:#cd7f32;
 }
 
+/* AVATAR */
+
+.avatar-wrapper{
+  position:relative;
+  flex:0 0 42px;
+  width:42px;
+  height:42px;
+}
+
+.avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  overflow:hidden;
+  border:2px solid #554139;
+}
+
+.avatar img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* COROA */
+
+.crown{
+  position:absolute;
+  top:-8px;
+  right:-5px;
+  width:19px;
+  height:auto;
+  z-index:2;
+}
+
+/* INFORMAÇÕES */
+
+.meta{
+  flex:1;
+  min-width:0;
+  font-weight:700;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:2px;
+}
+
+.nickname{
+  font-size:12px;
+  font-weight:800;
+  line-height:1.2;
+  overflow-wrap:anywhere;
+  color:#fff;
+}
+
+.badges{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:3px;
+  min-height:0;
+}
+
+.badges img{
+  width:15px !important;
+  height:15px;
+  object-fit:contain;
+  margin:0 !important;
+}
+
+/* PETS */
+
+.rank-pets{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:5px;
+  margin-top:3px;
+}
+
+.rank-pets img{
+  width:27px;
+  height:27px;
+  object-fit:contain;
+  border-radius:5px;
+}
+
+/* CURTIDAS */
+
+.like-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  flex:0 0 auto;
+  cursor:pointer;
+  padding:3px;
+}
+
+.heart{
+  width:19px;
+  height:19px;
+  object-fit:contain;
+}
+
+.like-btn span{
+  font-weight:700;
+  font-size:12px;
+  min-width:8px;
+}
+
+/* EDIÇÃO ADMINISTRATIVA */
+
+.admin-edit{
+  width:43px;
+  height:23px;
+  font-size:12px;
+  padding:2px;
+}
+
+/* POSIÇÃO DO USUÁRIO */
+
 .my-rank-box{
   background:#2b5c38;
-  padding:12px;
-  border-radius:10px;
-  margin-top:16px;
+  padding:10px;
+  border-radius:9px;
+  margin-top:12px;
   text-align:center;
 }
+
 
 .event-banner{
     position:relative;
